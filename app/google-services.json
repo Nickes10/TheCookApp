@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "92157865429",
+    "firebase_url": "https://thecookingapp-4857b-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "thecookingapp-4857b",
+    "storage_bucket": "thecookingapp-4857b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:92157865429:android:0c630e82ededb514d3e15c",
+        "android_client_info": {
+          "package_name": "com.example.mymobileapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCrKr8_VzuZVdIydWkltZDlwmixr8fTzJQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
