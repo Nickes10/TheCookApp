@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.mymobileapplication"
+    namespace = "com.example.thecookapp"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.mymobileapplication"
+        applicationId = "com.example.thecookapp"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

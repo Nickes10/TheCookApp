@@ -1,4 +1,4 @@
-package com.example.mymobileapplication
+package com.example.thecookapp
 
 import android.app.ProgressDialog
 import android.content.Intent
@@ -9,15 +9,14 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import com.example.mymobileapplication.R.id.*
-import com.example.mymobileapplication.R.layout
+import com.example.thecookapp.R.id.*
 import com.google.firebase.auth.FirebaseAuth
 
 class SignInActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(layout.activity_sign_in)
+        setContentView(R.layout.activity_sign_in)
 
         val signUpBtn: Button = findViewById(first_signup_btn)
         signUpBtn.setOnClickListener {

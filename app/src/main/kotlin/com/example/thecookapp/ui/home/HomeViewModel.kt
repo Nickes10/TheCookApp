@@ -1,4 +1,4 @@
-package com.example.mymobileapplication.ui.home
+package com.example.thecookapp.ui.home
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
