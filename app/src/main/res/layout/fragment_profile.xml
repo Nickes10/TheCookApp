@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.profile.ProfileFragment">
+
+        <!-- Profile Picture -->
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profile_photo"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_marginTop="16dp"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/default_image_profile"/>
+
+        <!-- User Name -->
+        <TextView
+            android:id="@+id/user_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/profile_photo"
+            android:layout_marginTop="8dp"
+            android:layout_centerHorizontal="true"
+            android:text="Susan Hampton"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black" />
+
+        <!-- Username -->
+        <TextView
+            android:id="@+id/username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/user_name"
+            android:layout_marginTop="4dp"
+            android:layout_centerHorizontal="true"
+            android:text="@susan_txxy"
+            android:textSize="14sp"
+            android:textColor="@android:color/darker_gray" />
+
+        <!-- Bio -->
+        <TextView
+            android:id="@+id/bio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/username"
+            android:layout_marginTop="8dp"
+            android:layout_centerHorizontal="true"
+            android:text="What’s cooking? Just a foodie trying to share smiles and inspire a bit along the way!"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:paddingHorizontal="16dp"
+            android:gravity="center" />
+
+        <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/following_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_below="@id/bio"
+            android:layout_marginTop="6dp"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/edit_profile_button"
+                android:layout_width="170dp"
+                android:layout_height="40dp"
+                android:layout_below="@id/bio"
+                android:text="Edit profile"
+                android:textAlignment="center"
+                android:textAllCaps="false"
+                android:layout_marginTop="10dp" />
+        </LinearLayout>
+
+        <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabs_profile_sections"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/following_layout"
+                android:layout_marginTop="10dp"
+                app:tabMode="fixed"
+                app:tabGravity="fill">
+
+                <com.google.android.material.tabs.TabItem
+                    android:id="@+id/tab_feed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="46 Posts" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:id="@+id/tab_explore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0 Saved" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:id="@+id/tab_list"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Following" />
+
+                <com.google.android.material.tabs.TabItem
+                    android:id="@+id/tab_collections"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Followers" />
+
+        </com.google.android.material.tabs.TabLayout>
+
+            <!-- Posts -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_posts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tabs_profile_sections"
+            android:layout_marginTop="16dp"
+            android:paddingHorizontal="16dp" />
+
+</RelativeLayout>

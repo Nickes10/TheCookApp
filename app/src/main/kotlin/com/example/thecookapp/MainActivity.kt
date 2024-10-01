@@ -4,34 +4,38 @@ import android.os.Bundle
 import android.widget.TextView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import com.example.thecookapp.ui.home.HomeFragment
+import com.example.thecookapp.ui.notifications.NotificationsFragment
+import com.example.thecookapp.ui.profile.ProfileFragment
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var textView: TextView
+    private var selectedFragment: Fragment? = null
 
     private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
         when (item.itemId) {
             R.id.navigation_home -> {
-                textView.setText("Home")
+                moveToFragment(HomeFragment())
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_search -> {
-                textView.setText("Search")
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_add_post -> {
-                textView.setText("Add Post")
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_notifications -> {
-                textView.setText("Notifications")
+                moveToFragment(NotificationsFragment())
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_profile -> {
-                textView.setText("Profile")
+                moveToFragment(ProfileFragment())
                 return@OnNavigationItemSelectedListener true
             }
         }
+        
         false
     }
 
@@ -42,8 +46,19 @@ class MainActivity : AppCompatActivity() {
         //setSupportActionBar(findViewById(R.id.home_toolbar))
 
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
-        textView = findViewById(R.id.message)
         navView.setOnItemSelectedListener(onNavigationItemSelectedListener)
 
+        moveToFragment(HomeFragment())
+
+
     }
+
+    private fun moveToFragment(fragment:Fragment)
+    {
+        supportFragmentManager.beginTransaction().replace(
+            R.id.fragment_container,
+            fragment
+        ).commit()
+    }
+
 }

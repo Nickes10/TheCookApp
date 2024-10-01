@@ -62,5 +62,11 @@ dependencies {
     implementation("com.google.firebase:firebase-database")
     implementation("com.google.firebase:firebase-storage")
 
+    //For the circular image in the profile
+    implementation("de.hdodenhof:circleimageview:3.1.0")
+
+    implementation("com.google.android.material:material:1.9.0") // Or the latest version
+
+
 
 }
