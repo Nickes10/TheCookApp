@@ -10,7 +10,7 @@
     <color name="colorPrimary">#FFFFFFFF</color>
     <color name="colorPrimaryDark">#5C32C7</color>
     <color name="colorAccent">#ff68a5</color>
-    <color name="colorGrey">#dcdcdc</color>
+    <color name="colorGrey">#EEEEEE</color>
     <color name="colorBlue">#5552FF</color>
     <color name="colorSignIn">#c8332c</color>
 </resources>

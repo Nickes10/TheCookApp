@@ -19,8 +19,9 @@ class ProfileFragment : Fragment() {
     ): View {
         // Initialize the binding object
         // Use ViewBinding to inflate the layout
+        val view = inflater.inflate(R.layout.fragment_profile, container, false)
 
-        return  inflater.inflate(R.layout.fragment_profile, container, false)
+        return  view
     }
 
 

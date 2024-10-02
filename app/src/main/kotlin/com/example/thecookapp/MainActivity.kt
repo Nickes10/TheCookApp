@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import com.example.thecookapp.ui.home.HomeFragment
 import com.example.thecookapp.ui.notifications.NotificationsFragment
 import com.example.thecookapp.ui.profile.ProfileFragment
+import com.example.thecookapp.ui.search.SearchBarFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -21,6 +22,7 @@ class MainActivity : AppCompatActivity() {
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_search -> {
+                moveToFragment(SearchBarFragment())
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_add_post -> {
