@@ -28,11 +28,11 @@ class SignUpActivity : AppCompatActivity() {
 
         val signUpBtn: Button = findViewById(signup_btn)
         signUpBtn.setOnClickListener {
-            CreateAccount()
+            createAccount()
         }
     }
 
-    private fun CreateAccount() {
+    private fun createAccount() {
         val fullName: EditText = findViewById(R.id.fullname_signup)
         val userName: EditText = findViewById(R.id.username_signup)
         val email: EditText = findViewById(R.id.email_signup)
@@ -85,7 +85,7 @@ class SignUpActivity : AppCompatActivity() {
 
         val userMap = HashMap<String, Any>()
         userMap["uid"] = currentUserID
-        userMap["fullname"] = fullNameString
+        userMap["fullname"] = fullNameString.lowercase()
         userMap["username"] = userNameString
         userMap["email"] = emailString
         userMap["bio"] = "Hey I am a professional cooker and I want to share with you some incredible dishes"

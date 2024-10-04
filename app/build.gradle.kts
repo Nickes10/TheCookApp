@@ -54,18 +54,21 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
-
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-database")
     implementation("com.google.firebase:firebase-storage")
 
-    //For the circular image in the profile
+    // For the circular image in the profile
     implementation("de.hdodenhof:circleimageview:3.1.0")
+    implementation("com.google.android.material:material:1.9.0")
 
-    implementation("com.google.android.material:material:1.9.0") // Or the latest version
+    // Import Picasso for image downloading and caching library
+    implementation("com.squareup.picasso:picasso:2.8")
+
 
 
 

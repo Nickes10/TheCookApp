@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="10dp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/searched_user_profile_image"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/default_image_profile"
+        android:layout_margin="8dp"/>
+
+    <!-- Username -->
+    <TextView
+        android:id="@+id/searched_user_full_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/searched_user_profile_image"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="20dp"
+        android:text="Brittney Gibson"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black" />
+
+    <!-- Full Name -->
+    <TextView
+        android:id="@+id/searched_user_username"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/searched_user_full_name"
+        android:layout_toEndOf="@id/searched_user_profile_image"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="5dp"
+        android:text="FielymonFiel"
+        android:textSize="14sp"
+        android:textColor="@android:color/darker_gray" />
+
+
+    <!-- Follow Button -->
+    <Button
+        android:id="@+id/searched_follow_button"
+        android:layout_width="100dp"
+        android:layout_height="34dp"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="4dp"
+        android:text="Follow"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:background="@drawable/buttons_background22" />
+
+
+</RelativeLayout>
+
