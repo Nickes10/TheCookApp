@@ -65,12 +65,10 @@
                 <ImageView
                     android:id="@+id/notificationBellIcon"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="48dp"
                     android:layout_marginLeft="130dp"
-                    android:paddingBottom="12dp"
                     android:scaleType="fitCenter"
-
-                    android:src="@drawable/notification_bell" />
+                    android:src="@drawable/notification_icon" />
 
             </LinearLayout>
 

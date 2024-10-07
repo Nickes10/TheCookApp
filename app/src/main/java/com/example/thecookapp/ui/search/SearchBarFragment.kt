@@ -55,7 +55,7 @@ class SearchBarFragment : Fragment() {
                     searchUser(s.toString().lowercase())
                 }
                 else{
-                    createArrayUser(querySearch.text.toString())
+                    allArrayUser()
                 }
             }
 
@@ -81,7 +81,6 @@ class SearchBarFragment : Fragment() {
             }
             override fun onDataChange(datasnapshot: DataSnapshot) {
                 listUsers?.clear()
-                Log.e("CAVO", "è entrato in searchUser")
                 for(snapshot in datasnapshot.children)
                 {
                     //searching all users
@@ -97,29 +96,26 @@ class SearchBarFragment : Fragment() {
     }
 
 
-    private fun createArrayUser(searchText: String)
+    private fun allArrayUser()
     // Function to save all the users in the Database in the Array<User>
     {
         val usersSearchRef= FirebaseDatabase.getInstance().reference.child("Users")
         usersSearchRef.addValueEventListener(object: ValueEventListener
         {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (searchText == "") {
-                    Log.e("CAVO", "è entrato in createArrayUser")
-                    listUsers?.clear()
+                listUsers?.clear()
 
-                    // Cycles on all registered users
-                    for (snapShot in dataSnapshot.children) {
-                        // Convert Each Firebase DataSnapshot into a User Object
-                        val user = snapShot.getValue(User::class.java)
-                        if (user != null) {
-                            listUsers?.add(user)
-                        }
-
+                // Cycles on all registered users
+                for (snapShot in dataSnapshot.children) {
+                    // Convert Each Firebase DataSnapshot into a User Object
+                    val user = snapShot.getValue(User::class.java)
+                    if (user != null) {
+                        listUsers?.add(user)
                     }
-                    // Telling to RecyclerView adapter that the data has changed, so to refresh the display.
-                    userAdapter?.notifyDataSetChanged()
+
                 }
+                // Telling to RecyclerView adapter that the data has changed, so to refresh the display.
+                userAdapter?.notifyDataSetChanged()
             }
 
             override fun onCancelled(error: DatabaseError) {

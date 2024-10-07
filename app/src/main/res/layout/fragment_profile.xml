@@ -7,6 +7,33 @@
     android:layout_height="match_parent"
     tools:context=".ui.profile.ProfileFragment">
 
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/settings_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+                <RelativeLayout
+                    android:id="@+id/settings_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginRight="10dp">
+
+                        <!--Setting button -->
+                        <ImageView
+                            android:id="@+id/settings_icon"
+                            android:layout_width="35dp"
+                            android:layout_height="35dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginRight="4dp"
+                            android:layout_marginTop="2dp"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:src="@drawable/setting_icon" />
+
+                </RelativeLayout>
+        </androidx.appcompat.widget.Toolbar>
+
         <!-- Profile Picture -->
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/profile_photo"
@@ -14,6 +41,7 @@
             android:layout_height="120dp"
             android:layout_marginTop="16dp"
             android:layout_centerHorizontal="true"
+            android:layout_below="@+id/settings_toolbar"
             android:src="@drawable/default_image_profile"/>
 
         <!-- User Name -->
