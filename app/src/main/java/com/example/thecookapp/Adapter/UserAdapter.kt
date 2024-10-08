@@ -11,6 +11,12 @@ import androidx.annotation.NonNull
 import androidx.recyclerview.widget.RecyclerView
 import com.example.thecookapp.R
 import com.example.thecookapp.R.id.*
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
 
@@ -18,6 +24,8 @@ class UserAdapter (private var mContext: Context,
                    private var mUser: List<User>,
                    private var isFragment: Boolean = false): RecyclerView.Adapter<UserAdapter.ViewHolder>()
 {
+    private var firebaseUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
+
     class ViewHolder (@NonNull itemView: View): RecyclerView.ViewHolder(itemView){
         var username: TextView = itemView.findViewById(searched_user_username)
         var fullname: TextView = itemView.findViewById(searched_user_full_name)
@@ -45,6 +53,92 @@ class UserAdapter (private var mContext: Context,
         holder.fullname.text = user.getFullname()
         // For return the image
         Picasso.get().load(user.getImage()).placeholder(R.drawable.default_image_profile).into(holder.profileimage)
+        
+        checkFollowingStatus(user.getUid(), holder.followButton)
+        
+        holder.followButton.setOnClickListener {
+            if (holder.followButton.text.toString() == "Follow")
+            {
+                firebaseUser?.uid.let { it ->
+                    // Searched user added to Following of Current user
+                    FirebaseDatabase.getInstance().reference
+                        .child("Follow").child(it.toString())
+                        .child("Following").child(user.getUid())
+                        .setValue(true).addOnCompleteListener { task ->
+                            if (task.isSuccessful)
+                            {
+                                // Current user added to Followers of Searched user
+                                firebaseUser?.uid.let { it1 ->
+                                    FirebaseDatabase.getInstance().reference
+                                        .child("Follow").child(user.getUid())
+                                        .child("Followers").child(it1.toString())
+                                        .setValue(true).addOnCompleteListener { task ->
+                                            if (task.isSuccessful)
+                                            {
+
+                                            }
+                                        }
+                                }
+                            }
+                        }
+                }
+            }
+            else
+            {
+                if(holder.followButton.text.toString()=="Following")
+                {
+                    // Removing searched user from Following of Current user
+                    firebaseUser?.uid.let { it1 ->
+                        FirebaseDatabase.getInstance().reference
+                            .child("Follow").child(it1.toString())
+                            .child("Following").child(user.getUid())
+                            .removeValue().addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    // Remove the current user from Followers of searched user
+                                    firebaseUser?.uid.let { it1 ->
+                                        FirebaseDatabase.getInstance().reference
+                                            .child("Follow").child(user.getUid())
+                                            .child("Followers").child(it1.toString())
+                                            .removeValue().addOnCompleteListener { task ->
+                                                if (task.isSuccessful) {
+
+                                                }
+                                            }
+                                    }
+                                }
+                            }
+                    }
+                }
+            }
+
+        }
+    }
+
+
+    private fun checkFollowingStatus(uid: String, followButton: Button)
+    // Function to check if the Searched is followed or not but by current user
+    {
+        val followingList = firebaseUser?.uid.let { it1 ->
+            FirebaseDatabase.getInstance().reference
+                .child("Follow").child(it1.toString())
+                .child("Following")
+        }
+
+        followingList.addValueEventListener(object : ValueEventListener {
+            override fun onCancelled(error: DatabaseError) {
+
+            }
+
+            override fun onDataChange(datasnapshot: DataSnapshot) {
+                if (datasnapshot.child(uid).exists()) {
+                    followButton.text = "Following"
+                }
+                else {
+                    followButton.text = "Follow"
+                }
+            }
+        })
+
     }
 
 

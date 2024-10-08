@@ -16,6 +16,7 @@ import com.example.thecookapp.Adapter.UserAdapter
 import com.example.thecookapp.AppObject.User
 import com.example.thecookapp.R
 import com.example.thecookapp.R.id.*
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -55,7 +56,8 @@ class SearchBarFragment : Fragment() {
                     searchUser(s.toString().lowercase())
                 }
                 else{
-                    allArrayUser()
+                    // When user remove what searched for, all users in database displayed
+                    getAllUsers()
                 }
             }
 
@@ -66,7 +68,7 @@ class SearchBarFragment : Fragment() {
     }
 
     private fun searchUser(input:String) {
-
+        // Function to search users in database based on input String
         val query=FirebaseDatabase.getInstance().reference
             .child("Users")
             .orderByChild("fullname")
@@ -85,7 +87,7 @@ class SearchBarFragment : Fragment() {
                 {
                     //searching all users
                     val user=snapshot.getValue(User::class.java)
-                    if(user!=null)
+                    if(user!=null && checkNotCurrentUser(user))
                     {
                         listUsers?.add(user)
                     }
@@ -96,11 +98,15 @@ class SearchBarFragment : Fragment() {
     }
 
 
-    private fun allArrayUser()
+    private fun getAllUsers()
     // Function to save all the users in the Database in the Array<User>
     {
-        val usersSearchRef= FirebaseDatabase.getInstance().reference.child("Users")
-        usersSearchRef.addValueEventListener(object: ValueEventListener
+        val usersDatabaseRef= FirebaseDatabase.getInstance().reference.child("Users")
+
+        // Get the UID of the current user (the one doing the search)
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+
+        usersDatabaseRef.addValueEventListener(object: ValueEventListener
         {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 listUsers?.clear()
@@ -109,7 +115,7 @@ class SearchBarFragment : Fragment() {
                 for (snapShot in dataSnapshot.children) {
                     // Convert Each Firebase DataSnapshot into a User Object
                     val user = snapShot.getValue(User::class.java)
-                    if (user != null) {
+                    if (user != null && checkNotCurrentUser(user)) {
                         listUsers?.add(user)
                     }
 
@@ -124,5 +130,13 @@ class SearchBarFragment : Fragment() {
 
         })
     }
+
+    private fun checkNotCurrentUser(user: User): Boolean {
+        // Get the UID of the current user (the one doing the search)
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+
+        return user.getUid() != currentUserId
+    }
+
 
 }
