@@ -6,11 +6,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.annotation.NonNull
+import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.thecookapp.R
 import com.example.thecookapp.R.id.*
+import com.example.thecookapp.ui.profile.ProfileFragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
@@ -29,6 +32,7 @@ class UserAdapter (private var mContext: Context,
     class ViewHolder (@NonNull itemView: View): RecyclerView.ViewHolder(itemView){
         var username: TextView = itemView.findViewById(searched_user_username)
         var fullname: TextView = itemView.findViewById(searched_user_full_name)
+        var item: RelativeLayout = itemView.findViewById(searched_user_layout)
         var profileimage: CircleImageView = itemView.findViewById(searched_user_profile_image)
         var followButton: Button = itemView.findViewById(searched_follow_button)
     }
@@ -55,7 +59,19 @@ class UserAdapter (private var mContext: Context,
         Picasso.get().load(user.getImage()).placeholder(R.drawable.default_image_profile).into(holder.profileimage)
         
         checkFollowingStatus(user.getUid(), holder.followButton)
-        
+
+        // If user clicks everywhere on the user item
+        holder.item.setOnClickListener(View.OnClickListener {
+            val preference = mContext.getSharedPreferences("PREFS",Context.MODE_PRIVATE).edit()
+            preference.putString("profileId",user.getUid())
+            preference.apply()
+
+            (mContext as FragmentActivity).supportFragmentManager.beginTransaction()
+                .replace(fragment_container, ProfileFragment()).commit()
+        })
+
+
+        // If user clicks on the follow button
         holder.followButton.setOnClickListener {
             if (holder.followButton.text.toString() == "Follow")
             {

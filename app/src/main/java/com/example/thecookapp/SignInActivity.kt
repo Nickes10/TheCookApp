@@ -1,9 +1,11 @@
 package com.example.thecookapp
 
 import android.app.ProgressDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -55,6 +57,15 @@ class SignInActivity : AppCompatActivity() {
                         if (task.isSuccessful)
                         {
                             progressDialog.dismiss()
+
+                            val user = mAuth.currentUser // Retrieve the current user
+
+                            if (user != null) { // Ensure the user is not null
+                                val preference = getSharedPreferences("PREFS", Context.MODE_PRIVATE).edit()
+                                preference.putString("profileId", user.uid)
+                                preference.apply()
+                            }
+
                             val intent = Intent(this@SignInActivity, MainActivity::class.java) //to pass from this to the normal app
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
                             startActivity(intent)
@@ -73,18 +84,17 @@ class SignInActivity : AppCompatActivity() {
         }
     }
 
-    /*
     override fun onStart() {
         super.onStart()
         if (FirebaseAuth.getInstance().currentUser != null)
         {
             // Code to move the app from SignUp to the menu, removing the possibility for the user to go back
-            val intent = Intent(this@SignInActivity, MainActivity::class.java) //to pass from this to the normal app
+            val intent = Intent(this@SignInActivity, MainActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(intent)
             finish()
         }
     }
+    
 
-     */
 }

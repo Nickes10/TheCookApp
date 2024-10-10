@@ -1,6 +1,7 @@
 package com.example.thecookapp
 
 import android.app.ProgressDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
@@ -97,6 +98,10 @@ class SignUpActivity : AppCompatActivity() {
                 {
                     progressDialog.dismiss()
                     Toast.makeText(this, "Account has been created successfully", Toast.LENGTH_LONG).show()
+
+                    val preferences = getSharedPreferences("PREFS", Context.MODE_PRIVATE).edit()
+                    preferences.putString("profileId", currentUserID)
+                    preferences.apply()
 
                     val intent = Intent(this@SignUpActivity, MainActivity::class.java) //to pass from this to the normal app
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)

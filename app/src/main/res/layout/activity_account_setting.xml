@@ -34,6 +34,7 @@
                     android:background="@android:color/white"
                     android:layout_centerVertical="true"
                     android:scaleType="fitCenter"
+                    android:clickable="true"
                     android:src="@drawable/back_arrow_icon" />
 
                 <TextView
@@ -231,7 +232,7 @@
     </RelativeLayout>
 
     <Button
-        android:id="@+id/accountSettings_logoutbtn"
+        android:id="@+id/accountSettings_logoutBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="4dp"

@@ -46,7 +46,7 @@
 
         <!-- User Name -->
         <TextView
-            android:id="@+id/user_name"
+            android:id="@+id/user_fullname"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/profile_photo"
@@ -62,7 +62,7 @@
             android:id="@+id/username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/user_name"
+            android:layout_below="@id/user_fullname"
             android:layout_marginTop="4dp"
             android:layout_centerHorizontal="true"
             android:text="@susan_txxy"
@@ -111,13 +111,15 @@
                 android:layout_below="@id/following_layout"
                 android:layout_marginTop="10dp"
                 app:tabMode="fixed"
-                app:tabGravity="fill">
+                app:tabGravity="fill"
+                app:tabTextAppearance="@style/CustomTabTextAppearance">
 
                 <com.google.android.material.tabs.TabItem
                     android:id="@+id/tab_feed"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="46 Posts" />
+                    android:text="46 Posts"
+                    />
 
                 <com.google.android.material.tabs.TabItem
                     android:id="@+id/tab_explore"
@@ -126,13 +128,13 @@
                     android:text="0 Saved" />
 
                 <com.google.android.material.tabs.TabItem
-                    android:id="@+id/tab_list"
+                    android:id="@+id/tab_following"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Following" />
+                    android:text=" 47 Following" />
 
                 <com.google.android.material.tabs.TabItem
-                    android:id="@+id/tab_collections"
+                    android:id="@+id/tab_followers"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Followers" />
