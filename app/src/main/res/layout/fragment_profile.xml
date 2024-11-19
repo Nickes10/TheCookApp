@@ -98,7 +98,7 @@
                 android:layout_width="170dp"
                 android:layout_height="40dp"
                 android:layout_below="@id/bio"
-                android:text="Edit profile"
+                android:text="Edit Profile"
                 android:textAlignment="center"
                 android:textAllCaps="false"
                 android:layout_marginTop="10dp" />
@@ -118,7 +118,7 @@
                     android:id="@+id/tab_feed"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="46 Posts"
+                    android:text="0 Posts"
                     />
 
                 <com.google.android.material.tabs.TabItem
@@ -131,13 +131,13 @@
                     android:id="@+id/tab_following"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text=" 47 Following" />
+                    android:text="0 Following" />
 
                 <com.google.android.material.tabs.TabItem
                     android:id="@+id/tab_followers"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Followers" />
+                    android:text="0 Followers" />
 
         </com.google.android.material.tabs.TabLayout>
 

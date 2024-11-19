@@ -3,6 +3,7 @@ package com.example.thecookapp.ui.profile
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -54,7 +55,46 @@ class ProfileFragment : Fragment() {
         }
 
         view.findViewById<Button>(R.id.edit_profile_button).setOnClickListener{
-            startActivity(Intent(context, AccountSettingsActivity::class.java))
+            val getButtontext = view.findViewById<Button>(R.id.edit_profile_button).text.toString()
+            Log.d("ProfileFragment", "Button text: $getButtontext")
+
+            when {
+                getButtontext == "Edit Profile" -> startActivity(Intent(context, AccountSettingsActivity::class.java))
+
+
+                getButtontext == "Follow" -> {
+                    signInUser.uid.let { it1 ->
+                        FirebaseDatabase.getInstance().reference
+                            .child("Follow").child(it1.toString())
+                            .child("Following").child(viewedProfileId)
+                            .setValue(true)
+
+                    }
+
+                    signInUser.uid.let { it1 ->
+                        FirebaseDatabase.getInstance().reference
+                            .child("Follow").child(viewedProfileId)
+                            .child("Followers").child(it1.toString())
+                            .setValue(true)
+                    }
+                }
+
+                getButtontext == "Following" -> {
+                    signInUser.uid.let { it1 ->
+                        FirebaseDatabase.getInstance().reference
+                            .child("Follow").child(it1.toString())
+                            .child("Following").child(viewedProfileId)
+                            .removeValue()
+                    }
+
+                    signInUser.uid.let { it1 ->
+                        FirebaseDatabase.getInstance().reference
+                            .child("Follow").child(viewedProfileId)
+                            .child("Followers").child(it1.toString())
+                            .removeValue()
+                    }
+                }
+            }
         }
 
         // Fill the data necessary in the profile
