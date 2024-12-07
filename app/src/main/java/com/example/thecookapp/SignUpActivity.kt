@@ -3,25 +3,39 @@ package com.example.thecookapp
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.example.thecookapp.R.id.signin_link_btn
 import com.example.thecookapp.R.id.signup_btn
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import com.squareup.picasso.Picasso
 
 class SignUpActivity : AppCompatActivity() {
+
+    private lateinit var selectedImageUri: Uri
+    private lateinit var profileImageView: ImageView
+    private lateinit var storageReference: StorageReference
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_sign_up)
 
+        profileImageView = findViewById(R.id.profile_image)
+        val selectImageBtn: TextView = findViewById(R.id.select_image_btn)
         val signInBtn: Button = findViewById(signin_link_btn)
         signInBtn.setOnClickListener {
             startActivity(Intent(this, SignInActivity::class.java))
@@ -30,6 +44,37 @@ class SignUpActivity : AppCompatActivity() {
         val signUpBtn: Button = findViewById(signup_btn)
         signUpBtn.setOnClickListener {
             createAccount()
+        }
+
+        storageReference = FirebaseStorage.getInstance().reference
+
+        signInBtn.setOnClickListener {
+            startActivity(Intent(this, SignInActivity::class.java))
+        }
+
+        signUpBtn.setOnClickListener {
+            createAccount()
+        }
+
+        selectImageBtn.setOnClickListener {
+            // Launch image picker to choose profile image
+            openImagePicker()
+        }
+    }
+
+    private fun openImagePicker() {
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.type = "image/*"
+        openImagePickerLauncher.launch(intent)
+    }
+
+    private val openImagePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val imageUri = result.data?.data
+            if (imageUri != null) {
+                selectedImageUri = imageUri
+                Picasso.get().load(selectedImageUri).into(profileImageView)
+            }
         }
     }
 
@@ -63,8 +108,7 @@ class SignUpActivity : AppCompatActivity() {
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful)
                         {
-                            saveUsersInfo(fullNameString, userNameString, emailString, progressDialog)
-
+                            uploadProfileImage(fullNameString, userNameString, emailString, progressDialog)
                         }
                         else
                         {
@@ -80,7 +124,26 @@ class SignUpActivity : AppCompatActivity() {
 
     }
 
-    private fun saveUsersInfo(fullNameString: String, userNameString: String, emailString: String, progressDialog: ProgressDialog) {
+    private fun uploadProfileImage(fullNameString: String, userNameString: String, emailString: String, progressDialog: ProgressDialog) {
+        if (::selectedImageUri.isInitialized) {
+            val filePath = storageReference.child("ProfileImages").child("${FirebaseAuth.getInstance().currentUser!!.uid}.jpg")
+            filePath.putFile(selectedImageUri)
+                .addOnSuccessListener {
+                    filePath.downloadUrl.addOnSuccessListener { uri ->
+                        saveUsersInfo(fullNameString, userNameString, emailString, uri.toString(), progressDialog)
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Toast.makeText(this, "Error uploading image: ${exception.message}", Toast.LENGTH_SHORT).show()
+                    progressDialog.dismiss()
+                }
+        } else {
+            saveUsersInfo(fullNameString, userNameString, emailString, "", progressDialog)
+        }
+    }
+
+
+    private fun saveUsersInfo(fullNameString: String, userNameString: String, emailString: String, imageUrl: String, progressDialog: ProgressDialog) {
         val currentUserID = FirebaseAuth.getInstance().currentUser!!.uid
         val userRef : DatabaseReference = FirebaseDatabase.getInstance().reference.child("Users")
 
@@ -90,7 +153,7 @@ class SignUpActivity : AppCompatActivity() {
         userMap["username"] = userNameString
         userMap["email"] = emailString
         userMap["bio"] = "Hey I am a professional cooker and I want to share with you some incredible dishes"
-        userMap["image"] = "https://firebasestorage.googleapis.com/v0/b/thecookingapp-4857b.appspot.com/o/Default%20Images%2FdefaultImageProfile.jpg?alt=media&token=d66fbe7f-effb-44f5-9174-d52c4d6d412f"
+        userMap["image"] = if (imageUrl.isNotEmpty()) imageUrl else "https://firebasestorage.googleapis.com/v0/b/thecookingapp-4857b.appspot.com/o/Default%20Images%2FdefaultImageProfile.jpg?alt=media&token=d66fbe7f-effb-44f5-9174-d52c4d6d412f"
 
         userRef.child(currentUserID).setValue(userMap)
             .addOnCompleteListener { task ->

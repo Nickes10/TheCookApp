@@ -52,7 +52,7 @@
             android:layout_below="@id/profile_photo"
             android:layout_marginTop="8dp"
             android:layout_centerHorizontal="true"
-            android:text="Susan Hampton"
+            android:text=""
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@android:color/black" />
@@ -65,7 +65,7 @@
             android:layout_below="@id/user_fullname"
             android:layout_marginTop="4dp"
             android:layout_centerHorizontal="true"
-            android:text="@susan_txxy"
+            android:text=""
             android:textSize="14sp"
             android:textColor="@android:color/darker_gray" />
 
@@ -77,7 +77,7 @@
             android:layout_below="@id/username"
             android:layout_marginTop="8dp"
             android:layout_centerHorizontal="true"
-            android:text="What’s cooking? Just a foodie trying to share smiles and inspire a bit along the way!"
+            android:text=""
             android:textSize="14sp"
             android:textColor="@android:color/black"
             android:paddingHorizontal="16dp"

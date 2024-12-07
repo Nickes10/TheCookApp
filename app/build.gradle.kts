@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-
+    id("org.jetbrains.kotlin.kapt")
     id("com.google.gms.google-services")
 }
 
@@ -72,7 +72,8 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.7.0")
     implementation("androidx.fragment:fragment-ktx:1.5.5")
 
-
-
+    // Glide dependencies
+    implementation("com.github.bumptech.glide:glide:4.15.0")
+    kapt("com.github.bumptech.glide:compiler:4.15.0")
 
 }

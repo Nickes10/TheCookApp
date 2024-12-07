@@ -53,9 +53,26 @@ class MainActivity : AppCompatActivity() {
         val navView: BottomNavigationView = findViewById(R.id.nav_view)
         navView.setOnItemSelectedListener(onNavigationItemSelectedListener)
 
-        moveToFragment(HomeFragment())
+        val showProfileFragment = intent.getBooleanExtra("SHOW_PROFILE_FRAGMENT", false)
+        if (showProfileFragment) {
+            // Navigate to ProfileFragment if the flag is set
+            moveToFragment(ProfileFragment())
+        } else {
+            // Default fragment (e.g., HomeFragment)
+            moveToFragment(HomeFragment())
+        }
 
+    }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode == RESULT_OK) {
+            val fragmentNavigation = data?.getStringExtra("fragment_navigation")
+            if (fragmentNavigation == "profileFragment") {
+                moveToFragment(ProfileFragment())  // Navigate to ProfileFragment
+            }
+        }
     }
 
     private fun moveToFragment(fragment:Fragment)
