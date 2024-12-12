@@ -18,7 +18,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.app.ActivityCompat
+import com.bumptech.glide.Glide
 import com.example.thecookapp.R
+import com.example.thecookapp.ui.profile.ProfileFragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.FirebaseDatabase
@@ -27,7 +29,6 @@ import com.google.firebase.storage.StorageReference
 import de.hdodenhof.circleimageview.CircleImageView
 
 class AccountSettingsActivity : AppCompatActivity() {
-
     private lateinit var profileImageView: CircleImageView
     private lateinit var changeImageButton: TextView
     private lateinit var imageUri: Uri
@@ -56,6 +57,10 @@ class AccountSettingsActivity : AppCompatActivity() {
         profileImageView = findViewById(R.id.accountSettings_image_profile)
         changeImageButton = findViewById(R.id.accountSettings_change_image)
         signInUser = FirebaseAuth.getInstance().currentUser!!
+
+        // Load user data into fields
+        loadUserData()
+
         changeImageButton.setOnClickListener {
             if (checkPermissions()) {
                 openImagePicker()
@@ -109,12 +114,6 @@ class AccountSettingsActivity : AppCompatActivity() {
             } else {
                 updateUserProfileInDatabase(updates)
             }
-
-            // Navigate back to MainActivity after saving/uploading the image
-            val intent = Intent(this@AccountSettingsActivity, MainActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-            startActivity(intent)
-            finish()
         }
     }
 
@@ -126,9 +125,10 @@ class AccountSettingsActivity : AppCompatActivity() {
             .updateChildren(updates)
             .addOnSuccessListener {
                 Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this, MainActivity::class.java).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-                })
+                val intent = Intent(this, MainActivity::class.java)
+                // Pass data to signal that ProfileFragment should be shown
+                intent.putExtra("SHOW_PROFILE_FRAGMENT", true)
+                startActivity(intent)
                 finish()
             }
             .addOnFailureListener { e ->
@@ -204,4 +204,37 @@ class AccountSettingsActivity : AppCompatActivity() {
                 Toast.makeText(this, "Failed to upload image: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
+
+    private fun loadUserData() {
+        val userId = signInUser.uid
+        val userRef = FirebaseDatabase.getInstance().reference.child("Users").child(userId)
+
+        userRef.get().addOnSuccessListener { snapshot ->
+            if (snapshot.exists()) {
+                val fullName = snapshot.child("fullname").value.toString()
+                val userName = snapshot.child("username").value.toString()
+                val bio = snapshot.child("bio").value.toString()
+                val imageUrl = snapshot.child("image").value.toString()
+
+                // Populate the EditTexts
+                findViewById<EditText>(R.id.accountSettings_editTextName).setText(fullName)
+                findViewById<EditText>(R.id.accountSettings_editUsername).setText(userName)
+                findViewById<EditText>(R.id.accountSettings_editBio).setText(bio)
+
+                // Load profile image if available
+                if (imageUrl.isNotEmpty()) {
+                    Glide.with(this)
+                        .load(imageUrl)
+                        .placeholder(R.drawable.default_image_profile) // Replace with your placeholder image
+                        .into(profileImageView)
+                }
+            } else {
+                Log.e("AccountSettings", "User data not found")
+            }
+        }.addOnFailureListener { e ->
+            Log.e("AccountSettings", "Failed to fetch user data: ${e.message}")
+            Toast.makeText(this, "Failed to load profile data", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 }
