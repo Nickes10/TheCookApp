@@ -205,5 +205,173 @@
             android:background="@android:color/transparent"
             android:paddingTop="16dp"
             android:paddingBottom="16dp" />
+
+        <RelativeLayout
+            android:id="@+id/instructions_item_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/instructions_container">
+
+            <TextView
+                android:id="@+id/step_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Step 1"
+                android:textColor="@color/colorDarkGrey"
+                android:textSize="14sp" />
+
+            <!-- EditText for description -->
+            <EditText
+                android:id="@+id/edit_text_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_below="@id/step_text"
+                android:layout_toStartOf="@+id/icon_camera"
+                android:hint="Write your step of recipe here"
+                android:background="@drawable/edit_text_background"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                android:padding="8dp" />
+
+            <!-- ImageView -->
+            <ImageView
+                android:id="@+id/icon_camera"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_alignParentEnd="true"
+                android:contentDescription="Add image"
+                android:layout_below="@id/step_text"
+                android:layout_marginStart="4dp"
+                android:src="@drawable/instagram_style_icon"
+                android:layout_centerVertical="true" />
+
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_time_difficult_servings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="6dp"
+            app:layout_constraintTop_toBottomOf="@id/second_divider"
+            android:layout_marginTop="12dp">
+
+            <!-- Time Section -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <!-- Time Label -->
+                <TextView
+                    android:id="@+id/time_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="TIME."
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <!-- Time Input -->
+                <EditText
+                    android:id="@+id/time_value"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/edit_text_background"
+                    android:gravity="center"
+                    android:padding="12dp"
+                    android:text="0 mins"
+                    android:textColor="#999999"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- Spacer -->
+            <View
+                android:layout_width="14dp"
+                android:layout_height="wrap_content" />
+
+            <!-- Difficulty Section -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <!-- Difficulty Label -->
+                <TextView
+                    android:id="@+id/difficult_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="DIFFICULTY."
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <!-- Difficulty Input -->
+                <EditText
+                    android:id="@+id/difficult_value"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/edit_text_background"
+                    android:gravity="center"
+                    android:padding="12dp"
+                    android:text="Medium"
+                    android:textColor="#999999"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- Spacer -->
+            <View
+                android:layout_width="14dp"
+                android:layout_height="wrap_content" />
+
+            <!-- Servings Section -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <!-- Servings Label -->
+                <TextView
+                    android:id="@+id/servings_label"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="SERVINGS."
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <!-- Servings Input -->
+                <EditText
+                    android:id="@+id/servings_value"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/edit_text_background"
+                    android:gravity="center"
+                    android:padding="12dp"
+                    android:text="0 servings"
+                    android:textColor="#999999"
+                    android:textSize="14sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+
+
     </LinearLayout>
+
 </ScrollView>

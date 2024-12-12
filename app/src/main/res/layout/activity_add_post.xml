@@ -39,7 +39,7 @@
 
             <!-- Done Button -->
             <TextView
-                android:id="@+id/done_button"
+                android:id="@+id/next_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end|center_vertical"
@@ -67,8 +67,8 @@
             android:layout_height="wrap_content"
             android:background="#FFFFFF"
             android:padding="26dp"
-            tools:layout_editor_absoluteX="1dp"
-            app:layout_constraintStart_toEndOf="@+id/app_bar_layout_addPost">
+            app:layout_constraintStart_toEndOf="@+id/app_bar_layout_addPost"
+            tools:layout_editor_absoluteX="1dp">
 
             <!-- Header -->
             <TextView
@@ -173,7 +173,7 @@
             <EditText
                 android:id="@+id/aboutInput"
                 android:layout_width="match_parent"
-                android:layout_height="80dp"
+                android:layout_height="129dp"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/edit_text_background"
                 android:gravity="top|start"
@@ -200,11 +200,11 @@
                 android:id="@+id/layout_time_difficult_servings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
                 android:gravity="center"
                 android:orientation="horizontal"
                 android:padding="6dp"
-                app:layout_constraintTop_toBottomOf="@id/second_divider"
-                android:layout_marginTop="16dp">
+                app:layout_constraintTop_toBottomOf="@id/second_divider">
 
                 <!-- Time Section -->
                 <LinearLayout
@@ -233,9 +233,9 @@
                         android:layout_marginTop="8dp"
                         android:background="@drawable/edit_text_background"
                         android:gravity="center"
+                        android:hint="0 mins"
                         android:padding="12dp"
-                        android:text="0 mins"
-                        android:textColor="#999999"
+                        android:textColor="@color/black"
                         android:textSize="14sp" />
                 </LinearLayout>
 
@@ -264,16 +264,16 @@
                         android:textStyle="bold" />
 
                     <!-- Servings Input -->
-                    <TextView
+                    <EditText
                         android:id="@+id/difficult_value"
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
                         android:layout_marginTop="8dp"
                         android:background="@drawable/edit_text_background"
                         android:gravity="center"
+                        android:hint="Medium"
                         android:padding="12dp"
-                        android:text="Medium"
-                        android:textColor="#999999"
+                        android:textColor="@color/black"
                         android:textSize="14sp" />
                 </LinearLayout>
 
@@ -302,16 +302,16 @@
                         android:textStyle="bold" />
 
                     <!-- Servings Input -->
-                    <TextView
+                    <EditText
                         android:id="@+id/servings_value"
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
                         android:layout_marginTop="8dp"
                         android:background="@drawable/edit_text_background"
                         android:gravity="center"
+                        android:hint="0 servings"
                         android:padding="12dp"
-                        android:text="0 servings"
-                        android:textColor="#999999"
+                        android:textColor="@color/black"
                         android:textSize="14sp" />
                 </LinearLayout>
             </LinearLayout>
@@ -328,84 +328,183 @@
                 app:layout_constraintTop_toBottomOf="@+id/layout_time_difficult_servings" />
 
             <!-- Ingredients Section -->
-
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:id="@+id/ingredients_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="6dp"
+                app:layout_constraintTop_toBottomOf="@id/third_divider">
+
+                <!-- Ingredients Text -->
+                <TextView
+                    android:id="@+id/ingredients_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="INGREDIENTS."
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <!-- Done Button -->
+                <TextView
+                    android:id="@+id/edit_button_ingredients"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:text="Edit"
+                    android:textColor="@color/colorApp"
+                    android:textSize="14sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+            <!-- Dynamic Container which contains different Item -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/dynamic_ingredient_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:divider="?android:attr/dividerHorizontal"
-                android:showDividers="middle"
-                app:layout_constraintTop_toBottomOf="@+id/third_divider">
+                android:scrollbars="vertical"
+                app:layout_constraintTop_toBottomOf="@+id/ingredients_container">
 
-                <!-- Ingredients Section -->
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
+            </androidx.recyclerview.widget.RecyclerView>
+
+
+            <Button
+                android:id="@+id/add_ingredient_button"
+                android:layout_width="wrap_content"
+                android:layout_height="65dp"
+                android:layout_marginTop="5dp"
+                android:background="@android:color/transparent"
+                android:gravity="center"
+                android:paddingTop="8dp"
+                android:paddingBottom="16dp"
+                android:text="+ Ingredient"
+                android:textAllCaps="false"
+                android:textColor="@color/colorApp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/dynamic_ingredient_recycler_view" />
+
+            <!-- Divider -->
+            <View
+                android:id="@+id/fourth_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginBottom="16dp"
+                android:background="#DDDDDD"
+                app:layout_constraintTop_toBottomOf="@+id/add_ingredient_button" />
+
+            <!-- Steps Section -->
+            <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/instructions_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="6dp"
+                app:layout_constraintTop_toBottomOf="@id/fourth_divider">
+
+                <!-- Ingredients Text -->
+                <TextView
+                    android:id="@+id/instructions_text"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:background="@color/white">
+                    android:text="INSTRUCTIONS."
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                    <!-- Ingredients Text -->
-                    <TextView
-                        android:id="@+id/ingredients_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="INGREDIENTS."
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:textColor="#000000"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
-
-                    <!-- Done Button -->
-                    <TextView
-                        android:id="@+id/done_ingredients_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Done"
-                        android:textSize="14sp"
-                        android:textColor="#FF0000"
-                        android:clickable="true"
-                        android:focusable="true"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <!-- Example Ingredient Item -->
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <!-- Done Button -->
+                <TextView
+                    android:id="@+id/edit_button_instructions"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:text="Edit"
+                    android:textColor="@color/colorApp"
+                    android:textSize="14sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <RelativeLayout
+                android:id="@+id/instructions_item_container"
+                android:layout_width="match_parent"
+                android:layout_height="87dp"
+                android:padding="8dp"
+                app:layout_constraintTop_toBottomOf="@+id/instructions_container"
+                tools:layout_editor_absoluteX="26dp">
+
+                <TextView
+                    android:id="@+id/step_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Step 1"
+                    android:textColor="@color/colorDarkGrey"
+                    android:textSize="14sp" />
+
+                <!-- EditText for description -->
+                <EditText
+                    android:id="@+id/edit_text_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_below="@id/step_text"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginTop="8dp"
+                    android:layout_toStartOf="@+id/icon_camera"
+                    android:background="@drawable/edit_text_background"
+                    android:hint="Write your step of recipe here"
                     android:padding="8dp"
-                    android:layout_marginTop="20dp">
+                    android:textColor="@color/black"
+                    android:textSize="14sp" />
 
-                    <EditText
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="Add new ingredient"
-                        android:background="@drawable/edit_text_background"
-                        android:padding="8dp" />
+                <!-- ImageView -->
+                <ImageView
+                    android:id="@+id/icon_camera"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_below="@id/step_text"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="6dp"
+                    android:layout_marginTop="8dp"
+                    android:contentDescription="Add image"
+                    android:src="@drawable/instagram_style_icon" />
+            </RelativeLayout>
 
-                    <EditText
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:hint="Amount"
-                        android:background="@drawable/edit_text_background"
-                        android:padding="8dp"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginEnd="8dp" />
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/x"
-                        android:contentDescription="Remove ingredient" />
-                </LinearLayout>
-            </LinearLayout>
+            <Button
+                android:id="@+id/add_step_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:background="@android:color/transparent"
+                android:gravity="center"
+                android:paddingTop="6dp"
+                android:paddingBottom="16dp"
+                android:text="+ Step"
+                android:textAllCaps="false"
+                android:textColor="@color/colorApp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/instructions_item_container" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 </RelativeLayout>

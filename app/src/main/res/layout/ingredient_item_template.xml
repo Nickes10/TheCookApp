@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ingredient_item_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="8dp">
+
+    <EditText
+        android:id="@+id/ingredient_input"
+        android:layout_width="0dp"
+        android:layout_height="44dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:hint="Add new ingredient"
+        android:background="@drawable/edit_text_background"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        android:padding="10dp" />
+
+    <EditText
+        android:id="@+id/amount_input"
+        android:layout_width="0dp"
+        android:layout_height="44dp"
+        android:layout_weight="0.48"
+        android:hint="Amount"
+        android:gravity="center_vertical"
+        android:background="@drawable/edit_text_background"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        android:padding="10dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="10dp" />
+
+    <ImageView
+        android:id="@+id/moving_icon"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:src="@drawable/instagram_style_icon"
+        android:gravity="center"
+        android:clickable="true"
+        android:contentDescription="Move ingredient" />
+
+    <ImageView
+        android:id="@+id/delete_icon"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:src="@drawable/delete"
+        android:gravity="center"
+        android:clickable="true"
+        android:contentDescription="Remove ingredient"
+        android:visibility="gone" />
+</LinearLayout>
