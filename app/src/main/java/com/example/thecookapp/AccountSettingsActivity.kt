@@ -18,7 +18,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.app.ActivityCompat
-import com.bumptech.glide.Glide
 import com.example.thecookapp.R
 import com.example.thecookapp.ui.profile.ProfileFragment
 import com.google.firebase.auth.FirebaseAuth
@@ -26,6 +25,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
 
 class AccountSettingsActivity : AppCompatActivity() {
@@ -36,7 +36,11 @@ class AccountSettingsActivity : AppCompatActivity() {
     private val getImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             imageUri = it // Initialize imageUri for gallery selection
-            profileImageView.setImageURI(uri) // Display the selected image
+            // Use Picasso to load and display the image in the ImageView
+            Picasso.get()
+                .load(imageUri)
+                .fit() // Resize to fit ImageView dimensions
+                .into(profileImageView)
             Log.d("AccountSettings", "Gallery Image URI: $imageUri")
         } ?: run {
             Log.e("AccountSettings", "No image selected from gallery")
@@ -45,7 +49,11 @@ class AccountSettingsActivity : AppCompatActivity() {
 
     private val takePhoto = registerForActivityResult(ActivityResultContracts.TakePicture()) { isSuccess: Boolean ->
         if (isSuccess) {
-            profileImageView.setImageURI(imageUri)  // Set the image URI after a successful photo capture
+            Picasso.get()
+                .load(imageUri)
+                .fit() // Resize to fit ImageView dimensions
+                .centerCrop() // Crop to maintain aspect ratio
+                .into(profileImageView)
         }
     }
 
@@ -223,9 +231,10 @@ class AccountSettingsActivity : AppCompatActivity() {
 
                 // Load profile image if available
                 if (imageUrl.isNotEmpty()) {
-                    Glide.with(this)
+                    Picasso.get()
                         .load(imageUrl)
                         .placeholder(R.drawable.default_image_profile) // Replace with your placeholder image
+                        .error(R.drawable.default_image_profile) // Fallback in case of an error
                         .into(profileImageView)
                 }
             } else {

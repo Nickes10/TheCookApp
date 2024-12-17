@@ -40,6 +40,7 @@ android {
     }
 }
 
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -73,7 +74,7 @@ dependencies {
     implementation("androidx.fragment:fragment-ktx:1.5.5")
 
     // Glide dependencies
-    implementation("com.github.bumptech.glide:glide:4.15.0")
-    kapt("com.github.bumptech.glide:compiler:4.15.0")
+    //implementation("com.github.bumptech.glide:glide:4.15.0")
+    //kapt("com.github.bumptech.glide:compiler:4.15.0")
 
 }

@@ -47,9 +47,7 @@ class IngredientAdapter(
         // Update the data model when the focus is lost
         holder.ingredientEditText.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
-                Log.e("Move-Remove", "Before ingredient: ${ingredient.ingredient}")
                 ingredient.ingredient = holder.ingredientEditText.text.toString()
-                Log.e("Move-Remove", "Updated ingredient: ${ingredient.ingredient}, ingredients: $ingredients")
             }
         }
 

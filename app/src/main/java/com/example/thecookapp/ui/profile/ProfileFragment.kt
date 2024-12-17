@@ -179,7 +179,11 @@ class ProfileFragment : Fragment() {
                     val user = snapshot.getValue<User>(User::class.java)
 
                     val imageProfile = view.findViewById<CircleImageView>(profile_photo)
-                    Picasso.get().load(user!!.getImage()).placeholder(R.drawable.default_image_profile).into(imageProfile)
+                    Log.e("AccountSetting", "Image URL: ${user!!.getImage()}")
+                    Picasso.get()
+                        .load(user!!.getImage())
+                        .placeholder(R.drawable.default_image_profile)
+                        .into(imageProfile)
 
                     view.findViewById<TextView>(username).text = user.getUsername()
                     view.findViewById<TextView>(user_fullname).text = user.getFullname()

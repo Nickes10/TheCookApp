@@ -24,9 +24,9 @@
             android:layout_height="match_parent"
             android:background="@android:color/white">
 
-            <!-- Back Arrow Button -->
+            <!-- Back Button -->
             <ImageButton
-                android:id="@+id/back_arrow_button"
+                android:id="@+id/back_button"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_gravity="start|center"
@@ -95,12 +95,14 @@
 
             <!-- Upload Section -->
             <ImageView
-                android:id="@+id/uploadIllustration"
+                android:id="@+id/recipeImage"
                 android:layout_width="200dp"
                 android:layout_height="200dp"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/dashed_border"
                 android:padding="8dp"
+                android:scaleType="centerCrop"
+                android:adjustViewBounds="true"
                 android:src="@drawable/plate_knife_fork"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -118,7 +120,7 @@
                 android:textColor="@color/white"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/uploadIllustration" />
+                app:layout_constraintTop_toBottomOf="@id/recipeImage" />
 
             <!-- Divider -->
             <View
@@ -445,50 +447,16 @@
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <RelativeLayout
-                android:id="@+id/instructions_item_container"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/dynamic_instruction_recycler_view"
                 android:layout_width="match_parent"
-                android:layout_height="87dp"
-                android:padding="8dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:scrollbars="vertical"
                 app:layout_constraintTop_toBottomOf="@+id/instructions_container"
                 tools:layout_editor_absoluteX="26dp">
 
-                <TextView
-                    android:id="@+id/step_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Step 1"
-                    android:textColor="@color/colorDarkGrey"
-                    android:textSize="14sp" />
-
-                <!-- EditText for description -->
-                <EditText
-                    android:id="@+id/edit_text_description"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_below="@id/step_text"
-                    android:layout_alignParentStart="true"
-                    android:layout_marginTop="8dp"
-                    android:layout_toStartOf="@+id/icon_camera"
-                    android:background="@drawable/edit_text_background"
-                    android:hint="Write your step of recipe here"
-                    android:padding="8dp"
-                    android:textColor="@color/black"
-                    android:textSize="14sp" />
-
-                <!-- ImageView -->
-                <ImageView
-                    android:id="@+id/icon_camera"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:layout_below="@id/step_text"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginStart="6dp"
-                    android:layout_marginTop="8dp"
-                    android:contentDescription="Add image"
-                    android:src="@drawable/instagram_style_icon" />
-            </RelativeLayout>
+            </androidx.recyclerview.widget.RecyclerView>
 
             <Button
                 android:id="@+id/add_step_button"
@@ -504,7 +472,7 @@
                 android:textColor="@color/colorApp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/instructions_item_container" />
+                app:layout_constraintTop_toBottomOf="@id/dynamic_instruction_recycler_view" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 </RelativeLayout>
