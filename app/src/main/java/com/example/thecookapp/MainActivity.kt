@@ -2,6 +2,10 @@ package com.example.thecookapp
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import android.widget.TextView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
@@ -61,6 +65,40 @@ class MainActivity : AppCompatActivity() {
             // Default fragment (e.g., HomeFragment)
             moveToFragment(HomeFragment())
         }
+
+        val newRecipe = Recipe(
+            user_id = 1,
+            post_id = 100, // You could increment this based on the number of recipes posted, e.g., by counting entries in your database
+            title = "Pasta Carbonara",
+            description = "A classic Italian dish.",
+            ingredients = mapOf(
+                "Pasta" to "200g",
+                "Eggs" to "2",
+                "Parmesan" to "50g",
+                "Bacon" to "100g",
+                "Garlic" to "2 cloves"
+            ),
+            instructions = listOf("ok pasta.","Fry bacon.", "Mix eggs with cheese.", "Combine all."),
+            image_url = "http://example.com/carbonara.jpg",
+            difficulty = "Easy",
+            servings = 2,
+            time = "flask prende current time"
+        )
+
+        // Use the API to add the recipe
+        ApiClient.recipeApi.addRecipe(newRecipe).enqueue(object : Callback<Map<String, Any>> {
+            override fun onResponse(call: Call<Map<String, Any>>, response: Response<Map<String, Any>>) {
+                if (response.isSuccessful) {
+                    Log.d("API", "Recipe added: ${response.body()}")
+                } else {
+                    Log.e("API","Error: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: Call<Map<String, Any>>, t: Throwable) {
+                Log.e("API", "Failed to add recipe", t)
+            }
+        })
 
     }
 

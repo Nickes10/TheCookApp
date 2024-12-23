@@ -57,10 +57,11 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     // Import the Firebase BoM
+    implementation("com.google.firebase:firebase-database:20.1.0")
     implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-database")
+    //implementation("com.google.firebase:firebase-database.py")
     implementation("com.google.firebase:firebase-storage")
 
     // For the circular image in the profile
@@ -76,5 +77,8 @@ dependencies {
     // Glide dependencies
     //implementation("com.github.bumptech.glide:glide:4.15.0")
     //kapt("com.github.bumptech.glide:compiler:4.15.0")
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
 }

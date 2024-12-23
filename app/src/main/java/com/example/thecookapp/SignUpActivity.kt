@@ -3,12 +3,17 @@ package com.example.thecookapp
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -23,16 +28,48 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.squareup.picasso.Picasso
 
+
 class SignUpActivity : AppCompatActivity() {
 
     private lateinit var selectedImageUri: Uri
     private lateinit var profileImageView: ImageView
     private lateinit var storageReference: StorageReference
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_sign_up)
+
+        val fixedButtonContainer = findViewById<LinearLayout>(R.id.fixed_button_container)
+        val rootView: View = findViewById(android.R.id.content)
+        rootView.viewTreeObserver.addOnGlobalLayoutListener {
+            val rect = Rect()
+            rootView.getWindowVisibleDisplayFrame(rect)
+
+            val screenHeight = rootView.rootView.height
+            val keyboardHeight = screenHeight - rect.bottom
+
+            // Check if the keyboard is visible (arbitrary threshold)
+            if (keyboardHeight > screenHeight * 0.15) {
+                Log.e("Pasqualo", "Keyboard opened")
+                // Adjust the height of the fixed button container when the keyboard is visible
+                val params = fixedButtonContainer.layoutParams as RelativeLayout.LayoutParams
+                params.height = 500
+                Log.e("Pasqualo", params.toString())
+                fixedButtonContainer.layoutParams = params
+                fixedButtonContainer.requestLayout()
+                Log.e("DEBUG", "New height: ${fixedButtonContainer.layoutParams.height}")
+
+            } else {
+                // Reset to default height when the keyboard is hidden
+                val params = fixedButtonContainer.layoutParams as LinearLayout.LayoutParams
+                params.height = 2054
+
+                fixedButtonContainer.layoutParams = params
+                fixedButtonContainer.requestLayout()
+            }
+        }
 
         profileImageView = findViewById(R.id.profile_image)
         val selectImageBtn: TextView = findViewById(R.id.select_image_btn)
