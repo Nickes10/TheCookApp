@@ -36,8 +36,7 @@ class InstructionAdapter (
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val stepItem = steps[position]
 
-        holder.stepNumText.text = ""
-        holder.stepNumText.text = "Step ${holder.adapterPosition + 1}"
+        holder.stepNumText.text = "Step ${position + 1}"
         holder.descriptionEditText.setText(stepItem.description)
 
         // Clear previous listeners to avoid duplicate callbacks

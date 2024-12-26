@@ -3,11 +3,18 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.ContentValues
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapShader
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.RectF
+import android.graphics.Shader
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import com.squareup.picasso.Transformation
 import android.widget.TextView
 import android.widget.Button
 import android.widget.ImageButton
@@ -54,7 +61,8 @@ class AddPostActivity : AppCompatActivity() {
             Picasso.get()
                 .load(imageUri)
                 .fit() // Resize to fit ImageView dimensions
-                .centerCrop() // Crop to maintain aspect ratio
+                .placeholder(R.drawable.plate_knife_fork) // Placeholder image
+                .transform(RoundedCornersTransformation(22f, 12f)) // Radius = 22dp, Margin = 8dp
                 .into(recipeImageView)
 
             Log.d("AccountSettings", "Gallery Image URI: $imageUri")
@@ -69,7 +77,8 @@ class AddPostActivity : AppCompatActivity() {
             Picasso.get()
                 .load(imageUri)
                 .fit() // Resize to fit ImageView dimensions
-                .centerCrop() // Crop to maintain aspect ratio
+                .placeholder(R.drawable.plate_knife_fork) // Placeholder image
+                .transform(RoundedCornersTransformation(22f, 12f))
                 .into(recipeImageView)
         }
     }
@@ -276,3 +285,27 @@ class AddPostActivity : AppCompatActivity() {
         instructionAdapter.notifyItemInserted(steps.size - 1)
     }
 }
+
+// Existing code for AddPostActivity
+
+class RoundedCornersTransformation(private val radius: Float, private val margin: Float) : Transformation {
+    override fun transform(source: Bitmap): Bitmap {
+        val paint = Paint().apply {
+            isAntiAlias = true
+            shader = BitmapShader(source, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
+        }
+
+        val output = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(output)
+        val rect = RectF(margin, margin, source.width - margin, source.height - margin)
+        canvas.drawRoundRect(rect, radius, radius, paint)
+
+        source.recycle()
+        return output
+    }
+
+    override fun key(): String {
+        return "rounded_corners(radius=$radius, margin=$margin)"
+    }
+}
+

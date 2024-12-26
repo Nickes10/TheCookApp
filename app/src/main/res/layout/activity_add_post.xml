@@ -94,19 +94,25 @@
                 app:layout_constraintTop_toBottomOf="@id/headerTitle" />
 
             <!-- Upload Section -->
-            <ImageView
-                android:id="@+id/recipeImage"
+            <FrameLayout
+                android:id="@+id/frame_for_image"
                 android:layout_width="200dp"
                 android:layout_height="200dp"
                 android:layout_marginTop="16dp"
-                android:background="@drawable/dashed_border"
-                android:padding="8dp"
-                android:scaleType="centerCrop"
-                android:adjustViewBounds="true"
-                android:src="@drawable/plate_knife_fork"
+                android:foreground="@drawable/dashed_border"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/headerSubtitle" />
+                app:layout_constraintTop_toBottomOf="@id/headerSubtitle">
+
+                <ImageView
+                    android:id="@+id/recipeImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:adjustViewBounds="true"
+                    android:src="@drawable/plate_knife_fork" />
+            </FrameLayout>
+
 
             <Button
                 android:id="@+id/uploadButton"
@@ -120,7 +126,7 @@
                 android:textColor="@color/white"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/recipeImage" />
+                app:layout_constraintTop_toBottomOf="@id/frame_for_image" />
 
             <!-- Divider -->
             <View
