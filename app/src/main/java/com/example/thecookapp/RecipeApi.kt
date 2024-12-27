@@ -1,13 +1,11 @@
 package com.example.thecookapp
 
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.POST
-import retrofit2.http.GET
+import retrofit2.http.*
 
 // Data class for Recipe
 data class Recipe(
-    val user_id: Int,
+    val user_id: String,
     val post_id: Int, // Incremented based on the number of posts
     val title: String,
     val description: String,
@@ -15,7 +13,7 @@ data class Recipe(
     val instructions: List<String>, //
     val image_url: String,
     val difficulty: String,
-    val servings: Int,
+    val servings: String,
     val time: String, // Timestamp when the recipe was created
     )
 
@@ -26,6 +24,9 @@ interface RecipeApi {
 
     @GET("get_recipes")
     fun getRecipes(): Call<List<Recipe>>
+
+    @GET("/get_post_count/{user_id}")
+    fun  getPostCount(@Path("user_id") userId: String): Call<Int>
 }
 
 data class ResponseMessage(

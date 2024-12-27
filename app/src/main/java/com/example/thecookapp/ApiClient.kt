@@ -3,7 +3,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiClient {
-    private const val BASE_URL = "http://192.168.1.99:5000"
+    private const val BASE_URL = "http://192.168.178.52:5000"
 
 
     val recipeApi: RecipeApi by lazy {

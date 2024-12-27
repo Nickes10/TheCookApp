@@ -29,6 +29,7 @@ db_config = {
 def get_db_connection():
     return mysql.connector.connect(**db_config)
 
+
 @app.route('/add_recipe', methods=['POST'])
 def add_recipe():
     data = request.json
@@ -83,6 +84,29 @@ def add_recipe():
     finally:
         cursor.close()
         db.close()  # Ensure the connection is closed after the operation
+
+@app.route('/get_post_count/<string:user_id>', methods=['GET'])
+def get_post_count(user_id):
+    """
+    Fetches the count of posts for a specific user.
+
+    Args:
+        user_id: The ID of the user passed as a path parameter.
+
+    Returns:
+        A JSON response containing the post count for the specified user.
+    """
+    try:
+        # Query the database to get the post count for the user
+        db = get_db_connection()
+        cursor = db.cursor()
+        query = "SELECT COUNT(*) FROM posts WHERE user_id = %s"
+        cursor.execute(query, (user_id,))
+        count = cursor.fetchone()[0]
+        return str(count), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)

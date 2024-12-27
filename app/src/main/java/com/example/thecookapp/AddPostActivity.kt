@@ -1,6 +1,7 @@
 package com.example.thecookapp
 import android.Manifest
 import android.app.AlertDialog
+import android.app.ProgressDialog
 import android.content.ContentValues
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -13,7 +14,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
+import android.text.TextUtils
 import com.squareup.picasso.Transformation
 import android.widget.TextView
 import android.widget.Button
@@ -34,9 +35,22 @@ import com.example.thecookapp.Adapter.StepItem
 import com.example.thecookapp.ui.home.HomeFragment
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.util.Collections
+import android.util.Log
+import android.widget.EditText
+import android.widget.Toast
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.gson.Gson
+import retrofit2.await
 
 class AddPostActivity : AppCompatActivity() {
+
+    // user id
+    private lateinit var signInUser: FirebaseUser
 
     // Ingredients variable
     private lateinit var ingredientAdapter: IngredientAdapter
@@ -84,6 +98,7 @@ class AddPostActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_add_post)
@@ -109,6 +124,11 @@ class AddPostActivity : AppCompatActivity() {
             }
         }
 
+        val postButton = findViewById<TextView>(R.id.next_button)
+        signInUser = FirebaseAuth.getInstance().currentUser!!
+        postButton.setOnClickListener{
+            create_post()
+        }
 
         // Initialize RecyclerViews
         ingredientRecyclerView = findViewById(R.id.dynamic_ingredient_recycler_view)
@@ -284,6 +304,81 @@ class AddPostActivity : AppCompatActivity() {
         Log.e("StepItem", "Step added, size: ${steps.size}, steps: $steps")
         instructionAdapter.notifyItemInserted(steps.size - 1)
     }
+
+    private fun create_post() {
+        Log.e("API_SUCCESS", "SET PROVA CREATE POST")
+        val user_id = signInUser.uid // Assuming `signInUser` is properly initialized
+
+        ApiClient.recipeApi.getPostCount(user_id).enqueue(object : Callback<Int> {
+            override fun onResponse(call: Call<Int>, response: Response<Int>) {
+                if (response.isSuccessful) {
+                    val post_id = (response.body() ?: 0) + 1 // Generate the next post ID
+                    Log.e("API_SUCCESS", "Next Post ID: $post_id")
+
+                    // Check if steps are properly populated
+                    Log.d("Steps", "Steps list before mapping: $steps")
+
+                    // Fetch values from the front-end
+                    val instructions: List<String> = steps.filter { it.description.isNotBlank() }
+                        .map { it.description }
+
+                    // Log the instructions list for debugging
+                    Log.d("Instructions", "Instructions list: $instructions")
+
+                    val ingredients = ingredients.associate { it.ingredient to it.amount }
+                    val servings = findViewById<EditText>(R.id.servings_value).text.toString()
+                    val title = findViewById<EditText>(R.id.titleInput).text.toString()
+                    val description = findViewById<EditText>(R.id.aboutInput).text.toString()
+                    val difficulty = findViewById<EditText>(R.id.difficult_value).text.toString()
+
+                    // Validate inputs
+                    when {
+                        title.isEmpty() -> Toast.makeText(this@AddPostActivity, "Title is required!", Toast.LENGTH_LONG).show()
+                        description.isEmpty() -> Toast.makeText(this@AddPostActivity, "Description is required!", Toast.LENGTH_LONG).show()
+                        ingredients.isEmpty() -> Toast.makeText(this@AddPostActivity, "Ingredients are required!", Toast.LENGTH_LONG).show()
+                        instructions.isEmpty() -> Toast.makeText(this@AddPostActivity, "Instructions are required!", Toast.LENGTH_LONG).show()
+                        else -> {
+                            // Create the recipe object
+                            val newRecipe = Recipe(
+                                user_id = user_id,
+                                post_id = post_id,
+                                title = title,
+                                description = description,
+                                ingredients = ingredients,
+                                instructions = instructions,
+                                image_url = imageUri.toString(),
+                                difficulty = difficulty,
+                                servings = servings,
+                                time = "flask prende current time"
+                            )
+
+                            // Use the API to add the recipe
+                            ApiClient.recipeApi.addRecipe(newRecipe).enqueue(object : Callback<Map<String, Any>> {
+                                override fun onResponse(call: Call<Map<String, Any>>, response: Response<Map<String, Any>>) {
+                                    if (response.isSuccessful) {
+                                        Log.e("API", "Recipe added: ${response.body()}")
+                                    } else {
+                                        Log.e("API", "Error: ${response.errorBody()?.string()}")
+                                    }
+                                }
+
+                                override fun onFailure(call: Call<Map<String, Any>>, t: Throwable) {
+                                    Log.e("API", "Failed to add recipe", t)
+                                }
+                            })
+                        }
+                    }
+                } else {
+                    Log.e("API_ERROR", "Server error: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: Call<Int>, t: Throwable) {
+                Log.e("API_FAILURE", "Failed to fetch post count: ${t.message}")
+            }
+        })
+    }
+
 }
 
 // Existing code for AddPostActivity
