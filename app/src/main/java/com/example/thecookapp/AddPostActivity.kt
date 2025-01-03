@@ -42,9 +42,11 @@ import java.util.Collections
 import android.util.Log
 import android.widget.EditText
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.gson.Gson
+import kotlinx.coroutines.launch
 import retrofit2.await
 
 class AddPostActivity : AppCompatActivity() {
@@ -127,7 +129,9 @@ class AddPostActivity : AppCompatActivity() {
         val postButton = findViewById<TextView>(R.id.next_button)
         signInUser = FirebaseAuth.getInstance().currentUser!!
         postButton.setOnClickListener{
-            create_post()
+            lifecycleScope.launch {
+                create_post()
+            }
         }
 
         // Initialize RecyclerViews
@@ -305,12 +309,21 @@ class AddPostActivity : AppCompatActivity() {
         instructionAdapter.notifyItemInserted(steps.size - 1)
     }
 
-    private fun create_post() {
-        Log.e("API_SUCCESS", "SET PROVA CREATE POST")
+    private suspend fun create_post() {
         val user_id = signInUser.uid // Assuming `signInUser` is properly initialized
+
+        val isConnected = ApiClient.checkServerConnection()
+        if (isConnected) {
+            Log.e("API_SUCCESS", "Successfully connected to the Flask server ")
+        } else {
+            Log.e("API_ERROR", "Failed to connect to the Flask server")
+            // MAYBE ADD SOMETHING TO COMUNICATE IN THE APP THE ERROR
+        }
+
 
         ApiClient.recipeApi.getPostCount(user_id).enqueue(object : Callback<Int> {
             override fun onResponse(call: Call<Int>, response: Response<Int>) {
+                Log.e("API_SUCCESS", "Response received")
                 if (response.isSuccessful) {
                     val post_id = (response.body() ?: 0) + 1 // Generate the next post ID
                     Log.e("API_SUCCESS", "Next Post ID: $post_id")
@@ -356,14 +369,14 @@ class AddPostActivity : AppCompatActivity() {
                             ApiClient.recipeApi.addRecipe(newRecipe).enqueue(object : Callback<Map<String, Any>> {
                                 override fun onResponse(call: Call<Map<String, Any>>, response: Response<Map<String, Any>>) {
                                     if (response.isSuccessful) {
-                                        Log.e("API", "Recipe added: ${response.body()}")
+                                        Log.e("API_ERROR", "Recipe added: ${response.body()}")
                                     } else {
-                                        Log.e("API", "Error: ${response.errorBody()?.string()}")
+                                        Log.e("API_ERROR", "Error: ${response.errorBody()?.string()}")
                                     }
                                 }
 
                                 override fun onFailure(call: Call<Map<String, Any>>, t: Throwable) {
-                                    Log.e("API", "Failed to add recipe", t)
+                                    Log.e("API_ERROR", "Failed to add recipe", t)
                                 }
                             })
                         }
@@ -381,7 +394,6 @@ class AddPostActivity : AppCompatActivity() {
 
 }
 
-// Existing code for AddPostActivity
 
 class RoundedCornersTransformation(private val radius: Float, private val margin: Float) : Transformation {
     override fun transform(source: Bitmap): Bitmap {

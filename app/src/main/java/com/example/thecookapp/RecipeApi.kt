@@ -1,6 +1,7 @@
 package com.example.thecookapp
 
 import retrofit2.Call
+import retrofit2.Response
 import retrofit2.http.*
 
 // Data class for Recipe
@@ -26,7 +27,10 @@ interface RecipeApi {
     fun getRecipes(): Call<List<Recipe>>
 
     @GET("/get_post_count/{user_id}")
-    fun  getPostCount(@Path("user_id") userId: String): Call<Int>
+    fun getPostCount(@Path("user_id") userId: String): Call<Int>
+
+    @GET("/health")
+    suspend fun healthCheck(): Response<ResponseMessage>
 }
 
 data class ResponseMessage(
