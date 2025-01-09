@@ -4,7 +4,6 @@
         <domain includeSubdomains="true">pythonanywhere.com</domain>
         <trust-anchors>
             <certificates src="system" />
-            <certificates src="@raw/lets_encrypt_root" />
         </trust-anchors>
     </domain-config>
 </network-security-config>

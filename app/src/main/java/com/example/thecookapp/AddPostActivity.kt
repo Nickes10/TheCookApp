@@ -103,7 +103,6 @@ class AddPostActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_add_post)
 
         recipeImageView = findViewById<ImageView>(R.id.recipeImage)
