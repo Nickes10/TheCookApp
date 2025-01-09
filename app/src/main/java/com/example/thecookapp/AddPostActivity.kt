@@ -304,9 +304,16 @@ class AddPostActivity : AppCompatActivity() {
 
     private fun addStepItem() {
         // Add a new item to the list and notify the adapter
-        steps.add(StepItem("", isEditingInstruction))
-        Log.e("StepItem", "Step added, size: ${steps.size}, steps: $steps")
-        instructionAdapter.notifyItemInserted(steps.size - 1)
+        val stepDescription = "step"
+
+        // Only add the step if the description is not empty
+        if (stepDescription.isNotBlank()) {
+            steps.add(StepItem(stepDescription, isEditingInstruction))
+            Log.e("StepItem", "Step added, size: ${steps.size}, steps: $steps")
+            instructionAdapter.notifyItemInserted(steps.size - 1)
+        } else {
+            Log.e("StepItem", "Attempted to add an empty step, skipping.")
+        }
     }
 
     private suspend fun create_post() {
@@ -343,13 +350,14 @@ class AddPostActivity : AppCompatActivity() {
                     val title = findViewById<EditText>(R.id.titleInput).text.toString()
                     val description = findViewById<EditText>(R.id.aboutInput).text.toString()
                     val difficulty = findViewById<EditText>(R.id.difficult_value).text.toString()
+                    val time = findViewById<EditText>(R.id.time_value).text.toString()
 
                     // Validate inputs
                     when {
                         title.isEmpty() -> Toast.makeText(this@AddPostActivity, "Title is required!", Toast.LENGTH_LONG).show()
                         description.isEmpty() -> Toast.makeText(this@AddPostActivity, "Description is required!", Toast.LENGTH_LONG).show()
-                        ingredients.isEmpty() -> Toast.makeText(this@AddPostActivity, "Ingredients are required!", Toast.LENGTH_LONG).show()
-                        instructions.isEmpty() -> Toast.makeText(this@AddPostActivity, "Instructions are required!", Toast.LENGTH_LONG).show()
+                        //ingredients.isEmpty() -> Toast.makeText(this@AddPostActivity, "Ingredients are required!", Toast.LENGTH_LONG).show()
+                        //instructions.isEmpty() -> Toast.makeText(this@AddPostActivity, "Instructions are required!", Toast.LENGTH_LONG).show()
                         else -> {
                             // Create the recipe object
                             val newRecipe = Recipe(
@@ -362,7 +370,8 @@ class AddPostActivity : AppCompatActivity() {
                                 image_url = imageUri.toString(),
                                 difficulty = difficulty,
                                 servings = servings,
-                                time = "flask prende current time"
+                                time_to_do = time,
+                                created_at = "SETTED BY SQL"
                             )
 
                             // Use the API to add the recipe

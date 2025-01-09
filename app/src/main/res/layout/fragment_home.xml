@@ -82,5 +82,14 @@
         android:background="@color/colorGrey"
         android:layout_below="@id/app_bar_layout" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewPosts"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/app_bar_layout"
+        android:padding="16dp"
+        android:clipToPadding="false"
+        tools:listitem="@layout/item_post" />
+
 
 </RelativeLayout>

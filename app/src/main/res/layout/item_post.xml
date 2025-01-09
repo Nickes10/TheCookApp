@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <!-- Post Image -->
+    <ImageView
+        android:id="@+id/imagePost"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_launcher_background" />
+
+    <!-- Post Title and Created At -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="8dp">
+
+        <!-- Post Title -->
+        <TextView
+            android:id="@+id/postTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Post Title"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_gravity="start"
+            android:maxWidth="0dp"
+            android:layout_weight="1"/>
+
+        <!-- Created At -->
+        <TextView
+            android:id="@+id/postCreatedAt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Created At"
+            android:textSize="14sp"
+            android:paddingLeft="8dp"
+            android:layout_gravity="end"
+            android:maxWidth="0dp"
+            android:layout_weight="1"/>
+    </LinearLayout>
+
+    <!-- Post Description -->
+    <TextView
+        android:id="@+id/postDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Post Description"
+        android:textSize="14sp"
+        android:paddingBottom="8dp" />
+
+    <!-- Post Ingredients -->
+    <TextView
+        android:id="@+id/postIngredients"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ingredients: [List of Ingredients]"
+        android:textSize="14sp"
+        android:paddingBottom="8dp" />
+
+    <!-- Post Instructions -->
+    <TextView
+        android:id="@+id/postInstructions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Instructions: [Step-by-step Instructions]"
+        android:textSize="14sp"
+        android:paddingBottom="8dp" />
+
+    <!-- Post Difficulty -->
+    <TextView
+        android:id="@+id/postDifficulty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Difficulty: Easy"
+        android:textSize="14sp"
+        android:paddingBottom="8dp" />
+
+    <!-- Post Servings -->
+    <TextView
+        android:id="@+id/postServings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Servings: 4"
+        android:textSize="14sp"
+        android:paddingBottom="8dp" />
+
+    <!-- Post Time -->
+    <TextView
+        android:id="@+id/postTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Time: 45 minutes"
+        android:textSize="14sp"
+        android:paddingBottom="8dp" />
+
+</LinearLayout>

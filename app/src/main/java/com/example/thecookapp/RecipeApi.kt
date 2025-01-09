@@ -4,6 +4,7 @@ import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.*
 
+
 // Data class for Recipe
 data class Recipe(
     val user_id: String,
@@ -15,7 +16,8 @@ data class Recipe(
     val image_url: String,
     val difficulty: String,
     val servings: String,
-    val time: String, // Timestamp when the recipe was created
+    val time_to_do: String, // Timestamp when the recipe was created
+    val created_at: String
     )
 
 // Retrofit API Interface
@@ -23,8 +25,8 @@ interface RecipeApi {
     @POST("/add_recipe")
     fun addRecipe(@Body recipe: Recipe): Call<Map<String, Any>>
 
-    @GET("get_recipes")
-    fun getRecipes(): Call<List<Recipe>>
+    @GET("get_post/{user_id}")
+    fun get_post(@Path("user_id") userId: String): Call<List<Recipe>>
 
     @GET("/get_post_count/{user_id}")
     fun getPostCount(@Path("user_id") userId: String): Call<Int>
