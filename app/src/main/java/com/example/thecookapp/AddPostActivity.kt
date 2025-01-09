@@ -3,6 +3,7 @@ import android.Manifest
 import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.ContentValues
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapShader
@@ -195,10 +196,13 @@ class AddPostActivity : AppCompatActivity() {
 
                 // Update the steps list
                 if (fromPosition in steps.indices && toPosition in steps.indices) {
+                    Log.e("StepItem", "Step moved: $steps, steps BEFORE Activity: $steps")
+                    steps[fromPosition].number = toPosition
+                    steps[toPosition].number = fromPosition
                     Collections.swap(steps, fromPosition, toPosition)
-                    Log.e("StepItem", "Step moved: $steps, steps: $steps")
+                    Log.e("StepItem", "Step moved: $steps, steps AFTER Activity: $steps")
                     instructionAdapter.notifyItemMoved(fromPosition, toPosition)
-                    instructionAdapter.updateStepNumbers() // Update step numbers
+                    instructionAdapter.notifyItemRangeChanged(0, steps.size)
 
                 }
                 return true
@@ -235,7 +239,6 @@ class AddPostActivity : AppCompatActivity() {
         // Set up the Add Step button
         val addStepButton = findViewById<Button>(R.id.add_step_button)
         addStepButton.setOnClickListener {
-            Log.d("StepItem", "Button clicked")
             addStepItem()
         }
 
@@ -247,8 +250,6 @@ class AddPostActivity : AppCompatActivity() {
         if (steps.isEmpty()) {
             addStepItem()
         }
-
-        Log.d("StepItem", "onCreate called")
 
     }
 
@@ -304,47 +305,31 @@ class AddPostActivity : AppCompatActivity() {
 
     private fun addStepItem() {
         // Add a new item to the list and notify the adapter
-        val stepDescription = "step"
-
-        // Only add the step if the description is not empty
-        if (stepDescription.isNotBlank()) {
-            steps.add(StepItem(stepDescription, isEditingInstruction))
-            Log.e("StepItem", "Step added, size: ${steps.size}, steps: $steps")
-            instructionAdapter.notifyItemInserted(steps.size - 1)
-        } else {
-            Log.e("StepItem", "Attempted to add an empty step, skipping.")
-        }
+        steps.add(StepItem("", steps.size, isEditingInstruction))
+        Log.e("StepItem", "Step added, size: ${steps.size}, steps ACTIVITY: $steps")
+        instructionAdapter.notifyItemInserted(steps.size - 1)
     }
 
     private suspend fun create_post() {
         val user_id = signInUser.uid // Assuming `signInUser` is properly initialized
 
         val isConnected = ApiClient.checkServerConnection()
-        if (isConnected) {
-            Log.e("API_SUCCESS", "Successfully connected to the Flask server ")
-        } else {
+        if (!isConnected) {
             Log.e("API_ERROR", "Failed to connect to the Flask server")
-            // MAYBE ADD SOMETHING TO COMUNICATE IN THE APP THE ERROR
+            runOnUiThread {
+                Toast.makeText(this@AddPostActivity, "Failed to connect to the server. Please try again.", Toast.LENGTH_LONG).show()
+            }
+            return
         }
-
 
         ApiClient.recipeApi.getPostCount(user_id).enqueue(object : Callback<Int> {
             override fun onResponse(call: Call<Int>, response: Response<Int>) {
-                Log.e("API_SUCCESS", "Response received")
                 if (response.isSuccessful) {
                     val post_id = (response.body() ?: 0) + 1 // Generate the next post ID
-                    Log.e("API_SUCCESS", "Next Post ID: $post_id")
-
-                    // Check if steps are properly populated
-                    Log.d("Steps", "Steps list before mapping: $steps")
 
                     // Fetch values from the front-end
                     val instructions: List<String> = steps.filter { it.description.isNotBlank() }
                         .map { it.description }
-
-                    // Log the instructions list for debugging
-                    Log.d("Instructions", "Instructions list: $instructions")
-
                     val ingredients = ingredients.associate { it.ingredient to it.amount }
                     val servings = findViewById<EditText>(R.id.servings_value).text.toString()
                     val title = findViewById<EditText>(R.id.titleInput).text.toString()
@@ -353,54 +338,70 @@ class AddPostActivity : AppCompatActivity() {
                     val time = findViewById<EditText>(R.id.time_value).text.toString()
 
                     // Validate inputs
-                    when {
-                        title.isEmpty() -> Toast.makeText(this@AddPostActivity, "Title is required!", Toast.LENGTH_LONG).show()
-                        description.isEmpty() -> Toast.makeText(this@AddPostActivity, "Description is required!", Toast.LENGTH_LONG).show()
-                        //ingredients.isEmpty() -> Toast.makeText(this@AddPostActivity, "Ingredients are required!", Toast.LENGTH_LONG).show()
-                        //instructions.isEmpty() -> Toast.makeText(this@AddPostActivity, "Instructions are required!", Toast.LENGTH_LONG).show()
-                        else -> {
-                            // Create the recipe object
-                            val newRecipe = Recipe(
-                                user_id = user_id,
-                                post_id = post_id,
-                                title = title,
-                                description = description,
-                                ingredients = ingredients,
-                                instructions = instructions,
-                                image_url = imageUri.toString(),
-                                difficulty = difficulty,
-                                servings = servings,
-                                time_to_do = time,
-                                created_at = "SETTED BY SQL"
-                            )
-
-                            // Use the API to add the recipe
-                            ApiClient.recipeApi.addRecipe(newRecipe).enqueue(object : Callback<Map<String, Any>> {
-                                override fun onResponse(call: Call<Map<String, Any>>, response: Response<Map<String, Any>>) {
-                                    if (response.isSuccessful) {
-                                        Log.e("API_ERROR", "Recipe added: ${response.body()}")
-                                    } else {
-                                        Log.e("API_ERROR", "Error: ${response.errorBody()?.string()}")
-                                    }
-                                }
-
-                                override fun onFailure(call: Call<Map<String, Any>>, t: Throwable) {
-                                    Log.e("API_ERROR", "Failed to add recipe", t)
-                                }
-                            })
+                    if (title.isEmpty() || description.isEmpty() || ingredients.isEmpty() || instructions.isEmpty()) {
+                        runOnUiThread {
+                            Toast.makeText(this@AddPostActivity, "All fields are required!", Toast.LENGTH_LONG).show()
                         }
+                        return
                     }
+
+                    // Create the recipe object
+                    val newRecipe = Recipe(
+                        user_id = user_id,
+                        post_id = post_id,
+                        title = title,
+                        description = description,
+                        ingredients = ingredients,
+                        instructions = instructions,
+                        image_url = imageUri.toString(),
+                        difficulty = difficulty,
+                        servings = servings,
+                        time_to_do = time,
+                        created_at = "SETTED BY SQL"
+                    )
+
+                    // Use the API to add the recipe
+                    ApiClient.recipeApi.addRecipe(newRecipe).enqueue(object : Callback<Map<String, Any>> {
+                        override fun onResponse(call: Call<Map<String, Any>>, response: Response<Map<String, Any>>) {
+                            if (response.isSuccessful) {
+                                Log.e("API_SUCCESS", "Recipe added: ${response.body()}")
+                                runOnUiThread {
+                                    Toast.makeText(this@AddPostActivity, "Post uploaded successfully!", Toast.LENGTH_LONG).show()
+                                    // Navigate to home page
+                                    startActivity(Intent(this@AddPostActivity, MainActivity::class.java))
+                                    finish() // Close the current activity
+                                }
+                            } else {
+                                Log.e("API_ERROR", "Error: ${response.errorBody()?.string()}")
+                                runOnUiThread {
+                                    Toast.makeText(this@AddPostActivity, "Failed to upload the post. Please try again.", Toast.LENGTH_LONG).show()
+                                }
+                            }
+                        }
+
+                        override fun onFailure(call: Call<Map<String, Any>>, t: Throwable) {
+                            Log.e("API_ERROR", "Failed to add recipe", t)
+                            runOnUiThread {
+                                Toast.makeText(this@AddPostActivity, "An error occurred. Please try again.", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    })
                 } else {
                     Log.e("API_ERROR", "Server error: ${response.errorBody()?.string()}")
+                    runOnUiThread {
+                        Toast.makeText(this@AddPostActivity, "Failed to fetch post details. Please try again.", Toast.LENGTH_LONG).show()
+                    }
                 }
             }
 
             override fun onFailure(call: Call<Int>, t: Throwable) {
                 Log.e("API_FAILURE", "Failed to fetch post count: ${t.message}")
+                runOnUiThread {
+                    Toast.makeText(this@AddPostActivity, "An error occurred. Please try again.", Toast.LENGTH_LONG).show()
+                }
             }
         })
     }
-
 }
 
 

@@ -1,6 +1,8 @@
 package com.example.thecookapp.Adapter
 
 import android.content.Context
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +15,7 @@ import com.example.thecookapp.R
 
 data class StepItem(
     var description: String = "",
+    var number : Int = 0,
     var isEditMode: Boolean = false // Toggle for showing/hiding move/delete icons
 )
 
@@ -34,19 +37,36 @@ class InstructionAdapter (
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        Log.e("StepItem", "Called OnBindViewHolder, list is: $steps")
         val stepItem = steps[position]
+        Log.e("StepItem", "Current step position: ${holder.adapterPosition + 1}")
+        Log.e("StepItem", "Current step position saved: ${stepItem.number+1}")
 
-        holder.stepNumText.text = "Step ${position + 1}"
+        holder.stepNumText.text = " "
+        holder.stepNumText.text = "Step ${stepItem.number +1}"
         holder.descriptionEditText.setText(stepItem.description)
 
-        // Clear previous listeners to avoid duplicate callbacks
-        holder.descriptionEditText.setOnFocusChangeListener(null)
+        holder.descriptionEditText.clearFocus() // Prevent focus issues during recycling
 
-        // Update the data model when the focus is lost
+        val textWatcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val adapterPosition = holder.adapterPosition
+                if (adapterPosition != RecyclerView.NO_POSITION) {
+                    steps[adapterPosition].description = s.toString()
+                    Log.e("StepItem", "Change of the text: ${steps[adapterPosition]}, steps: $steps")
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        }
+
         holder.descriptionEditText.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                stepItem.description = holder.descriptionEditText.text.toString()
-                Log.e("StepItem", "Step updated: $stepItem, steps: $steps")
+            if (hasFocus) {
+                holder.descriptionEditText.addTextChangedListener(textWatcher)
+            } else {
+                holder.descriptionEditText.removeTextChangedListener(textWatcher)
             }
         }
 
@@ -68,6 +88,9 @@ class InstructionAdapter (
     private fun removeItemAt(position: Int) {
         if (position in steps.indices) {
             steps.removeAt(position)
+            for (i in position until steps.size) {
+                steps[i].number -= 1
+            }
             Log.e("StepItem", "Removed item at position $position, steps: $steps")
             notifyItemRemoved(position)
             notifyItemRangeChanged(position, steps.size) // Ensure proper updates
@@ -86,7 +109,4 @@ class InstructionAdapter (
         }
     }
 
-    fun updateStepNumbers() {
-        notifyItemRangeChanged(0, steps.size)
-    }
 }
