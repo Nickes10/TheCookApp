@@ -16,64 +16,100 @@ import com.example.thecookapp.R
 import com.example.thecookapp.R.layout.fragment_home
 import com.example.thecookapp.Recipe
 import com.example.thecookapp.databinding.FragmentHomeBinding
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
-
-    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
     private lateinit var postAdapter: PostAdapter
     private lateinit var recyclerView: RecyclerView
+
+    private val firebaseAuth = FirebaseAuth.getInstance()
+    private val database = FirebaseDatabase.getInstance().reference
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Use ViewBinding to inflate the layout
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
         recyclerView = binding.recyclerViewPosts
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        val userId = "8yUGPtbsxrRFcsdbHGHjyRy76iv1"  // Update with the actual logged-in user's ID
+        postAdapter = PostAdapter(emptyList())
+        recyclerView.adapter = postAdapter
 
-        // Fetch posts
-        val adapter = PostAdapter(emptyList())
-
-        recyclerView.adapter = adapter
-
-        fetchPosts(userId)
+        val userId = firebaseAuth.currentUser?.uid
+        if (userId != null) {
+            fetchFollowingPosts(userId)
+        } else {
+            Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
+        }
 
         return root
     }
 
-    private fun fetchPosts(userId: String) {
-        ApiClient.recipeApi.get_post(userId).enqueue(object : Callback<List<Recipe>> {
-            override fun onResponse(call: Call<List<Recipe>>, response: Response<List<Recipe>>) {
-                if (response.isSuccessful) {
-                    val posts = response.body()
-                    if (posts != null) {
-                        postAdapter = PostAdapter(posts)
-                        recyclerView.adapter = postAdapter
-                    }
-                } else {
-                    Log.e("HomeFragment", "Error: ${response.errorBody()?.string()}")
-                    Toast.makeText(requireContext(), "Failed to load posts", Toast.LENGTH_SHORT).show()
-                }
-            }
+    private fun fetchFollowingPosts(userId: String) {
+        database.child("Follow").child(userId).child("Following").get().addOnSuccessListener { snapshot ->
+            val followingList = snapshot.children.mapNotNull { it.key }
+            fetchPostsForUsers(followingList)
+        }.addOnFailureListener {
+            Log.e("HomeFragment", "Failed to fetch following list: ${it.message}")
+            Toast.makeText(requireContext(), "Failed to load following list", Toast.LENGTH_SHORT).show()
+        }
+    }
 
-            override fun onFailure(call: Call<List<Recipe>>, t: Throwable) {
-                Log.e("HomeFragment", "Failure: ${t.message}")
-                Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
+    private fun fetchPostsForUsers(userIds: List<String>) {
+        val allPosts = mutableListOf<Recipe>()
+        var fetchedUsersCount = 0
+
+        for (userId in userIds) {
+            ApiClient.recipeApi.get_post(userId).enqueue(object : Callback<List<Recipe>> {
+                override fun onResponse(call: Call<List<Recipe>>, response: Response<List<Recipe>>) {
+                    if (response.isSuccessful) {
+                        val userPosts = response.body() ?: emptyList()
+                        allPosts.addAll(userPosts)
+                    } else {
+                        Log.e("HomeFragment", "Error fetching posts for user $userId: ${response.errorBody()?.string()}")
+                    }
+
+                    fetchedUsersCount++
+                    if (fetchedUsersCount == userIds.size) {
+                        updateRecyclerView(allPosts)
+                    }
+                }
+
+                override fun onFailure(call: Call<List<Recipe>>, t: Throwable) {
+                    Log.e("HomeFragment", "Failed to fetch posts for user $userId: ${t.message}")
+
+                    fetchedUsersCount++
+                    if (fetchedUsersCount == userIds.size) {
+                        updateRecyclerView(allPosts)
+                    }
+                }
+            })
+        }
+    }
+
+    private fun updateRecyclerView(posts: List<Recipe>) {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+        val sortedPosts = posts.sortedByDescending { post ->
+            post.created_at?.let {
+                dateFormat.parse(it)?.time
+            } ?: 0L
+        }
+        postAdapter = PostAdapter(sortedPosts)
+        recyclerView.adapter = postAdapter
     }
 
     override fun onDestroyView() {
