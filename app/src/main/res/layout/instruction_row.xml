@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="4dp">
+
+    <!-- Instruction Step Number -->
+    <TextView
+        android:id="@+id/instructionLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Step 1:"
+        android:textSize="14sp"
+        android:textColor="@color/black"
+        android:layout_marginBottom="4dp"/>
+
+    <!-- Instruction Description (Now below the step number) -->
+    <TextView
+        android:id="@+id/instructionValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Step description"
+        android:textSize="14sp"
+        android:textColor="@color/black"/>
+</LinearLayout>
+

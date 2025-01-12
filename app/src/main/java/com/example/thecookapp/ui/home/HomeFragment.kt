@@ -1,5 +1,6 @@
 package com.example.thecookapp.ui.home
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -11,7 +12,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.thecookapp.Adapter.PostAdapter
+import com.example.thecookapp.Adapter.PostPreviewAdapter
+import com.example.thecookapp.PostDetailsActivity
 import com.example.thecookapp.R
 import com.example.thecookapp.R.layout.fragment_home
 import com.example.thecookapp.Recipe
@@ -29,7 +31,7 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var postAdapter: PostAdapter
+    private lateinit var postPreviewAdapter: PostPreviewAdapter
     private lateinit var recyclerView: RecyclerView
 
     private val firebaseAuth = FirebaseAuth.getInstance()
@@ -46,8 +48,10 @@ class HomeFragment : Fragment() {
         recyclerView = binding.recyclerViewPosts
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        postAdapter = PostAdapter(emptyList())
-        recyclerView.adapter = postAdapter
+        postPreviewAdapter = PostPreviewAdapter(requireContext(), emptyList()) { post ->
+            openFullPost(post)
+        }
+        recyclerView.adapter = postPreviewAdapter
 
         val userId = firebaseAuth.currentUser?.uid
         if (userId != null) {
@@ -108,8 +112,17 @@ class HomeFragment : Fragment() {
                 dateFormat.parse(it)?.time
             } ?: 0L
         }
-        postAdapter = PostAdapter(sortedPosts)
-        recyclerView.adapter = postAdapter
+        postPreviewAdapter = PostPreviewAdapter(requireContext(), sortedPosts) { post ->
+            openFullPost(post)
+        }
+        recyclerView.adapter = postPreviewAdapter
+    }
+
+    private fun openFullPost(post: Recipe) {
+        val intent = Intent(context, PostDetailsActivity::class.java)
+        intent.putExtra("POST_DETAILS", post)
+        requireContext().startActivity(intent)
+
     }
 
     override fun onDestroyView() {

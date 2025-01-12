@@ -1,24 +1,26 @@
 package com.example.thecookapp
 
+import android.os.Parcelable
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.*
-
+import kotlinx.parcelize.Parcelize
 
 // Data class for Recipe
+@Parcelize
 data class Recipe(
     val user_id: String,
     val post_id: Int, // Incremented based on the number of posts
     val title: String,
     val description: String,
     val ingredients: Map<String, String>,  // Ingredient as key-value pair (ingredient, amount)
-    val instructions: List<String>, //
+    val instructions: List<String>,
     val image_url: String,
     val difficulty: String,
     val servings: String,
     val time_to_do: String, // Timestamp when the recipe was created
     val created_at: String
-    )
+    ) : Parcelable
 
 // Retrofit API Interface
 interface RecipeApi {
