@@ -6,10 +6,12 @@ import android.view.View
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.thecookapp.Recipe
 import com.example.thecookapp.R
+import com.example.thecookapp.R.id.profile_post_layout
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 
@@ -23,7 +25,19 @@ class ProfilePostAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProfilePostViewHolder {
+        val displayMetrics = context?.resources?.displayMetrics
+        val screenWidth = displayMetrics?.widthPixels
+        val imageWidth = screenWidth?.div(3) ?: 0
+        val imageHeight = imageWidth
+
         val itemView = LayoutInflater.from(context).inflate(R.layout.profilepost_layout, parent, false)
+        val linearLayout = itemView.findViewById<LinearLayout>(profile_post_layout)
+        val params = linearLayout.layoutParams
+        params.width = imageWidth
+        params.height = imageHeight
+
+        linearLayout.layoutParams = params
+
         return ProfilePostViewHolder(itemView)
     }
 

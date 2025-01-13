@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/colorSignIn">
+    android:background="@color/white">
 
     <ScrollView
         android:id="@+id/activity_sign_up_scrollView"
@@ -40,7 +40,7 @@
                 android:layout_marginTop="12dp"
                 android:clickable="true"
                 android:text="Change Image"
-                android:textColor="@color/purple_500"
+                android:textColor="@color/colorApp"
                 android:textSize="16dp"
                 android:textStyle="bold" />
             />
@@ -109,7 +109,7 @@
                 android:textAllCaps="false"
                 android:textColor="@android:color/black"
                 android:textSize="17dp"
-                app:backgroundTint="@android:color/holo_green_dark" />
+                android:background="@drawable/buttons_background22" />
         </LinearLayout>
     </ScrollView>
 
@@ -119,14 +119,13 @@
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:background="@color/teal_200">
+        android:padding="16dp">
 
         <Button
             android:id="@+id/signin_link_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:backgroundTint="@color/purple_500"
+            android:background="@drawable/buttons_background22"
             android:text="Already have an account? Sign in"
             android:textAllCaps="false"
             android:textSize="15sp"

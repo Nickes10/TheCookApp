@@ -1,5 +1,6 @@
 package com.example.thecookapp.ui.home
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -38,12 +39,13 @@ class HomeFragment : Fragment() {
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val database = FirebaseDatabase.getInstance().reference
 
+    private var isGlobalSelected = false
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Use ViewBinding to inflate the layout
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
@@ -55,6 +57,8 @@ class HomeFragment : Fragment() {
         }
         recyclerView.adapter = postPreviewAdapter
 
+        setupTabListeners()
+
         val userId = firebaseAuth.currentUser?.uid
         if (userId != null) {
             fetchFollowingPosts(userId)
@@ -63,6 +67,57 @@ class HomeFragment : Fragment() {
         }
 
         return root
+    }
+
+    private fun setupTabListeners() {
+
+        binding.globalTab.setOnClickListener {
+            isGlobalSelected = true
+            val userId = firebaseAuth.currentUser?.uid
+            if (userId != null) {
+                fetchGlobalPosts(userId)
+            }
+            updateTabSelection()
+        }
+
+        binding.followingTab.setOnClickListener {
+            isGlobalSelected = false
+            val userId = firebaseAuth.currentUser?.uid
+            if (userId != null) {
+                fetchFollowingPosts(userId)
+            }
+            updateTabSelection()
+        }
+    }
+
+    private fun updateTabSelection() {
+        binding.globalTab.setTextColor(
+            if (isGlobalSelected) resources.getColor(R.color.colorApp, null) else resources.getColor(R.color.black, null)
+        )
+        binding.followingTab.setTextColor(
+            if (!isGlobalSelected) resources.getColor(R.color.colorApp, null) else resources.getColor(R.color.black, null)
+        )
+    }
+
+    private fun fetchGlobalPosts(userId: String) {
+        //list of users followed
+        database.child("Follow").child(userId).child("Following").get().addOnSuccessListener { followingSnapshot ->
+            val followingList = followingSnapshot.children.mapNotNull { it.key }.toSet()
+
+            // Get all users
+            database.child("Users").get().addOnSuccessListener { usersSnapshot ->
+                val allUsers = usersSnapshot.children.mapNotNull { it.key }
+                val globalUsers = allUsers.filterNot { it in followingList || it == userId }
+
+                fetchPostsForUsers(globalUsers)
+            }.addOnFailureListener {
+                Log.e("HomeFragment", "Failed to fetch all users: ${it.message}")
+                Toast.makeText(requireContext(), "Failed to load users list", Toast.LENGTH_SHORT).show()
+            }
+        }.addOnFailureListener {
+            Log.e("HomeFragment", "Failed to fetch following list: ${it.message}")
+            Toast.makeText(requireContext(), "Failed to load following list", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun fetchFollowingPosts(userId: String) {

@@ -6,7 +6,7 @@
     android:id="@+id/activity_sign_in"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorSignIn"
+    android:background="@color/white"
     tools:context=".SignInActivity">
 
     <ImageView
@@ -54,12 +54,12 @@
         android:layout_below="@+id/password_login"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:layout_marginTop="6dp"
-        app:backgroundTint="@android:color/white"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/buttons_background22"
         android:text="Login"
         android:textAllCaps="false"
         android:textSize="17dp"
-        android:textColor="@android:color/black"
+        android:textColor="@android:color/white"
         />
 
     <Button
@@ -72,7 +72,7 @@
         android:layout_marginRight="20dp"
         android:layout_marginTop="6dp"
         android:layout_marginBottom="10dp"
-        app:backgroundTint="@color/purple_500"
+        android:background="@drawable/buttons_background22"
         android:text="Sign Up"
         android:textAllCaps="false"
         android:textSize="15sp"

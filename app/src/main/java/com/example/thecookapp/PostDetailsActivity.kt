@@ -37,9 +37,9 @@ class PostDetailsActivity : AppCompatActivity() {
             val formattedUsername = username.split(" ")
                 .joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
             findViewById<TextView>(R.id.postUserName).text = formattedUsername
-//            findViewById<TextView>(R.id.postUserName).setOnClickListener {
-//                showProfileFragment(post.user_id)
-//            }
+            findViewById<TextView>(R.id.postUserName).setOnClickListener {
+                showProfileFragment(post.user_id)
+            }
         }
 
         FirebaseUtils.fetchProfileImage(post.user_id) { profileImageUrl ->
@@ -47,9 +47,9 @@ class PostDetailsActivity : AppCompatActivity() {
                 .load(profileImageUrl)
                 .placeholder(R.drawable.default_image_profile)
                 .into(findViewById<ImageView>(R.id.profileImage))
-//            findViewById<TextView>(R.id.postUserName).setOnClickListener {
-//                showProfileFragment(post.user_id)
-//            }
+            findViewById<TextView>(R.id.postUserName).setOnClickListener {
+                showProfileFragment(post.user_id)
+            }
         }
 
         findViewById<TextView>(R.id.postTitle).text = post.title

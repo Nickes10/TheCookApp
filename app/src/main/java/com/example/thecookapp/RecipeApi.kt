@@ -22,7 +22,7 @@ data class Recipe(
     val servings: String,
     val time_to_do: String, // Timestamp when the recipe was created
     val created_at: String
-    )
+    ) : Parcelable
 
 // Retrofit API Interface
 interface RecipeApi {

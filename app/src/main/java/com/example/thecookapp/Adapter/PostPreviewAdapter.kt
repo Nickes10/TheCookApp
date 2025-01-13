@@ -62,7 +62,7 @@ class PostPreviewAdapter(
         val targetFormat = SimpleDateFormat("MM/dd/yy", Locale.getDefault())
         val date = originalFormat.parse(post.created_at)
         val formattedDate = targetFormat.format(date)
-        holder.createdAt.text = "Created At: $formattedDate"
+        holder.createdAt.text = "Created at: $formattedDate"
 
         holder.itemView.setOnClickListener {
             onPostClick(post)
