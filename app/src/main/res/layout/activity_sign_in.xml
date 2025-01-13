@@ -13,8 +13,7 @@
         android:id="@+id/logo"
         android:layout_width="160dp"
         android:layout_height="90dp"
-        android:src="@drawable/instagram"
-        app:tint="@color/white"
+        android:src="@drawable/my_recipe_text"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="180dp"
         />

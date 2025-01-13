@@ -50,6 +50,9 @@ import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.gson.Gson
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import android.location.Location
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -61,6 +64,9 @@ class AddPostActivity : AppCompatActivity() {
 
     // user id
     private lateinit var signInUser: FirebaseUser
+
+    // gps location
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     // Ingredients variable
     private lateinit var ingredientAdapter: IngredientAdapter
@@ -111,6 +117,18 @@ class AddPostActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_post)
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        // Set up the location button
+        val locationButton = findViewById<Button>(R.id.location_btn)
+        locationButton.setOnClickListener {
+            if (checkLocationPermission()) {
+                fetchCurrentLocation()
+            } else {
+                requestLocationPermission()
+            }
+        }
 
         recipeImageView = findViewById<ImageView>(R.id.recipeImage)
 
@@ -275,6 +293,56 @@ class AddPostActivity : AppCompatActivity() {
             arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA),
             100
         )
+    }
+
+    private fun checkLocationPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            this, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun requestLocationPermission() {
+        ActivityCompat.requestPermissions(
+            this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 200
+        )
+    }
+
+    private fun fetchCurrentLocation() {
+        if (ActivityCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            Toast.makeText(this, "Location permission not granted", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+            if (location != null) {
+                val latitude = location.latitude
+                val longitude = location.longitude
+                Log.d("Location", "Latitude: $latitude, Longitude: $longitude")
+
+                // Display the coordinates
+                val locationInput = findViewById<EditText>(R.id.locationInput)
+                locationInput.setText("Lat: $latitude\nLong: $longitude")
+            } else {
+                Toast.makeText(this, "Unable to fetch location", Toast.LENGTH_SHORT).show()
+            }
+        }.addOnFailureListener { exception ->
+            Log.e("Location", "Failed to get location", exception)
+            Toast.makeText(this, "Failed to fetch location", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 200 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            fetchCurrentLocation()
+        } else {
+            Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show()
+        }
     }
 
 

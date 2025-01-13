@@ -67,6 +67,14 @@
 
             </LinearLayout>
 
+            <ImageView
+                android:id="@+id/myRecipe"
+                android:layout_width="100dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="85dp"
+                android:src="@drawable/my_recipe_text"
+                android:layout_marginTop="0dp"
+                />
         </androidx.appcompat.widget.Toolbar>
 
     </com.google.android.material.appbar.AppBarLayout>

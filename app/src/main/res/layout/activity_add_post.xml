@@ -77,11 +77,11 @@
                 android:id="@+id/headerTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:text="NEW POST."
+                android:text="NEW POST"
                 android:textColor="@color/black"
                 android:textSize="24sp"
                 android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
             <TextView
@@ -146,7 +146,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="18dp"
-                android:text="TITLE."
+                android:text="TITLE"
                 android:textColor="@color/black"
                 android:textSize="14sp"
                 android:textStyle="bold"
@@ -173,7 +173,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="ABOUT."
+                android:text="ABOUT"
                 android:textColor="@color/black"
                 android:textSize="14sp"
                 android:textStyle="bold"
@@ -326,6 +326,46 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- Divider -->
+            <View
+                android:id="@+id/third_divider_two"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="18dp"
+                android:layout_marginBottom="16dp"
+                android:background="#DDDDDD"
+                app:layout_constraintTop_toBottomOf="@+id/layout_time_difficult_servings" />
+
+            <!-- Button location and ccordinates view-->
+            <LinearLayout
+                android:id="@+id/layout_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                app:layout_constraintTop_toBottomOf="@id/third_divider_two">
+
+                <Button
+                    android:id="@+id/location_btn"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/buttons_background22"
+                    android:text="Add actual location"
+                    android:textAllCaps="false"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/white" />
+
+                <EditText
+                    android:id="@+id/locationInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:hint="Location will appear here"
+                    android:textSize="14sp"
+                    android:focusable="false"
+                    android:gravity="center_vertical"/>
+            </LinearLayout>
 
             <!-- Divider -->
             <View
@@ -335,7 +375,7 @@
                 android:layout_marginTop="18dp"
                 android:layout_marginBottom="16dp"
                 android:background="#DDDDDD"
-                app:layout_constraintTop_toBottomOf="@+id/layout_time_difficult_servings" />
+                app:layout_constraintTop_toBottomOf="@+id/layout_location" />
 
             <!-- Ingredients Section -->
             <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
