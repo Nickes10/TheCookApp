@@ -1,6 +1,8 @@
 package com.example.thecookapp
 
 import android.os.Parcelable
+import com.google.gson.JsonObject
+import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.*
@@ -20,7 +22,7 @@ data class Recipe(
     val servings: String,
     val time_to_do: String, // Timestamp when the recipe was created
     val created_at: String
-    ) : Parcelable
+    )
 
 // Retrofit API Interface
 interface RecipeApi {
@@ -35,6 +37,10 @@ interface RecipeApi {
 
     @GET("/health")
     suspend fun healthCheck(): Response<ResponseMessage>
+
+    @Multipart
+    @POST("/upload")
+    suspend fun uploadImage(@Part file: MultipartBody.Part): Response<JsonObject>
 }
 
 data class ResponseMessage(

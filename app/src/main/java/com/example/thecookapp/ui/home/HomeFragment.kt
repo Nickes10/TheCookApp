@@ -1,6 +1,5 @@
 package com.example.thecookapp.ui.home
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -29,6 +28,8 @@ import java.util.Locale
 class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
+
+    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
     private lateinit var postPreviewAdapter: PostPreviewAdapter
@@ -42,6 +43,7 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        // Use ViewBinding to inflate the layout
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 

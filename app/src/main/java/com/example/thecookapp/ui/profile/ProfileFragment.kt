@@ -9,11 +9,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import java.util.Collections
 import com.example.thecookapp.AccountSettingsActivity
+import com.example.thecookapp.Adapter.IngredientAdapter
+import com.example.thecookapp.Adapter.IngredientItem
+import com.example.thecookapp.Adapter.ProfilePostAdapter
 import com.example.thecookapp.AppObject.User
 import com.example.thecookapp.R
 import com.example.thecookapp.R.id.*
+import com.example.thecookapp.Recipe
 import com.example.thecookapp.databinding.FragmentProfileBinding
 import com.google.android.material.tabs.TabItem
 import com.google.android.material.tabs.TabLayout
@@ -25,11 +34,18 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class ProfileFragment : Fragment() {
 
     private lateinit var viewedProfileId: String // the Id of the profile displayed
     private lateinit var signInUser: FirebaseUser // the user of Firebase SignIn in this moment (the one that is using the app)
+
+    private lateinit var profilePostAdapter:ProfilePostAdapter
+    private lateinit var profilePostRecyclerView: RecyclerView
+    private val profilePostList = mutableListOf<Recipe>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -54,8 +70,8 @@ class ProfileFragment : Fragment() {
             }
         }
 
-        view.findViewById<Button>(R.id.edit_profile_button).setOnClickListener{
-            val getButtontext = view.findViewById<Button>(R.id.edit_profile_button).text.toString()
+        view.findViewById<Button>(edit_profile_button).setOnClickListener{
+            val getButtontext = view.findViewById<Button>(edit_profile_button).text.toString()
             Log.d("ProfileFragment", "Button text: $getButtontext")
 
             when {
@@ -97,10 +113,21 @@ class ProfileFragment : Fragment() {
             }
         }
 
+        // Initialize RecyclerViews
+        profilePostRecyclerView = view.findViewById(recycler_view_posts)
+        val gridLayoutManager:LinearLayoutManager= GridLayoutManager(context,3)
+        profilePostRecyclerView.layoutManager = gridLayoutManager
+
+        // Set up adapter with initial data
+        profilePostAdapter = context?.let { ProfilePostAdapter(it, profilePostList) }!!
+        profilePostRecyclerView.adapter = profilePostAdapter
+
+        Log.e("ProfileFragment", "profileId: $viewedProfileId")
         // Fill the data necessary in the profile
         getUserInfo(view)
         getFollowers()
         getFollowing()
+        takePosts(viewedProfileId)
 
         return  view
     }
@@ -202,6 +229,44 @@ class ProfileFragment : Fragment() {
         // to take the number of Following of the profile
         updateFollowCount("Following")
     }
+
+    private fun takePosts(userId: String) {
+        Log.e("ProfileFragment", "userId: $userId")
+        ApiClient.recipeApi.get_post(userId).enqueue(object : Callback<List<Recipe>> {
+            override fun onResponse(call: Call<List<Recipe>>, response: Response<List<Recipe>>) {
+                Log.e("ProfileFragment", "Entrato in takePosts")
+                if (response.isSuccessful) {
+                    val posts = response.body()
+                    Log.e("ProfileFragment", "Posts: $posts")
+                    if (posts != null) {
+                        // Clear the current postList and add the fetched posts
+                        (profilePostList as ArrayList<Recipe>).clear()
+                        (profilePostList as ArrayList<Recipe>).addAll(posts)
+                        Log.e("ProfileFragment", "profilePostList: $profilePostList")
+
+                        // Reverse the list to show the most recent posts first
+                        Collections.reverse(profilePostList)
+
+                        // Update Post Number
+                        val tabLayout = view?.findViewById<TabLayout>(tabs_profile_sections)
+                        tabLayout?.getTabAt(0)?.text = "${profilePostList.size} Posts"
+
+                        // Notify the adapter of data changes
+                        profilePostAdapter?.notifyDataSetChanged()
+                    }
+                } else {
+                    Log.e("ProfileFragment", "Error: ${response.errorBody()?.string()}")
+                    Toast.makeText(requireContext(), "Failed to load posts", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<List<Recipe>>, t: Throwable) {
+                Log.e("ProfileFragment", "Failure: ${t.message}")
+                Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
 
 
     override fun onStop() {

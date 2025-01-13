@@ -2,7 +2,9 @@ package com.example.thecookapp
 import android.Manifest
 import android.app.AlertDialog
 import android.app.ProgressDialog
+import android.content.ContentResolver
 import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -15,6 +17,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.text.TextUtils
 import com.squareup.picasso.Transformation
 import android.widget.TextView
@@ -48,7 +51,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.gson.Gson
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import retrofit2.await
+import java.io.File
 
 class AddPostActivity : AppCompatActivity() {
 
@@ -310,8 +317,6 @@ class AddPostActivity : AppCompatActivity() {
     }
 
     private suspend fun create_post() {
-        val user_id = signInUser.uid // Assuming `signInUser` is properly initialized
-
         val isConnected = ApiClient.checkServerConnection()
         if (!isConnected) {
             Log.e("API_ERROR", "Failed to connect to the Flask server")
@@ -321,28 +326,49 @@ class AddPostActivity : AppCompatActivity() {
             return
         }
 
+        val user_id = signInUser.uid // Assuming `signInUser` is properly initialized
+
+        // Fetch values from the front-end
+        val instructions: List<String> = steps.filter { it.description.isNotBlank() }
+            .map { it.description }
+        val ingredients = ingredients.associate { it.ingredient to it.amount }
+        val servings = findViewById<EditText>(R.id.servings_value).text.toString()
+        val title = findViewById<EditText>(R.id.titleInput).text.toString()
+        val description = findViewById<EditText>(R.id.aboutInput).text.toString()
+        val difficulty = findViewById<EditText>(R.id.difficult_value).text.toString()
+        val time = findViewById<EditText>(R.id.time_value).text.toString()
+
+        // Validate inputs
+        if (title.isEmpty() || description.isEmpty() || ingredients.isEmpty() || instructions.isEmpty()) {
+            runOnUiThread {
+                Toast.makeText(this@AddPostActivity, "All fields are required!", Toast.LENGTH_LONG).show()
+            }
+            return
+        }
+
+        // Check if image is upload by user
+        if (imageUri == null) {
+            Log.e("Upload Image", "Image URI is null")
+            runOnUiThread {
+                Toast.makeText(this@AddPostActivity, "Image is required!", Toast.LENGTH_LONG).show()
+            }
+            return
+        }
+
+        // Create URL of image - saved on Flask server
+        val imageUrl = uploadImage(imageUri) ?: run {
+            Log.e("Upload Image", "Failed to upload image")
+            Toast.makeText(this@AddPostActivity, "Failed to upload image", Toast.LENGTH_LONG)
+                .show()
+            return
+        }
+
+
+
         ApiClient.recipeApi.getPostCount(user_id).enqueue(object : Callback<Int> {
             override fun onResponse(call: Call<Int>, response: Response<Int>) {
                 if (response.isSuccessful) {
                     val post_id = (response.body() ?: 0) + 1 // Generate the next post ID
-
-                    // Fetch values from the front-end
-                    val instructions: List<String> = steps.filter { it.description.isNotBlank() }
-                        .map { it.description }
-                    val ingredients = ingredients.associate { it.ingredient to it.amount }
-                    val servings = findViewById<EditText>(R.id.servings_value).text.toString()
-                    val title = findViewById<EditText>(R.id.titleInput).text.toString()
-                    val description = findViewById<EditText>(R.id.aboutInput).text.toString()
-                    val difficulty = findViewById<EditText>(R.id.difficult_value).text.toString()
-                    val time = findViewById<EditText>(R.id.time_value).text.toString()
-
-                    // Validate inputs
-                    if (title.isEmpty() || description.isEmpty() || ingredients.isEmpty() || instructions.isEmpty()) {
-                        runOnUiThread {
-                            Toast.makeText(this@AddPostActivity, "All fields are required!", Toast.LENGTH_LONG).show()
-                        }
-                        return
-                    }
 
                     // Create the recipe object
                     val newRecipe = Recipe(
@@ -352,7 +378,7 @@ class AddPostActivity : AppCompatActivity() {
                         description = description,
                         ingredients = ingredients,
                         instructions = instructions,
-                        image_url = imageUri.toString(),
+                        image_url = imageUrl,
                         difficulty = difficulty,
                         servings = servings,
                         time_to_do = time,
@@ -400,6 +426,55 @@ class AddPostActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    private suspend fun uploadImage(imageUri: Uri): String? {
+        val file = getFileFromUri(this, imageUri)
+        if (file == null) {
+            Log.e("Upload Image", "Error creating temporary file from URI")
+            return null
+        }
+        Log.e("Upload Image", "File path: ${file}")
+
+        val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+        val body = MultipartBody.Part.createFormData("image", file.name, requestFile)
+
+        return try {
+            val response = ApiClient.recipeApi.uploadImage(body)
+            if (response.isSuccessful) {
+                response.body()?.get("url")?.asString
+            } else {
+                Log.e("Upload Image", "Error uploading image: ${response.errorBody()?.string()}")
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("Upload Image", "Exception during image upload", e)
+            null
+        }
+    }
+
+
+    private fun getFileFromUri(context: Context, uri: Uri): File? {
+        val contentResolver = context.contentResolver
+        val fileName = getFileName(contentResolver, uri) ?: return null
+        val tempFile = File(context.cacheDir, fileName)
+        contentResolver.openInputStream(uri)?.use { inputStream ->
+            tempFile.outputStream().use { outputStream ->
+                inputStream.copyTo(outputStream)
+            }
+        }
+        return tempFile
+    }
+
+    private fun getFileName(contentResolver: ContentResolver, uri: Uri): String? {
+        val cursor = contentResolver.query(uri, null, null, null, null)
+        cursor?.use {
+            val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            if (nameIndex != -1 && it.moveToFirst()) {
+                return it.getString(nameIndex)
+            }
+        }
+        return null
     }
 }
 
