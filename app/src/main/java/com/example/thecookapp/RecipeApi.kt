@@ -21,8 +21,10 @@ data class Recipe(
     val difficulty: String,
     val servings: String,
     val time_to_do: String, // Timestamp when the recipe was created
-    val created_at: String
-    ) : Parcelable
+    val created_at: String,
+    val latitude: Double,
+    val longitude: Double
+) : Parcelable
 
 // Retrofit API Interface
 interface RecipeApi {
@@ -41,6 +43,20 @@ interface RecipeApi {
     @Multipart
     @POST("/upload")
     suspend fun uploadImage(@Part file: MultipartBody.Part): Response<JsonObject>
+
+    @DELETE("/delete_post/{user_id}/{post_id}")
+    fun deletePost(
+        @Path("user_id") userId: String,
+        @Path("post_id") postId: Int
+    ): Call<Map<String, Any>>
+
+    // Update post
+    @PUT("/update_post/{user_id}/{post_id}")
+    fun updatePost(
+        @Path("user_id") userId: String,
+        @Path("post_id") postId: Int,
+        @Body updatedRecipe: Recipe
+    ): Call<Map<String, Any>>
 }
 
 data class ResponseMessage(

@@ -2,19 +2,29 @@ package com.example.thecookapp
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentActivity
 import com.example.thecookapp.ui.profile.ProfileFragment
+import com.google.firebase.auth.FirebaseAuth
 import com.squareup.picasso.Picasso
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.Locale
+import android.view.MenuItem
+
 
 class PostDetailsActivity : AppCompatActivity() {
+
+    private val firebaseAuth = FirebaseAuth.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,6 +43,19 @@ class PostDetailsActivity : AppCompatActivity() {
     }
 
     private fun updateUI(post: Recipe) {
+        val userId = firebaseAuth.currentUser?.uid
+
+        val menuOptions = findViewById<ImageView>(R.id.menuOptions)
+        if (post.user_id == userId) {
+            menuOptions.visibility = View.VISIBLE
+        } else {
+            menuOptions.visibility = View.GONE
+        }
+
+        menuOptions.setOnClickListener {
+            showMenuOptions(post)
+        }
+
         FirebaseUtils.fetchUsername(post.user_id) { username ->
             val formattedUsername = username.split(" ")
                 .joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
@@ -51,7 +74,8 @@ class PostDetailsActivity : AppCompatActivity() {
                 showProfileFragment(post.user_id)
             }
         }
-
+        findViewById<TextView>(R.id.locationInput).text =
+            "lat: ${post.latitude}, lon: ${post.longitude}"
         findViewById<TextView>(R.id.postTitle).text = post.title
         findViewById<TextView>(R.id.postDescription).text = post.description
         //findViewById<TextView>(R.id.postIngredients).text = "Ingredients: ${post.ingredients}"
@@ -100,6 +124,57 @@ class PostDetailsActivity : AppCompatActivity() {
             instructionsContainer.addView(instructionRow)
         }
     }
+
+    private fun showMenuOptions(post: Recipe) {
+        val popupMenu = PopupMenu(this, findViewById(R.id.menuOptions))
+        popupMenu.menuInflater.inflate(R.menu.post_menu , popupMenu.menu)
+        popupMenu.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.modifyPost -> {
+                    modifyPost(post)
+                    true
+                }
+                R.id.deletePost -> {
+                    deletePost(post)
+                    true
+                }
+                else -> false
+            }
+        }
+        popupMenu.show()
+    }
+
+    private fun modifyPost(post: Recipe) {
+        // Implement modify post functionality
+        Toast.makeText(this, "Modify post clicked", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun deletePost(post: Recipe) {
+        ApiClient.recipeApi.deletePost(post.user_id, post.post_id).enqueue(object : Callback<Map<String, Any>> {
+            override fun onResponse(call: Call<Map<String, Any>>, response: Response<Map<String, Any>>) {
+                if (response.isSuccessful) {
+                    Log.e("API_SUCCESS", "Recipe deleted: ${response.body()}")
+                    runOnUiThread {
+                        Toast.makeText(this@PostDetailsActivity, "Post deleted successfully!", Toast.LENGTH_LONG).show()
+                        finish() // Close the current activity and return to the previous screen
+                    }
+                } else {
+                    Log.e("API_ERROR", "Error: ${response.errorBody()?.string()}")
+                    runOnUiThread {
+                        Toast.makeText(this@PostDetailsActivity, "Failed to delete the post. Please try again.", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<Map<String, Any>>, t: Throwable) {
+                Log.e("API_ERROR", "Failed to delete recipe", t)
+                runOnUiThread {
+                    Toast.makeText(this@PostDetailsActivity, "An error occurred. Please try again.", Toast.LENGTH_LONG).show()
+                }
+            }
+        })
+    }
+
 
     private fun showProfileFragment(userId: String) {
         // Save profile ID in SharedPreferences

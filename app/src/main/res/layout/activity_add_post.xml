@@ -336,7 +336,7 @@
                 android:background="#DDDDDD"
                 app:layout_constraintTop_toBottomOf="@+id/layout_time_difficult_servings" />
 
-            <!-- Button location and ccordinates view-->
+            <!-- Button location and coordinates view-->
             <LinearLayout
                 android:id="@+id/layout_location"
                 android:layout_width="match_parent"

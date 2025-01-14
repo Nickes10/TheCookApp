@@ -67,6 +67,8 @@ class AddPostActivity : AppCompatActivity() {
 
     // gps location
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var latitude: Double? = null
+    private var longitude: Double? = null
 
     // Ingredients variable
     private lateinit var ingredientAdapter: IngredientAdapter
@@ -316,10 +318,10 @@ class AddPostActivity : AppCompatActivity() {
             return
         }
 
-        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-            if (location != null) {
-                val latitude = location.latitude
-                val longitude = location.longitude
+        fusedLocationClient.lastLocation.addOnSuccessListener { loc: Location? ->
+            if (loc != null) {
+                latitude = loc.latitude
+                longitude = loc.longitude
                 Log.d("Location", "Latitude: $latitude, Longitude: $longitude")
 
                 // Display the coordinates
@@ -333,6 +335,7 @@ class AddPostActivity : AppCompatActivity() {
             Toast.makeText(this, "Failed to fetch location", Toast.LENGTH_SHORT).show()
         }
     }
+
 
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<out String>, grantResults: IntArray
@@ -431,7 +434,8 @@ class AddPostActivity : AppCompatActivity() {
             return
         }
 
-
+        val locationLatitude = latitude ?: 0.0
+        val locationLongitude = longitude ?: 0.0
 
         ApiClient.recipeApi.getPostCount(user_id).enqueue(object : Callback<Int> {
             override fun onResponse(call: Call<Int>, response: Response<Int>) {
@@ -450,7 +454,9 @@ class AddPostActivity : AppCompatActivity() {
                         difficulty = difficulty,
                         servings = servings,
                         time_to_do = time,
-                        created_at = "SETTED BY SQL"
+                        created_at = "SETTED BY SQL",
+                        latitude = locationLatitude,
+                        longitude = locationLongitude
                     )
 
                     // Use the API to add the recipe

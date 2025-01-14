@@ -1,27 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:padding="4dp">
 
-    <!-- Ingredient Label -->
-    <TextView
-        android:id="@+id/ingredientKey"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Ingredient:"
-        android:textSize="14sp"
-        android:textColor="@color/black"/>
+        android:orientation="horizontal">
 
-    <!-- Ingredient Value -->
-    <TextView
-        android:id="@+id/ingredientValue"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Value"
-        android:textSize="14sp"
-        android:textColor="@color/black"/>
+        <!-- Ingredient Label -->
+        <TextView
+            android:id="@+id/ingredientKey"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Ingredient:"
+            android:textSize="14sp"
+            android:textColor="@color/black"/>
+
+        <!-- Ingredient Value -->
+        <TextView
+            android:id="@+id/ingredientValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Value"
+            android:textSize="14sp"
+            android:textColor="@color/black"/>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/dottedLine"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/dotted_line" />
+
 </LinearLayout>
