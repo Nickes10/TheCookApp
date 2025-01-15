@@ -85,7 +85,7 @@ class AddPostActivity : AppCompatActivity() {
     private var recipe_modify : Recipe? = null
 
     // Image variable
-    private lateinit var imageUri: Uri
+    private var imageUri: Uri? = null
     private lateinit var recipeImageView: ImageView
     private val getImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
@@ -168,7 +168,10 @@ class AddPostActivity : AppCompatActivity() {
                 }
             } else {
                 lifecycleScope.launch {
-                    update_post()
+                    update_post(
+                        post_id = recipe_modify!!.post_id,
+                        currentImageUrl = recipe_modify!!.image_url
+                    )
                 }
             }
         }
@@ -324,9 +327,101 @@ class AddPostActivity : AppCompatActivity() {
         }
     }
 
-    private fun update_post() {
+    private suspend fun update_post(post_id: Int, currentImageUrl: String) {
         // Function to update the post in the database
+        val isConnected = ApiClient.checkServerConnection()
+        if (!isConnected) {
+            Log.e("API_ERROR", "Failed to connect to the Flask server")
+            runOnUiThread {
+                Toast.makeText(this@AddPostActivity, "Failed to connect to the server. Please try again.", Toast.LENGTH_LONG).show()
+            }
+            return
+        }
+
+        val user_id = signInUser.uid // Assuming `signInUser` is properly initialized
+
+        // Fetch values from the front-end
+        val instructions: List<String> = steps.filter { it.description.isNotBlank() }
+            .map { it.description }
+        val ingredients = ingredients.associate { it.ingredient to it.amount }
+        val servings = findViewById<EditText>(R.id.servings_value).text.toString()
+        val title = findViewById<EditText>(R.id.titleInput).text.toString()
+        val description = findViewById<EditText>(R.id.aboutInput).text.toString()
+        val difficulty = findViewById<EditText>(R.id.difficult_value).text.toString()
+        val time = findViewById<EditText>(R.id.time_value).text.toString()
+
+        // Validate inputs
+        if (title.isEmpty() || description.isEmpty() || ingredients.isEmpty() || instructions.isEmpty()) {
+            runOnUiThread {
+                Toast.makeText(this@AddPostActivity, "All fields are required!", Toast.LENGTH_LONG).show()
+            }
+            return
+        }
+
+        // Handle image logic
+        val imageUrl: String = if (imageUri == null) {
+            // If no new image is uploaded, reuse the current image URL
+            currentImageUrl
+        } else {
+            // Upload the new image and get its URL
+            uploadImage(imageUri!!) ?: run {
+                Log.e("Upload Image", "Failed to upload image")
+                Toast.makeText(this@AddPostActivity, "Failed to upload image", Toast.LENGTH_LONG)
+                    .show()
+                return
+            }
+        }
+
+        val locationLatitude = latitude ?: 0.0
+        val locationLongitude = longitude ?: 0.0
+
+        // Create the updated recipe object
+        val updatedRecipe = Recipe(
+            user_id = user_id,
+            post_id = post_id,
+            title = title,
+            description = description,
+            ingredients = ingredients,
+            instructions = instructions,
+            image_url = imageUrl,
+            difficulty = difficulty,
+            servings = servings,
+            time_to_do = time,
+            latitude = locationLatitude,
+            longitude = locationLongitude,
+            created_at = "Set by SQL"
+        )
+
+        Log.e("AddpostActivity", "latitude is $latitude and longitude is $longitude")
+
+        // Use the API to update the recipe
+        ApiClient.recipeApi.updatePost(user_id, post_id, updatedRecipe).enqueue(object : Callback<Map<String, Any>> {
+            override fun onResponse(call: Call<Map<String, Any>>, response: Response<Map<String, Any>>) {
+                if (response.isSuccessful) {
+                    Log.e("API_SUCCESS", "Recipe updated: ${response.body()}")
+                    runOnUiThread {
+                        Toast.makeText(this@AddPostActivity, "Post updated successfully!", Toast.LENGTH_LONG).show()
+                        // Navigate to home page or another activity
+                        startActivity(Intent(this@AddPostActivity, MainActivity::class.java))
+                        finish() // Close the current activity
+                    }
+                } else {
+                    Log.e("API_ERROR", "Error: ${response.errorBody()?.string()}")
+                    runOnUiThread {
+                        Toast.makeText(this@AddPostActivity, "Failed to update the post. Please try again.", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<Map<String, Any>>, t: Throwable) {
+                Log.e("API_ERROR", "Failed to update recipe", t)
+                runOnUiThread {
+                    Toast.makeText(this@AddPostActivity, "An error occurred. Please try again.", Toast.LENGTH_LONG).show()
+                }
+            }
+        })
     }
+
 
     private fun checkPermissions(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -408,7 +503,7 @@ class AddPostActivity : AppCompatActivity() {
                 0 -> getImage.launch("image/*")  // Launch the gallery picker
                 1 -> {
                     imageUri = createImageUri()  // Create a URI for the photo capture
-                    takePhoto.launch(imageUri)   // Launch the camera to take a photo
+                    takePhoto.launch(imageUri!!)   // Launch the camera to take a photo
                 }
             }
         }
@@ -476,7 +571,7 @@ class AddPostActivity : AppCompatActivity() {
         }
 
         // Create URL of image - saved on Flask server
-        val imageUrl = uploadImage(imageUri) ?: run {
+        val imageUrl = uploadImage(imageUri!!) ?: run {
             Log.e("Upload Image", "Failed to upload image")
             Toast.makeText(this@AddPostActivity, "Failed to upload image", Toast.LENGTH_LONG)
                 .show()
