@@ -121,20 +121,15 @@
                                 android:layout_marginTop="10dp"
                                 app:tabMode="fixed"
                                 app:tabGravity="fill"
-                                app:tabTextAppearance="@style/CustomTabTextAppearance">
+                                app:tabTextAppearance="@style/CustomTabTextAppearance"
+                                app:tabIndicatorColor="@color/colorApp">
 
                                 <com.google.android.material.tabs.TabItem
                                     android:id="@+id/tab_post"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="0 Posts"
-                                    />
+                                    android:text="0 Posts"/>
 
-                                <com.google.android.material.tabs.TabItem
-                                    android:id="@+id/tab_explore"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="0 Saved" />
 
                                 <com.google.android.material.tabs.TabItem
                                     android:id="@+id/tab_following"

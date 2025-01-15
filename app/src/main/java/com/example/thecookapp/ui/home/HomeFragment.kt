@@ -46,6 +46,7 @@ class HomeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        // Use ViewBinding to inflate the layout
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
@@ -179,7 +180,6 @@ class HomeFragment : Fragment() {
         val intent = Intent(context, PostDetailsActivity::class.java)
         intent.putExtra("POST_DETAILS", post)
         requireContext().startActivity(intent)
-
     }
 
     override fun onDestroyView() {

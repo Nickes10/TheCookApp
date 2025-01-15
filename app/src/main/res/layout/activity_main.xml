@@ -22,6 +22,7 @@
         android:layout_alignParentBottom="true"
         android:background="@android:color/white"
         app:labelVisibilityMode="unlabeled"
-        app:menu="@menu/bottom_nav_menu" />
+        app:menu="@menu/bottom_nav_menu"
+        app:itemIconTint="@color/nav_item_color_selector"/>
 
 </RelativeLayout>

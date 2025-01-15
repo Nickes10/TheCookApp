@@ -61,7 +61,6 @@ import retrofit2.await
 import java.io.File
 
 class AddPostActivity : AppCompatActivity() {
-
     // user id
     private lateinit var signInUser: FirebaseUser
 
@@ -81,6 +80,9 @@ class AddPostActivity : AppCompatActivity() {
     private lateinit var instructionRecyclerView: RecyclerView
     private val steps = mutableListOf<StepItem>() // List to hold steps items
     private var isEditingInstruction = false
+
+    // Mofication post variable
+    private var recipe_modify : Recipe? = null
 
     // Image variable
     private lateinit var imageUri: Uri
@@ -120,6 +122,10 @@ class AddPostActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_post)
 
+        // Set if there is the post to modify
+        recipe_modify = intent.getParcelableExtra<Recipe>("RECIPE_DETAILS")
+
+        recipeImageView = findViewById<ImageView>(R.id.recipeImage)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         // Set up the location button
@@ -132,11 +138,11 @@ class AddPostActivity : AppCompatActivity() {
             }
         }
 
-        recipeImageView = findViewById<ImageView>(R.id.recipeImage)
 
         // Set up the back button
         val backButton = findViewById<ImageButton>(R.id.back_button)
         backButton.setOnClickListener {
+            // A QUANTO PARE COSì FUNZIONA BENE SE STO MODIFICANDO IL POST MA NON SE DEVO AGGIUNGERLO
             supportFragmentManager.beginTransaction().replace(
                 R.id.fragment_container,
                 HomeFragment()
@@ -156,8 +162,14 @@ class AddPostActivity : AppCompatActivity() {
         val postButton = findViewById<TextView>(R.id.next_button)
         signInUser = FirebaseAuth.getInstance().currentUser!!
         postButton.setOnClickListener{
-            lifecycleScope.launch {
-                create_post()
+            if (recipe_modify== null) {
+                lifecycleScope.launch {
+                    create_post()
+                }
+            } else {
+                lifecycleScope.launch {
+                    update_post()
+                }
             }
         }
 
@@ -259,24 +271,61 @@ class AddPostActivity : AppCompatActivity() {
         // Set up the Add Ingredient button
         val addIngredientButton = findViewById<Button>(R.id.add_ingredient_button)
         addIngredientButton.setOnClickListener {
-            addIngredientItem()
+            addIngredientItem("", "", isEditingIngredient)
         }
 
         // Set up the Add Step button
         val addStepButton = findViewById<Button>(R.id.add_step_button)
         addStepButton.setOnClickListener {
-            addStepItem()
+            addStepItem("", isEditingInstruction)
+        }
+
+        if(recipe_modify != null) {
+            // if there is a recipe to modify populate the UI
+            populateUI()
         }
 
         // Ensure at least one default item is present
         if (ingredients.isEmpty()) {
-            addIngredientItem()
+            addIngredientItem("", "", isEditingIngredient)
         }
 
         if (steps.isEmpty()) {
-            addStepItem()
+            addStepItem("", isEditingInstruction)
         }
 
+    }
+
+    private fun populateUI() {
+        // Fill all Front-end with the correct info of the post
+        findViewById<EditText>(R.id.titleInput).setText(recipe_modify?.title)
+        findViewById<EditText>(R.id.aboutInput).setText(recipe_modify?.description)
+        findViewById<EditText>(R.id.time_value).setText(recipe_modify?.time_to_do)
+        findViewById<EditText>(R.id.difficult_value).setText(recipe_modify?.difficulty)
+        findViewById<EditText>(R.id.servings_value).setText(recipe_modify?.servings)
+        val locationInput = findViewById<EditText>(R.id.locationInput)
+        locationInput.setText("Lat: ${recipe_modify?.latitude}, Lon: ${recipe_modify?.longitude}")
+
+        // Set Image using Picasso
+        Picasso.get()
+            .load(recipe_modify?.image_url)
+            .fit() // Resize to fit ImageView dimensions
+            .placeholder(R.drawable.plate_knife_fork) // Placeholder image
+            .transform(RoundedCornersTransformation(22f, 12f)) // Radius = 22dp, Margin = 8dp
+            .into(recipeImageView)
+
+        // Set the recyclerView with the ingredient of the recipe
+        for ((ingredientName, ingredientAmount) in recipe_modify!!.ingredients) {
+            addIngredientItem(ingredientName, ingredientAmount, isEditingIngredient)
+        }
+        // Set the recyclerView with the instruction of the recipe
+        for (stepDescription in recipe_modify!!.instructions) {
+            addStepItem(stepDescription, isEditingInstruction)
+        }
+    }
+
+    private fun update_post() {
+        // Function to update the post in the database
     }
 
     private fun checkPermissions(): Boolean {
@@ -374,15 +423,15 @@ class AddPostActivity : AppCompatActivity() {
         return contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)!!
     }
 
-    private fun addIngredientItem() {
+    private fun addIngredientItem(ingredient_name: String, amount: String, isEditing: Boolean) {
         // Add a new item to the list and notify the adapter
-        ingredients.add(IngredientItem("", "", isEditingIngredient))
+        ingredients.add(IngredientItem(ingredient_name, amount, isEditing))
         ingredientAdapter.notifyItemInserted(ingredients.size - 1)
     }
 
-    private fun addStepItem() {
+    private fun addStepItem(step_description: String, isEditing: Boolean) {
         // Add a new item to the list and notify the adapter
-        steps.add(StepItem("", steps.size, isEditingInstruction))
+        steps.add(StepItem(step_description, steps.size, isEditing))
         Log.e("StepItem", "Step added, size: ${steps.size}, steps ACTIVITY: $steps")
         instructionAdapter.notifyItemInserted(steps.size - 1)
     }

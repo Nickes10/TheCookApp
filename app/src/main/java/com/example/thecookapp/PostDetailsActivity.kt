@@ -1,6 +1,7 @@
 package com.example.thecookapp
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -145,7 +146,9 @@ class PostDetailsActivity : AppCompatActivity() {
     }
 
     private fun modifyPost(post: Recipe) {
-        // Implement modify post functionality
+        val intent = Intent(this, AddPostActivity::class.java)
+        intent.putExtra("RECIPE_DETAILS", post)
+        startActivity(intent)
         Toast.makeText(this, "Modify post clicked", Toast.LENGTH_SHORT).show()
     }
 

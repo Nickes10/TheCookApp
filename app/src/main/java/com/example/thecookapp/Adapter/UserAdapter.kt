@@ -2,6 +2,7 @@ package com.example.thecookapp.Adapter
 
 import com.example.thecookapp.AppObject.User
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -62,9 +63,12 @@ class UserAdapter (private var mContext: Context,
 
         // If user clicks everywhere on the user item
         holder.item.setOnClickListener(View.OnClickListener {
+            Log.e("Profile Adapter", "User item clicked: ${user.getUsername()}, and ${user.getUid()}")
             val preference = mContext.getSharedPreferences("PREFS",Context.MODE_PRIVATE).edit()
             preference.putString("profileId",user.getUid())
             preference.apply()
+            val savedId = mContext.getSharedPreferences("PREFS", Context.MODE_PRIVATE).getString("profileId", null)
+            Log.e("Profile Adapter", "Saved profileId in SharedPreferences: $savedId")
 
             (mContext as FragmentActivity).supportFragmentManager.beginTransaction()
                 .replace(fragment_container, ProfileFragment()).commit()
@@ -156,6 +160,5 @@ class UserAdapter (private var mContext: Context,
         })
 
     }
-
 
 }

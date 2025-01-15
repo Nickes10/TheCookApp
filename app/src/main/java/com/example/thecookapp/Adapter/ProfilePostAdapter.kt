@@ -1,6 +1,7 @@
 package com.example.thecookapp.Adapter
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import android.view.View
 import android.view.LayoutInflater
@@ -9,6 +10,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.example.thecookapp.PostDetailsActivity
 import com.example.thecookapp.Recipe
 import com.example.thecookapp.R
 import com.example.thecookapp.R.id.profile_post_layout
@@ -33,6 +35,8 @@ class ProfilePostAdapter(
         val itemView = LayoutInflater.from(context).inflate(R.layout.profilepost_layout, parent, false)
         val linearLayout = itemView.findViewById<LinearLayout>(profile_post_layout)
         val params = linearLayout.layoutParams
+
+        // Set the width and height of the layout to be adaptable to each screen
         params.width = imageWidth
         params.height = imageHeight
 
@@ -70,6 +74,12 @@ class ProfilePostAdapter(
                     }
                 })
 
+        }
+        // Add click listener to open PostDetailsActivity
+        holder.postImageView.setOnClickListener {
+            val intent = Intent(context, PostDetailsActivity::class.java)
+            intent.putExtra("POST_DETAILS", currentPost)
+            context.startActivity(intent)
         }
     }
 
