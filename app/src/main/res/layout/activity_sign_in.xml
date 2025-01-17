@@ -9,8 +9,17 @@
     android:background="@color/white"
     tools:context=".SignInActivity">
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/logo"
+        android:layout_width="160dp"
+        android:layout_height="90dp"
+        android:src="@drawable/logo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="80dp"
+        />
+
+    <ImageView
+        android:id="@+id/app_name"
         android:layout_width="160dp"
         android:layout_height="90dp"
         android:src="@drawable/my_recipe_text"
@@ -24,7 +33,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/inputs_background"
         android:padding="10dp"
-        android:layout_below="@+id/logo"
+        android:layout_below="@+id/app_name"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginTop="6dp"
@@ -71,7 +80,7 @@
         android:layout_marginRight="20dp"
         android:layout_marginTop="6dp"
         android:layout_marginBottom="10dp"
-        android:background="@drawable/buttons_background22"
+        android:background="@drawable/buttons_background11"
         android:text="Sign Up"
         android:textAllCaps="false"
         android:textSize="15sp"

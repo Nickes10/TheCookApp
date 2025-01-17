@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -16,7 +15,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.util.Collections
-import com.example.thecookapp.AccountSettingsActivity
+import com.example.thecookapp.EditProfileActivity
 import com.example.thecookapp.Adapter.IngredientAdapter
 import com.example.thecookapp.Adapter.IngredientItem
 import com.example.thecookapp.Adapter.ProfilePostAdapter
@@ -118,8 +117,7 @@ class ProfileFragment : Fragment() {
             Log.d("ProfileFragment", "Button text: $getButtontext")
 
             when {
-                getButtontext == "Edit Profile" -> startActivity(Intent(context, AccountSettingsActivity::class.java))
-
+                getButtontext == "Edit Profile" -> startActivity(Intent(context, EditProfileActivity::class.java))
 
                 getButtontext == "Follow" -> {
                     signInUser.uid.let { it1 ->

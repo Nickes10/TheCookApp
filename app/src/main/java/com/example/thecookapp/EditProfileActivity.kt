@@ -18,8 +18,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.app.ActivityCompat
-import com.example.thecookapp.R
-import com.example.thecookapp.ui.profile.ProfileFragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.FirebaseDatabase
@@ -28,7 +26,7 @@ import com.google.firebase.storage.StorageReference
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
 
-class AccountSettingsActivity : AppCompatActivity() {
+class EditProfileActivity : AppCompatActivity() {
     private lateinit var profileImageView: CircleImageView
     private lateinit var changeImageButton: TextView
     private lateinit var imageUri: Uri
@@ -59,7 +57,7 @@ class AccountSettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_account_setting)
+        setContentView(R.layout.activity_edit_profile)
 
         // Profile image and change image button
         profileImageView = findViewById(R.id.accountSettings_image_profile)
@@ -75,16 +73,6 @@ class AccountSettingsActivity : AppCompatActivity() {
             } else {
                 requestPermissions()
             }
-        }
-
-        // Log out functionality
-        val logoutBtn = findViewById<Button>(R.id.accountSettings_logoutBtn)
-        logoutBtn.setOnClickListener {
-            FirebaseAuth.getInstance().signOut()
-            val intent = Intent(this@AccountSettingsActivity, SignInActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-            startActivity(intent)
-            finish()
         }
 
         // Done button functionality
