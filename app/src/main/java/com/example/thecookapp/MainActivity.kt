@@ -13,7 +13,7 @@ import com.example.thecookapp.ui.search.SearchBarFragment
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var textView: TextView
+    private lateinit var navView: BottomNavigationView
     private var selectedFragment: Fragment? = null
 
     private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
@@ -27,9 +27,8 @@ class MainActivity : AppCompatActivity() {
                 return@OnNavigationItemSelectedListener true
             }
             R.id.navigation_add_post -> {
-                item.isChecked=false
                 startActivity(Intent(this@MainActivity,AddPostActivity::class.java))
-                return@OnNavigationItemSelectedListener true
+                return@OnNavigationItemSelectedListener false
             }
             R.id.navigation_notifications -> {
                 moveToFragment(NotificationsFragment())
@@ -50,18 +49,27 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         //setSupportActionBar(findViewById(R.id.home_toolbar))
 
-        val navView: BottomNavigationView = findViewById(R.id.nav_view)
+        navView = findViewById(R.id.nav_view)
         navView.setOnItemSelectedListener(onNavigationItemSelectedListener)
 
         val showProfileFragment = intent.getBooleanExtra("SHOW_PROFILE_FRAGMENT", false)
         if (showProfileFragment) {
             // Navigate to ProfileFragment if the flag is set
-            moveToFragment(ProfileFragment())
+            navView.selectedItemId = R.id.navigation_profile
         } else {
             // Default fragment (e.g., HomeFragment)
-            moveToFragment(HomeFragment())
+            navView.selectedItemId = R.id.navigation_home
         }
 
+    }
+
+    override fun onBackPressed() {
+        if (navView.selectedItemId != R.id.navigation_home) {
+            navView.selectedItemId = R.id.navigation_home
+        } else {
+            // Quit the app if already on 'Home'
+            super.onBackPressed()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -74,6 +82,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
 
     private fun moveToFragment(fragment:Fragment)
     {

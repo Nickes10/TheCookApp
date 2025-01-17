@@ -50,7 +50,7 @@
         android:layout_below="@+id/email_login"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="10dp"
         android:inputType="textPassword"
         android:hint="Password..."
         />
@@ -78,14 +78,12 @@
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:layout_marginTop="6dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="30dp"
         android:background="@drawable/buttons_background11"
         android:text="Sign Up"
         android:textAllCaps="false"
         android:textSize="15sp"
         android:textColor="@android:color/white"
-        android:textStyle="normal"
         />
 
 </RelativeLayout>

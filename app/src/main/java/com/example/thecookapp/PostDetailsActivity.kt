@@ -149,7 +149,6 @@ class PostDetailsActivity : AppCompatActivity() {
         val intent = Intent(this, AddPostActivity::class.java)
         intent.putExtra("RECIPE_DETAILS", post)
         startActivity(intent)
-        Toast.makeText(this, "Modify post clicked", Toast.LENGTH_SHORT).show()
     }
 
     private fun deletePost(post: Recipe) {

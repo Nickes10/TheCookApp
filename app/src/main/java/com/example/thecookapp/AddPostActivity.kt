@@ -146,11 +146,8 @@ class AddPostActivity : AppCompatActivity() {
         // Set up the back button
         val backButton = findViewById<ImageButton>(R.id.back_button)
         backButton.setOnClickListener {
-            // A QUANTO PARE COSì FUNZIONA BENE SE STO MODIFICANDO IL POST MA NON SE DEVO AGGIUNGERLO
-            supportFragmentManager.beginTransaction().replace(
-                R.id.fragment_container,
-                HomeFragment()
-            ).commit()
+            onBackPressedDispatcher.onBackPressed()
+
         }
 
         // Set up the Upload Recipe Image
@@ -301,6 +298,14 @@ class AddPostActivity : AppCompatActivity() {
             addStepItem("", isEditingInstruction)
         }
 
+    }
+
+    override fun onBackPressed() {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.putExtra("navigate_to", R.id.navigation_home)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        startActivity(intent)
+        finish() // Ensure the current activity is removed from the back stack
     }
 
     private fun populateUI() {
@@ -707,27 +712,29 @@ class AddPostActivity : AppCompatActivity() {
         }
         return null
     }
-}
 
+    class RoundedCornersTransformation(private val radius: Float, private val margin: Float) : Transformation {
+        override fun transform(source: Bitmap): Bitmap {
+            val paint = Paint().apply {
+                isAntiAlias = true
+                shader = BitmapShader(source, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
+            }
 
-class RoundedCornersTransformation(private val radius: Float, private val margin: Float) : Transformation {
-    override fun transform(source: Bitmap): Bitmap {
-        val paint = Paint().apply {
-            isAntiAlias = true
-            shader = BitmapShader(source, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
+            val output = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(output)
+            val rect = RectF(margin, margin, source.width - margin, source.height - margin)
+            canvas.drawRoundRect(rect, radius, radius, paint)
+
+            source.recycle()
+            return output
         }
 
-        val output = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(output)
-        val rect = RectF(margin, margin, source.width - margin, source.height - margin)
-        canvas.drawRoundRect(rect, radius, radius, paint)
-
-        source.recycle()
-        return output
-    }
-
-    override fun key(): String {
-        return "rounded_corners(radius=$radius, margin=$margin)"
+        override fun key(): String {
+            return "rounded_corners(radius=$radius, margin=$margin)"
+        }
     }
 }
+
+
+
 

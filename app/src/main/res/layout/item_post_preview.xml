@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     android:padding="8dp">
 
-    <!-- User Info: Profile Image and Username -->
+    <!-- User Info -->
     <LinearLayout
+        android:id="@+id/userInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingBottom="8dp"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Profile Image -->
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/profileImage"
             android:layout_width="40dp"
@@ -22,7 +25,6 @@
             android:layout_marginEnd="8dp"
             android:src="@drawable/default_image_profile" />
 
-        <!-- Username -->
         <TextView
             android:id="@+id/postUserName"
             android:layout_width="wrap_content"
@@ -35,10 +37,14 @@
     <!-- Post Image -->
     <ImageView
         android:id="@+id/imagePost"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:src="@drawable/plate_knife_fork"
         android:scaleType="centerCrop"
-        android:src="@drawable/plate_knife_fork" />
+        app:layout_constraintTop_toBottomOf="@id/userInfo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintDimensionRatio="16:9" />
 
     <!-- Post Title -->
     <TextView
@@ -48,7 +54,10 @@
         android:text="Post Title"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:paddingTop="8dp" />
+        android:paddingTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/imagePost"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Created At -->
     <TextView
@@ -58,5 +67,8 @@
         android:text="Created at: 11/01/25"
         android:textSize="14sp"
         android:paddingTop="4dp"
-        android:textColor="@android:color/darker_gray"/>
-</LinearLayout>
+        android:textColor="@android:color/darker_gray"
+        app:layout_constraintTop_toBottomOf="@id/postTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

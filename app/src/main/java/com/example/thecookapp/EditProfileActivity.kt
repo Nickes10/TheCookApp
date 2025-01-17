@@ -2,6 +2,7 @@ package com.example.thecookapp
 
 import android.Manifest
 import android.app.AlertDialog
+import android.app.ProgressDialog
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -12,15 +13,20 @@ import android.provider.MediaStore
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.app.ActivityCompat
+import com.example.thecookapp.R.id.edit_profile_button
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.squareup.picasso.Picasso
@@ -81,6 +87,23 @@ class EditProfileActivity : AppCompatActivity() {
         val fullName = findViewById<EditText>(R.id.accountSettings_editTextName)
         val userName = findViewById<EditText>(R.id.accountSettings_editUsername)
         val updates = HashMap<String, Any>()
+        val changePassButton = findViewById<Button>(R.id.change_password_button)
+        val backButton = findViewById<ImageButton>(R.id.back_edit_button)
+        val deleteButton = findViewById<Button>(R.id.delete_account_button)
+
+        backButton.setOnClickListener {
+            onBackPressedDispatcher.onBackPressed()
+        }
+
+        deleteButton.setOnClickListener{
+            val progressDialog = ProgressDialog(this)
+            progressDialog.setCancelable(false)
+            deleteUserAccount(progressDialog)
+        }
+
+        changePassButton.setOnClickListener {
+            startActivity( Intent( this, ChangePasswordActivity::class.java))
+        }
 
         doneButton.setOnClickListener {
             updates["fullname"] = fullName.text.toString().lowercase()
@@ -113,6 +136,81 @@ class EditProfileActivity : AppCompatActivity() {
         }
     }
 
+    private fun deleteUserAccount(progressDialog: ProgressDialog) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+
+        if (currentUser != null) {
+            // Show progress dialog
+            progressDialog.setMessage("Deleting your account...")
+            progressDialog.show()
+
+            val currentUserID = currentUser.uid
+            val userRef = FirebaseDatabase.getInstance().reference.child("Users").child(currentUserID)
+
+            userRef.removeValue().addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    //delete the user from Follow tree
+                    deleteUserFromFollowLists(currentUserID)
+
+                    //delete the user from Firebase
+                    currentUser.delete().addOnCompleteListener { deleteTask ->
+                        if (deleteTask.isSuccessful) {
+                            // Successfully deleted the user
+                            progressDialog.dismiss()
+                            Toast.makeText(this, "Account deleted successfully", Toast.LENGTH_LONG).show()
+
+                            // Redirect to a screen or log out user
+                            val intent = Intent(this, SignInActivity::class.java)
+                            startActivity(intent)
+                            finish()
+                        } else {
+                            // Handle error while deleting user from Auth
+                            progressDialog.dismiss()
+                            val message = deleteTask.exception?.message ?: "Unknown error"
+                            Toast.makeText(this, "Error deleting account: $message", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                } else {
+                    // Handle error while removing data from Realtime Database
+                    progressDialog.dismiss()
+                    val message = task.exception?.message ?: "Unknown error"
+                    Toast.makeText(this, "Error deleting account data: $message", Toast.LENGTH_LONG).show()
+                }
+            }
+        } else {
+            Toast.makeText(this, "No user is currently signed in", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun deleteUserFromFollowLists(userId: String) {
+        val followRef = FirebaseDatabase.getInstance().reference.child("Follow")
+
+        // Remove the user ID from Follow
+        val userFollowRef = followRef.child(userId)
+        userFollowRef.removeValue()
+
+        followRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                // Iterate over each user in the Follow node
+                for (userSnapshot in snapshot.children) {
+                    Log.d("Follow", "User ID: $userId")
+                    val currentId = userSnapshot.key ?: ""
+                    // Iterate over the Followers of the current user
+                    val followersRef = followRef.child(currentId).child("Followers").child(userId)
+                    followersRef.removeValue()
+
+                    val followingRef = followRef.child(currentId).child("Following").child(userId)
+                    followingRef.removeValue()
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Handle error if necessary
+                Log.e("Follow", "Error fetching follow data: ${error.message}")
+            }
+        })
+    }
+
     private fun updateUserProfileInDatabase(updates: HashMap<String, Any>) {
         val userId = signInUser.uid
         FirebaseDatabase.getInstance().reference
@@ -120,7 +218,7 @@ class EditProfileActivity : AppCompatActivity() {
             .child(userId)
             .updateChildren(updates)
             .addOnSuccessListener {
-                Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
                 val intent = Intent(this, MainActivity::class.java)
                 // Pass data to signal that ProfileFragment should be shown
                 intent.putExtra("SHOW_PROFILE_FRAGMENT", true)
@@ -132,7 +230,6 @@ class EditProfileActivity : AppCompatActivity() {
                 Toast.makeText(this, "Failed to update profile: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
-
 
     private fun checkPermissions(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -16,16 +17,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.util.Collections
 import com.example.thecookapp.EditProfileActivity
-import com.example.thecookapp.Adapter.IngredientAdapter
-import com.example.thecookapp.Adapter.IngredientItem
 import com.example.thecookapp.Adapter.ProfilePostAdapter
 import com.example.thecookapp.Adapter.UserAdapter
 import com.example.thecookapp.AppObject.User
+import com.example.thecookapp.MainActivity
 import com.example.thecookapp.R
 import com.example.thecookapp.R.id.*
 import com.example.thecookapp.Recipe
-import com.example.thecookapp.databinding.FragmentProfileBinding
-import com.google.android.material.tabs.TabItem
+import com.example.thecookapp.SignInActivity
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -92,6 +91,7 @@ class ProfileFragment : Fragment() {
         listFollowers = ArrayList()
         followersAdapter = context?.let { UserAdapter(it, listFollowers as ArrayList<User>, true) }
         followersRecyclerView.adapter = followersAdapter
+        val logout = view.findViewById<Button>(logout_button)
 
         // Get the current authenticated user
         signInUser = FirebaseAuth.getInstance().currentUser!!
@@ -107,9 +107,19 @@ class ProfileFragment : Fragment() {
             // Check if the viewed profile belongs to the current user
             if (viewedProfileId == signInUser.uid) {
                 updateProfileButtonText("Edit Profile")
+                logout.visibility = View.VISIBLE
             } else if (viewedProfileId != signInUser.uid){
                 checkFollowOrFollowingButtonStatus()
+                logout.visibility = View.GONE
             }
+        }
+
+
+        view.findViewById<Button>(logout_button).setOnClickListener {
+            FirebaseAuth.getInstance().signOut()
+            val intent = Intent(context, SignInActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
         }
 
         view.findViewById<Button>(edit_profile_button).setOnClickListener{
@@ -375,7 +385,6 @@ class ProfileFragment : Fragment() {
         updateFollowCount("Following")
     }
 
-
     private fun takePosts(userId: String) {
         ApiClient.recipeApi.get_post(userId).enqueue(object : Callback<List<Recipe>> {
             override fun onResponse(call: Call<List<Recipe>>, response: Response<List<Recipe>>) {
@@ -398,7 +407,6 @@ class ProfileFragment : Fragment() {
                     }
                 } else {
                     Log.e("ProfileFragment", "Error: ${response.errorBody()?.string()}")
-                    Toast.makeText(requireContext(), "Failed to load posts", Toast.LENGTH_SHORT).show()
                 }
             }
 
