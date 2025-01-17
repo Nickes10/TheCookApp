@@ -53,6 +53,11 @@ import com.google.gson.Gson
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import android.location.Location
+import android.location.LocationManager
+import android.os.Looper
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -138,7 +143,6 @@ class AddPostActivity : AppCompatActivity() {
             }
         }
 
-
         // Set up the back button
         val backButton = findViewById<ImageButton>(R.id.back_button)
         backButton.setOnClickListener {
@@ -162,7 +166,7 @@ class AddPostActivity : AppCompatActivity() {
         val postButton = findViewById<TextView>(R.id.next_button)
         signInUser = FirebaseAuth.getInstance().currentUser!!
         postButton.setOnClickListener{
-            if (recipe_modify== null) {
+            if (recipe_modify == null) {
                 lifecycleScope.launch {
                     create_post()
                 }
@@ -307,7 +311,7 @@ class AddPostActivity : AppCompatActivity() {
         findViewById<EditText>(R.id.difficult_value).setText(recipe_modify?.difficulty)
         findViewById<EditText>(R.id.servings_value).setText(recipe_modify?.servings)
         val locationInput = findViewById<EditText>(R.id.locationInput)
-        locationInput.setText("Lat: ${recipe_modify?.latitude}, Lon: ${recipe_modify?.longitude}")
+        locationInput.setText("Lat: ${recipe_modify?.latitude}\nLon: ${recipe_modify?.longitude}")
 
         // Set Image using Picasso
         Picasso.get()
@@ -372,8 +376,16 @@ class AddPostActivity : AppCompatActivity() {
             }
         }
 
-        val locationLatitude = latitude ?: 0.0
-        val locationLongitude = longitude ?: 0.0
+        var locationLatitude: Double
+        var locationLongitude: Double
+
+        if (latitude == null && longitude == null) {
+            locationLatitude = recipe_modify?.latitude!!
+            locationLongitude = recipe_modify?.longitude!!
+        } else {
+            locationLatitude = latitude!!
+            locationLongitude = longitude!!
+        }
 
         // Create the updated recipe object
         val updatedRecipe = Recipe(
@@ -392,7 +404,7 @@ class AddPostActivity : AppCompatActivity() {
             created_at = "Set by SQL"
         )
 
-        Log.e("AddpostActivity", "latitude is $latitude and longitude is $longitude")
+        Log.e("AddpostActivity", "latitude is $locationLatitude and longitude is $locationLongitude")
 
         // Use the API to update the recipe
         ApiClient.recipeApi.updatePost(user_id, post_id, updatedRecipe).enqueue(object : Callback<Map<String, Any>> {
@@ -470,7 +482,7 @@ class AddPostActivity : AppCompatActivity() {
 
                 // Display the coordinates
                 val locationInput = findViewById<EditText>(R.id.locationInput)
-                locationInput.setText("Lat: $latitude\nLong: $longitude")
+                locationInput.setText("Lat: $latitude\nLon: $longitude")
             } else {
                 Toast.makeText(this, "Unable to fetch location", Toast.LENGTH_SHORT).show()
             }
@@ -479,6 +491,7 @@ class AddPostActivity : AppCompatActivity() {
             Toast.makeText(this, "Failed to fetch location", Toast.LENGTH_SHORT).show()
         }
     }
+
 
 
     override fun onRequestPermissionsResult(
