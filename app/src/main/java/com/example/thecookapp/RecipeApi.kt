@@ -50,7 +50,11 @@ interface RecipeApi {
         @Path("post_id") postId: Int
     ): Call<Map<String, Any>>
 
-    // Update post
+    @DELETE("/delete_account/{user_id}")
+    fun deleteAccount(
+        @Path("user_id") userId: String
+    ): Call<Map<String, Any>>
+
     @PUT("/update_post/{user_id}/{post_id}")
     fun updatePost(
         @Path("user_id") userId: String,

@@ -31,6 +31,23 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.squareup.picasso.Picasso
 import de.hdodenhof.circleimageview.CircleImageView
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+
+import android.content.Context
+
+import android.view.View
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.PopupMenu
+
+import androidx.fragment.app.FragmentActivity
+import com.example.thecookapp.ui.profile.ProfileFragment
+
+import java.text.SimpleDateFormat
+import java.util.Locale
+
 
 class EditProfileActivity : AppCompatActivity() {
     private lateinit var profileImageView: CircleImageView
@@ -136,6 +153,32 @@ class EditProfileActivity : AppCompatActivity() {
         }
     }
 
+    private fun deletePosts(userId: String) {
+        ApiClient.recipeApi.deleteAccount(userId).enqueue(object : Callback<Map<String, Any>> {
+            override fun onResponse(call: Call<Map<String, Any>>, response: Response<Map<String, Any>>) {
+                if (response.isSuccessful) {
+                        Log.e("API_SUCCESS", "Posts deleted: ${response.body()}")
+                        runOnUiThread {
+                            Toast.makeText(
+                                this@EditProfileActivity,"Posts deleted successfully!",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            finish() // Close the current activity and return to the previous screen
+                        }
+                } else {
+                    Log.e("API_ERROR", "Error: ${response.errorBody()?.string()}")
+                    Toast.makeText(this@EditProfileActivity, "Failed to delete posts. Please try again.", Toast.LENGTH_LONG).show()
+                }
+            }
+
+            override fun onFailure(call: Call<Map<String, Any>>, t: Throwable) {
+                Log.e("API_ERROR", "Failed to delete posts", t)
+                Toast.makeText(this@EditProfileActivity, "An error occurred. Please try again.", Toast.LENGTH_LONG).show()
+            }
+        })
+    }
+
+
     private fun deleteUserAccount(progressDialog: ProgressDialog) {
         val currentUser = FirebaseAuth.getInstance().currentUser
 
@@ -146,6 +189,9 @@ class EditProfileActivity : AppCompatActivity() {
 
             val currentUserID = currentUser.uid
             val userRef = FirebaseDatabase.getInstance().reference.child("Users").child(currentUserID)
+
+            //Delete all posts from db
+            deletePosts(currentUserID)
 
             userRef.removeValue().addOnCompleteListener { task ->
                 if (task.isSuccessful) {

@@ -14,32 +14,26 @@ import com.example.thecookapp.ui.search.SearchBarFragment
 class MainActivity : AppCompatActivity() {
 
     private lateinit var navView: BottomNavigationView
-    private var selectedFragment: Fragment? = null
 
-    private val onNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-        when (item.itemId) {
-            R.id.navigation_home -> {
-                moveToFragment(HomeFragment())
-                return@OnNavigationItemSelectedListener true
-            }
-            R.id.navigation_search -> {
-                moveToFragment(SearchBarFragment())
-                return@OnNavigationItemSelectedListener true
-            }
-            R.id.navigation_add_post -> {
-                startActivity(Intent(this@MainActivity,AddPostActivity::class.java))
-                return@OnNavigationItemSelectedListener false
-            }
-            R.id.navigation_notifications -> {
-                moveToFragment(NotificationsFragment())
-                return@OnNavigationItemSelectedListener true
-            }
-            R.id.navigation_profile -> {
-                moveToFragment(ProfileFragment())
-                return@OnNavigationItemSelectedListener true
-            }
+    private val onNavigationItemSelectedListener =
+        BottomNavigationView.OnNavigationItemSelectedListener { item ->
+        val selectedFragment = when (item.itemId) {
+            R.id.navigation_home -> HomeFragment()
+            R.id.navigation_search -> SearchBarFragment()
+            R.id.navigation_notifications -> NotificationsFragment()
+            R.id.navigation_profile -> ProfileFragment()
+            else -> null
         }
-        
+
+        selectedFragment?.let {
+            replaceFragment(it, addToBackStack = false)
+            return@OnNavigationItemSelectedListener true
+        }
+
+        if (item.itemId == R.id.navigation_add_post) {
+            startActivity(Intent(this@MainActivity, AddPostActivity::class.java))
+        }
+
         false
     }
 
@@ -64,12 +58,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
+        val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
+
+        // Check if not already on HomeFragment
         if (navView.selectedItemId != R.id.navigation_home) {
             navView.selectedItemId = R.id.navigation_home
+        } else if (currentFragment !is HomeFragment) {
+            replaceFragment(HomeFragment(), addToBackStack = false)
         } else {
-            // Quit the app if already on 'Home'
-            super.onBackPressed()
+            super.onBackPressed() // Quit the app
         }
+    }
+
+    private fun replaceFragment(fragment: Fragment, addToBackStack: Boolean) {
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.fragment_container, fragment)
+        if (addToBackStack) {
+            transaction.addToBackStack(null)
+        }
+        transaction.commit()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

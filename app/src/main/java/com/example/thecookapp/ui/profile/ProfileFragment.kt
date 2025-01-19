@@ -194,7 +194,6 @@ class ProfileFragment : Fragment() {
         return  view
     }
 
-
     private fun loadPosts() {
         profilePostRecyclerView.visibility = View.VISIBLE
         followingRecyclerView.visibility = View.GONE

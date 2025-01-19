@@ -209,6 +209,7 @@ class PostDetailsActivity : AppCompatActivity() {
             profileFragmentContainer.visibility = View.GONE
             postDetailsContainer.visibility = View.VISIBLE
         } else {
+            finish()
             super.onBackPressed() // Normal back press behavior
         }
     }
