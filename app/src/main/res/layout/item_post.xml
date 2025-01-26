@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!-- ScrollView to make the content scrollable -->
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="8dp">
+        android:paddingTop="8dp"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:paddingBottom="8dp">
 
         <!-- LinearLayout to hold the content of the post details -->
         <LinearLayout
@@ -57,7 +60,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:hint="Location will appear here"
                         android:textSize="14sp"
                         android:focusable="false"
                         android:gravity="center_vertical"
@@ -78,11 +80,19 @@
             </LinearLayout>
 
             <!-- Post Image -->
-            <ImageView
-                android:id="@+id/imagePost"
+            <FrameLayout
+                android:id="@+id/frame_for_image"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:src="@drawable/plate_knife_fork" />
+                android:layout_height="400dp"
+                android:layout_marginTop="4dp">
+
+                <ImageView
+                    android:id="@+id/imagePost"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/plate_knife_fork" />
+            </FrameLayout>
 
             <!-- Post Title and Created At -->
             <LinearLayout

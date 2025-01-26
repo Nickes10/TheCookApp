@@ -14,6 +14,15 @@
         tools:targetApi="31"
         android:networkSecurityConfig="@xml/network_security_config"
         android:usesCleartextTraffic="true">
+
+        <service
+            android:name=".FirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
         <activity
             android:name=".ChangePasswordActivity"
             android:exported="false"/>
@@ -57,6 +66,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
 
 
 

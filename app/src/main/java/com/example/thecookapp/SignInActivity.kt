@@ -13,6 +13,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.example.thecookapp.R.id.*
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.messaging.FirebaseMessaging
 
 class SignInActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,6 +63,24 @@ class SignInActivity : AppCompatActivity() {
                             val user = mAuth.currentUser // Retrieve the current user
 
                             if (user != null) { // Ensure the user is not null
+
+                                FirebaseMessaging.getInstance().token.addOnCompleteListener { tokenTask ->
+                                    if (tokenTask.isSuccessful) {
+                                        val fcmToken = tokenTask.result
+
+                                        // Save the FCM token to Firebase Realtime Database for notifications
+                                        FirebaseDatabase.getInstance().reference
+                                            .child("Users").child(user.uid)
+                                            .child("fcmToken").setValue(fcmToken)
+                                            .addOnSuccessListener {
+                                                Log.d("SignInActivity", "FCM Token saved successfully.")
+                                            }
+                                            .addOnFailureListener { error ->
+                                                Log.e("SignInActivity", "Failed to save FCM token: ${error.message}")
+                                            }
+                                    }
+                                }
+
                                 val preference = getSharedPreferences("PREFS", Context.MODE_PRIVATE).edit()
                                 preference.putString("profileId", user.uid)
                                 preference.apply()

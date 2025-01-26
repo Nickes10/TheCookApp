@@ -12,6 +12,7 @@ import com.example.thecookapp.R
 import com.squareup.picasso.Picasso
 import android.content.Context
 import androidx.fragment.app.FragmentActivity
+import com.bumptech.glide.Glide
 import com.example.thecookapp.ui.profile.ProfileFragment
 import java.text.SimpleDateFormat
 import java.util.*
@@ -53,10 +54,15 @@ class PostPreviewAdapter(
 
         holder.title.text = post.title
 
-        Picasso.get()
+        Glide.with(mContext)
             .load(post.image_url)
             .placeholder(R.drawable.plate_knife_fork)
             .into(holder.image)
+
+//        Picasso.get()
+//            .load(post.image_url)
+//            .placeholder(R.drawable.plate_knife_fork)
+//            .into(holder.image)
 
         val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
         val targetFormat = SimpleDateFormat("MM/dd/yy", Locale.getDefault())

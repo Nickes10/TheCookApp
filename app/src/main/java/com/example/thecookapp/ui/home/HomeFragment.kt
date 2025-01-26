@@ -40,6 +40,7 @@ class HomeFragment : Fragment() {
     private val database = FirebaseDatabase.getInstance().reference
 
     private var isGlobalSelected = false
+    private var isRefreshing = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -67,7 +68,32 @@ class HomeFragment : Fragment() {
             Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
         }
 
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            refreshPosts()
+        }
+
         return root
+    }
+
+    private fun refreshPosts() {
+        if (isRefreshing) return
+
+        isRefreshing = true
+        binding.swipeRefreshLayout.isRefreshing = true
+
+        // Trigger the refresh, re-fetching the posts from the server
+        val userId = firebaseAuth.currentUser?.uid
+        if (userId != null) {
+            if(isGlobalSelected){
+                fetchGlobalPosts(userId)
+            } else {
+                fetchFollowingPosts(userId)
+            }
+        } else {
+            binding.swipeRefreshLayout.isRefreshing = false
+            Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
+            isRefreshing = false
+        }
     }
 
     private fun setupTabListeners() {
@@ -174,6 +200,9 @@ class HomeFragment : Fragment() {
             openFullPost(post)
         }
         recyclerView.adapter = postPreviewAdapter
+
+        binding.swipeRefreshLayout.isRefreshing = false
+        isRefreshing = false
     }
 
     private fun openFullPost(post: Recipe) {

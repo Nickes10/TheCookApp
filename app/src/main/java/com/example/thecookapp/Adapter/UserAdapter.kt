@@ -74,6 +74,14 @@ class UserAdapter (private var mContext: Context,
                 .replace(fragment_container, ProfileFragment()).commit()
         })
 
+        if (user.getUid() == firebaseUser?.uid) {
+            // Hide the follow button
+            holder.followButton.visibility = View.GONE
+        } else {
+            // Show the follow button
+            holder.followButton.visibility = View.VISIBLE
+            checkFollowingStatus(user.getUid(), holder.followButton)
+        }
 
         // If user clicks on the follow button
         holder.followButton.setOnClickListener {

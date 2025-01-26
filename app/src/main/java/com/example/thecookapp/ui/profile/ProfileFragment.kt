@@ -144,6 +144,18 @@ class ProfileFragment : Fragment() {
                             .child("Followers").child(it1.toString())
                             .setValue(true)
                     }
+
+                    FirebaseDatabase.getInstance().reference.child("Users").child(viewedProfileId).child("fcmToken")
+                        .get()
+                        .addOnSuccessListener { snapshot ->
+                            val token = snapshot.getValue(String::class.java)
+                            if (token != null) {
+                                Log.e("FCM", "send notify to user: $viewedProfileId")
+                                FirebaseMessagingService.sendNotification(token, "New Follower", "You have a new follower!")
+                            } else {
+                                Log.e("FCM", "No token found for user: $viewedProfileId")
+                            }
+                        }
                 }
 
                 getButtontext == "Following" -> {

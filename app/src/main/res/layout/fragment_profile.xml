@@ -7,6 +7,12 @@
     android:layout_height="match_parent"
     tools:context=".ui.profile.ProfileFragment">
 
+        <FrameLayout
+            android:id="@+id/fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/settings_toolbar" />
+
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/settings_toolbar"
             android:layout_width="match_parent"
@@ -55,7 +61,6 @@
                         </RelativeLayout>
                 </androidx.appcompat.widget.Toolbar>
         </com.google.android.material.appbar.AppBarLayout>
-
 
         <ScrollView
             android:id="@+id/scrollView_profile"

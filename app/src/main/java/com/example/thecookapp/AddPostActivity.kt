@@ -115,8 +115,8 @@ class AddPostActivity : AppCompatActivity() {
     private val cropImage =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
-                val resultUri = UCrop.getOutput(result.data!!)
-                resultUri?.let {
+                imageUri = UCrop.getOutput(result.data!!)
+                imageUri?.let {
                     // Display the cropped image in the ImageView using Picasso
                     Picasso.get()
                         .load(it)
@@ -645,8 +645,8 @@ class AddPostActivity : AppCompatActivity() {
             return
         }
 
-        val locationLatitude = latitude ?: 0.0
-        val locationLongitude = longitude ?: 0.0
+        val locationLatitude = latitude
+        val locationLongitude = longitude
 
         ApiClient.recipeApi.getPostCount(user_id).enqueue(object : Callback<Int> {
             override fun onResponse(call: Call<Int>, response: Response<Int>) {

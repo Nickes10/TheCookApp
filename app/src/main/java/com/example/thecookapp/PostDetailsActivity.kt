@@ -21,6 +21,7 @@ import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.Locale
 import android.view.MenuItem
+import com.bumptech.glide.Glide
 
 
 class PostDetailsActivity : AppCompatActivity() {
@@ -75,8 +76,10 @@ class PostDetailsActivity : AppCompatActivity() {
                 showProfileFragment(post.user_id)
             }
         }
-        findViewById<TextView>(R.id.locationInput).text =
-            "lat: ${post.latitude}, lon: ${post.longitude}"
+        if(post.latitude != null){
+            findViewById<TextView>(R.id.locationInput).text =
+                "lat: ${post.latitude}, lon: ${post.longitude}"
+        }
         findViewById<TextView>(R.id.postTitle).text = post.title
         findViewById<TextView>(R.id.postDescription).text = post.description
         //findViewById<TextView>(R.id.postIngredients).text = "Ingredients: ${post.ingredients}"
@@ -92,10 +95,16 @@ class PostDetailsActivity : AppCompatActivity() {
 
         findViewById<TextView>(R.id.postCreatedAt).text = "Created at: $formattedDate"
 
-        Picasso.get()
+        Glide.with(this)
             .load(post.image_url)
             .placeholder(R.drawable.plate_knife_fork)
             .into(findViewById<ImageView>(R.id.imagePost))
+
+
+//        Picasso.get()
+//            .load(post.image_url)
+//            .placeholder(R.drawable.plate_knife_fork)
+//            .into(findViewById<ImageView>(R.id.imagePost))
 
         val ingredientsContainer = findViewById<LinearLayout>(R.id.postIngredientsContainer)
         ingredientsContainer.removeAllViews() // Clear any previous ingredients

@@ -16,6 +16,8 @@ import com.example.thecookapp.R
 import com.example.thecookapp.R.id.profile_post_layout
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.GlideException
 
 class ProfilePostAdapter(
     private val context: Context,
@@ -48,18 +50,20 @@ class ProfilePostAdapter(
     override fun onBindViewHolder(holder: ProfilePostViewHolder, position: Int) {
         val currentPost = postList[position]
 
-        // Load the Post image using Picasso
+        // Load the Post image using Glide
         if (!currentPost.image_url.isNullOrEmpty()) {
-            Picasso.get()
-                .load(currentPost.image_url)
-                .fit()
-                .centerCrop()
-                .into(holder.postImageView, object : Callback {
-                    override fun onSuccess() {
-                        Log.e("ProfileFragment", "Image loaded successfully")
-                    }
 
-                    override fun onError(e: Exception?) {
+            Glide.with(context)
+                .load(currentPost.image_url)
+                .placeholder(R.drawable.plate_knife_fork)
+                .centerCrop()
+                .listener(object : com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable>?,
+                        isFirstResource: Boolean
+                    ): Boolean {
                         e?.printStackTrace()
                         Log.e("ProfileFragment", "Error loading image: ${e?.message}")
 
@@ -71,9 +75,21 @@ class ProfilePostAdapter(
 
                         // Impose a default image in case of error
                         holder.postImageView.setImageResource(R.drawable.plate_knife_fork)
+                        return false // Return false to allow Glide to handle the error placeholder
+                    }
+
+                    override fun onResourceReady(
+                        resource: android.graphics.drawable.Drawable?,
+                        model: Any?,
+                        target: com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable>?,
+                        dataSource: com.bumptech.glide.load.DataSource?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        Log.e("ProfileFragment", "Image loaded successfully")
+                        return false // Return false to let Glide handle setting the image
                     }
                 })
-
+                .into(holder.postImageView)
         }
         // Add click listener to open PostDetailsActivity
         holder.postImageView.setOnClickListener {
