@@ -58,6 +58,7 @@ import android.os.Looper
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
+import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -87,40 +88,49 @@ class AddPostActivity : AppCompatActivity() {
     private var isEditingInstruction = false
 
     // Mofication post variable
-    private var recipe_modify : Recipe? = null
+    private var recipe_modify: Recipe? = null
 
     // Image variable
     private var imageUri: Uri? = null
     private lateinit var recipeImageView: ImageView
-    private val getImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let {
-            imageUri = it // Initialize imageUri for gallery selection
-
-            // Use Picasso to load and display the image in the ImageView
-            Picasso.get()
-                .load(imageUri)
-                .fit() // Resize to fit ImageView dimensions
-                .placeholder(R.drawable.plate_knife_fork) // Placeholder image
-                .transform(RoundedCornersTransformation(22f, 12f)) // Radius = 22dp, Margin = 8dp
-                .into(recipeImageView)
-
-            Log.d("AccountSettings", "Gallery Image URI: $imageUri")
-        } ?: run {
-            Log.e("AccountSettings", "No image selected from gallery")
+    private val getImage =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                startCrop(it) // Pass the selected image to uCrop
+            } ?: run {
+                Log.e("ImagePicker", "No image selected from gallery")
+            }
         }
-    }
 
-    private val takePhoto = registerForActivityResult(ActivityResultContracts.TakePicture()) { isSuccess: Boolean ->
-        if (isSuccess) {
-            // Use Picasso to load and display the captured photo in the ImageView
-            Picasso.get()
-                .load(imageUri)
-                .fit() // Resize to fit ImageView dimensions
-                .placeholder(R.drawable.plate_knife_fork) // Placeholder image
-                .transform(RoundedCornersTransformation(22f, 12f))
-                .into(recipeImageView)
+
+    private val takePhoto =
+        registerForActivityResult(ActivityResultContracts.TakePicture()) { isSuccess: Boolean ->
+            if (isSuccess && imageUri != null) {
+                startCrop(imageUri!!) // Pass the captured photo to uCrop
+            } else {
+                Log.e("Camera", "Photo capture failed or imageUri is null")
+            }
         }
-    }
+
+    private val cropImage =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val resultUri = UCrop.getOutput(result.data!!)
+                resultUri?.let {
+                    // Display the cropped image in the ImageView using Picasso
+                    Picasso.get()
+                        .load(it)
+                        .fit()
+                        .placeholder(R.drawable.plate_knife_fork)
+                        .transform(RoundedCornersTransformation(22f, 12f))
+                        .into(recipeImageView)
+                }
+            } else if (result.resultCode == UCrop.RESULT_ERROR) {
+                val cropError = UCrop.getError(result.data!!)
+                cropError?.let { Log.e("uCrop", "Crop error: ${it.message}") }
+            }
+        }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -162,7 +172,7 @@ class AddPostActivity : AppCompatActivity() {
 
         val postButton = findViewById<TextView>(R.id.next_button)
         signInUser = FirebaseAuth.getInstance().currentUser!!
-        postButton.setOnClickListener{
+        postButton.setOnClickListener {
             if (recipe_modify == null) {
                 lifecycleScope.launch {
                     create_post()
@@ -230,7 +240,8 @@ class AddPostActivity : AppCompatActivity() {
                 val toPosition = target.adapterPosition
 
                 // Save the current value of the EditText before moving
-                val fromViewHolder = recyclerView.findViewHolderForAdapterPosition(fromPosition) as? InstructionAdapter.ViewHolder
+                val fromViewHolder =
+                    recyclerView.findViewHolderForAdapterPosition(fromPosition) as? InstructionAdapter.ViewHolder
                 fromViewHolder?.let {
                     val currentText = it.descriptionEditText.text.toString()
                     steps[fromPosition].description = currentText
@@ -284,7 +295,7 @@ class AddPostActivity : AppCompatActivity() {
             addStepItem("", isEditingInstruction)
         }
 
-        if(recipe_modify != null) {
+        if (recipe_modify != null) {
             // if there is a recipe to modify populate the UI
             populateUI()
         }
@@ -301,6 +312,7 @@ class AddPostActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
+        super.onBackPressed()
         val intent = Intent(this, MainActivity::class.java)
         intent.putExtra("navigate_to", R.id.navigation_home)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -342,7 +354,11 @@ class AddPostActivity : AppCompatActivity() {
         if (!isConnected) {
             Log.e("API_ERROR", "Failed to connect to the Flask server")
             runOnUiThread {
-                Toast.makeText(this@AddPostActivity, "Failed to connect to the server. Please try again.", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@AddPostActivity,
+                    "Failed to connect to the server. Please try again.",
+                    Toast.LENGTH_LONG
+                ).show()
             }
             return
         }
@@ -362,7 +378,8 @@ class AddPostActivity : AppCompatActivity() {
         // Validate inputs
         if (title.isEmpty() || description.isEmpty() || ingredients.isEmpty() || instructions.isEmpty()) {
             runOnUiThread {
-                Toast.makeText(this@AddPostActivity, "All fields are required!", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@AddPostActivity, "All fields are required!", Toast.LENGTH_LONG)
+                    .show()
             }
             return
         }
@@ -409,43 +426,71 @@ class AddPostActivity : AppCompatActivity() {
             created_at = "Set by SQL"
         )
 
-        Log.e("AddpostActivity", "latitude is $locationLatitude and longitude is $locationLongitude")
+        Log.e(
+            "AddpostActivity",
+            "latitude is $locationLatitude and longitude is $locationLongitude"
+        )
 
         // Use the API to update the recipe
-        ApiClient.recipeApi.updatePost(user_id, post_id, updatedRecipe).enqueue(object : Callback<Map<String, Any>> {
-            override fun onResponse(call: Call<Map<String, Any>>, response: Response<Map<String, Any>>) {
-                if (response.isSuccessful) {
-                    Log.e("API_SUCCESS", "Recipe updated: ${response.body()}")
-                    runOnUiThread {
-                        Toast.makeText(this@AddPostActivity, "Post updated successfully!", Toast.LENGTH_LONG).show()
-                        // Navigate to home page or another activity
-                        startActivity(Intent(this@AddPostActivity, MainActivity::class.java))
-                        finish() // Close the current activity
-                    }
-                } else {
-                    Log.e("API_ERROR", "Error: ${response.errorBody()?.string()}")
-                    runOnUiThread {
-                        Toast.makeText(this@AddPostActivity, "Failed to update the post. Please try again.", Toast.LENGTH_LONG).show()
+        ApiClient.recipeApi.updatePost(user_id, post_id, updatedRecipe)
+            .enqueue(object : Callback<Map<String, Any>> {
+                override fun onResponse(
+                    call: Call<Map<String, Any>>,
+                    response: Response<Map<String, Any>>
+                ) {
+                    if (response.isSuccessful) {
+                        Log.e("API_SUCCESS", "Recipe updated: ${response.body()}")
+                        runOnUiThread {
+                            Toast.makeText(
+                                this@AddPostActivity,
+                                "Post updated successfully!",
+                                Toast.LENGTH_LONG
+                            ).show()
+                            // Navigate to home page or another activity
+                            startActivity(Intent(this@AddPostActivity, MainActivity::class.java))
+                            finish() // Close the current activity
+                        }
+                    } else {
+                        Log.e("API_ERROR", "Error: ${response.errorBody()?.string()}")
+                        runOnUiThread {
+                            Toast.makeText(
+                                this@AddPostActivity,
+                                "Failed to update the post. Please try again.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
                     }
                 }
-            }
 
-            override fun onFailure(call: Call<Map<String, Any>>, t: Throwable) {
-                Log.e("API_ERROR", "Failed to update recipe", t)
-                runOnUiThread {
-                    Toast.makeText(this@AddPostActivity, "An error occurred. Please try again.", Toast.LENGTH_LONG).show()
+                override fun onFailure(call: Call<Map<String, Any>>, t: Throwable) {
+                    Log.e("API_ERROR", "Failed to update recipe", t)
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@AddPostActivity,
+                            "An error occurred. Please try again.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
-            }
-        })
+            })
     }
 
 
     private fun checkPermissions(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
         } else {
-            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-                    ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.CAMERA
+                    ) == PackageManager.PERMISSION_GRANTED
         }
 
     }
@@ -496,7 +541,6 @@ class AddPostActivity : AppCompatActivity() {
             Toast.makeText(this, "Failed to fetch location", Toast.LENGTH_SHORT).show()
         }
     }
-
 
 
     override fun onRequestPermissionsResult(
@@ -554,7 +598,11 @@ class AddPostActivity : AppCompatActivity() {
         if (!isConnected) {
             Log.e("API_ERROR", "Failed to connect to the Flask server")
             runOnUiThread {
-                Toast.makeText(this@AddPostActivity, "Failed to connect to the server. Please try again.", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this@AddPostActivity,
+                    "Failed to connect to the server. Please try again.",
+                    Toast.LENGTH_LONG
+                ).show()
             }
             return
         }
@@ -574,7 +622,8 @@ class AddPostActivity : AppCompatActivity() {
         // Validate inputs
         if (title.isEmpty() || description.isEmpty() || ingredients.isEmpty() || instructions.isEmpty()) {
             runOnUiThread {
-                Toast.makeText(this@AddPostActivity, "All fields are required!", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@AddPostActivity, "All fields are required!", Toast.LENGTH_LONG)
+                    .show()
             }
             return
         }
@@ -622,35 +671,60 @@ class AddPostActivity : AppCompatActivity() {
                     )
 
                     // Use the API to add the recipe
-                    ApiClient.recipeApi.addRecipe(newRecipe).enqueue(object : Callback<Map<String, Any>> {
-                        override fun onResponse(call: Call<Map<String, Any>>, response: Response<Map<String, Any>>) {
-                            if (response.isSuccessful) {
-                                Log.e("API_SUCCESS", "Recipe added: ${response.body()}")
-                                runOnUiThread {
-                                    Toast.makeText(this@AddPostActivity, "Post uploaded successfully!", Toast.LENGTH_LONG).show()
-                                    // Navigate to home page
-                                    startActivity(Intent(this@AddPostActivity, MainActivity::class.java))
-                                    finish() // Close the current activity
-                                }
-                            } else {
-                                Log.e("API_ERROR", "Error: ${response.errorBody()?.string()}")
-                                runOnUiThread {
-                                    Toast.makeText(this@AddPostActivity, "Failed to upload the post. Please try again.", Toast.LENGTH_LONG).show()
+                    ApiClient.recipeApi.addRecipe(newRecipe)
+                        .enqueue(object : Callback<Map<String, Any>> {
+                            override fun onResponse(
+                                call: Call<Map<String, Any>>,
+                                response: Response<Map<String, Any>>
+                            ) {
+                                if (response.isSuccessful) {
+                                    Log.e("API_SUCCESS", "Recipe added: ${response.body()}")
+                                    runOnUiThread {
+                                        Toast.makeText(
+                                            this@AddPostActivity,
+                                            "Post uploaded successfully!",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                        // Navigate to home page
+                                        startActivity(
+                                            Intent(
+                                                this@AddPostActivity,
+                                                MainActivity::class.java
+                                            )
+                                        )
+                                        finish() // Close the current activity
+                                    }
+                                } else {
+                                    Log.e("API_ERROR", "Error: ${response.errorBody()?.string()}")
+                                    runOnUiThread {
+                                        Toast.makeText(
+                                            this@AddPostActivity,
+                                            "Failed to upload the post. Please try again.",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
                                 }
                             }
-                        }
 
-                        override fun onFailure(call: Call<Map<String, Any>>, t: Throwable) {
-                            Log.e("API_ERROR", "Failed to add recipe", t)
-                            runOnUiThread {
-                                Toast.makeText(this@AddPostActivity, "An error occurred. Please try again.", Toast.LENGTH_LONG).show()
+                            override fun onFailure(call: Call<Map<String, Any>>, t: Throwable) {
+                                Log.e("API_ERROR", "Failed to add recipe", t)
+                                runOnUiThread {
+                                    Toast.makeText(
+                                        this@AddPostActivity,
+                                        "An error occurred. Please try again.",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
                             }
-                        }
-                    })
+                        })
                 } else {
                     Log.e("API_ERROR", "Server error: ${response.errorBody()?.string()}")
                     runOnUiThread {
-                        Toast.makeText(this@AddPostActivity, "Failed to fetch post details. Please try again.", Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            this@AddPostActivity,
+                            "Failed to fetch post details. Please try again.",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
             }
@@ -658,7 +732,11 @@ class AddPostActivity : AppCompatActivity() {
             override fun onFailure(call: Call<Int>, t: Throwable) {
                 Log.e("API_FAILURE", "Failed to fetch post count: ${t.message}")
                 runOnUiThread {
-                    Toast.makeText(this@AddPostActivity, "An error occurred. Please try again.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        this@AddPostActivity,
+                        "An error occurred. Please try again.",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
         })
@@ -713,27 +791,60 @@ class AddPostActivity : AppCompatActivity() {
         return null
     }
 
-    class RoundedCornersTransformation(private val radius: Float, private val margin: Float) : Transformation {
-        override fun transform(source: Bitmap): Bitmap {
-            val paint = Paint().apply {
-                isAntiAlias = true
-                shader = BitmapShader(source, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
+    private fun startCrop(sourceUri: Uri) {
+        try {
+            val fileName = "cropped_image_${System.currentTimeMillis()}.jpg"
+            val destinationUri = Uri.fromFile(File(cacheDir, fileName))
+            Log.e("UCrop", "Destination URI: $destinationUri")
+
+            val options = UCrop.Options().apply {
+                setCompressionFormat(Bitmap.CompressFormat.JPEG)
+                setCompressionQuality(80)
+                setFreeStyleCropEnabled(true)  // Allow freestyle cropping
+                setShowCropFrame(true)
+                setShowCropGrid(true)
+                setToolbarColor(ContextCompat.getColor(this@AddPostActivity, R.color.colorPrimary))
+                setStatusBarColor(ContextCompat.getColor(this@AddPostActivity, R.color.colorPrimaryDark))
             }
 
-            val output = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
-            val canvas = Canvas(output)
-            val rect = RectF(margin, margin, source.width - margin, source.height - margin)
-            canvas.drawRoundRect(rect, radius, radius, paint)
+            Log.e("UCrop", "UCrop options configured")
 
-            source.recycle()
-            return output
-        }
+            val cropIntent = UCrop.of(sourceUri, destinationUri)
+                .withAspectRatio(1f, 1f)
+                .withMaxResultSize(800, 800)
+                .withOptions(options)
+                .getIntent(this)
 
-        override fun key(): String {
-            return "rounded_corners(radius=$radius, margin=$margin)"
+            Log.e("UCrop", "Launching crop intent")
+            cropImage.launch(cropIntent) // Launch the UCrop activity
+        } catch (e: Exception) {
+            Log.e("UCrop", "Error in startCrop: ${e.message}", e)
         }
     }
+
 }
+
+class RoundedCornersTransformation(private val radius: Float, private val margin: Float) : Transformation {
+    override fun transform(source: Bitmap): Bitmap {
+        val paint = Paint().apply {
+            isAntiAlias = true
+            shader = BitmapShader(source, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
+        }
+
+        val output = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(output)
+        val rect = RectF(margin, margin, source.width - margin, source.height - margin)
+        canvas.drawRoundRect(rect, radius, radius, paint)
+
+        source.recycle()
+        return output
+    }
+
+    override fun key(): String {
+        return "rounded_corners(radius=$radius, margin=$margin)"
+    }
+}
+
 
 
 

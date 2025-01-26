@@ -71,6 +71,9 @@ dependencies {
 
     // Import Picasso for image downloading and caching library
     implementation("com.squareup.picasso:picasso:2.8")
+    // Import UCrop for crop the image
+    implementation("com.github.yalantis:ucrop:2.2.8")
+
 
     implementation("androidx.activity:activity-ktx:1.7.0")
     implementation("androidx.fragment:fragment-ktx:1.5.5")
