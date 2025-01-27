@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.recyclerview.widget.RecyclerView
 import com.example.thecookapp.PostDetailsActivity
 import com.example.thecookapp.Recipe
@@ -21,7 +22,8 @@ import com.bumptech.glide.load.engine.GlideException
 
 class ProfilePostAdapter(
     private val context: Context,
-    private val postList: List<Recipe>
+    private val postList: List<Recipe>,
+    private val postDetailsLauncher: ActivityResultLauncher<Intent>
 ) : RecyclerView.Adapter<ProfilePostAdapter.ProfilePostViewHolder>() {
 
     inner class ProfilePostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -95,7 +97,7 @@ class ProfilePostAdapter(
         holder.postImageView.setOnClickListener {
             val intent = Intent(context, PostDetailsActivity::class.java)
             intent.putExtra("POST_DETAILS", currentPost)
-            context.startActivity(intent)
+            postDetailsLauncher.launch(intent)
         }
     }
 

@@ -1,5 +1,6 @@
 package com.example.thecookapp.ui.profile
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -11,6 +12,8 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -59,6 +62,9 @@ class ProfileFragment : Fragment() {
     private lateinit var followersRecyclerView: RecyclerView
     private var listFollowers: MutableList<User>? = null
 
+    private lateinit var postDetailsLauncher: ActivityResultLauncher<Intent>
+
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -67,12 +73,21 @@ class ProfileFragment : Fragment() {
         // Use ViewBinding to inflate the layout
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
 
+        postDetailsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val postDeleted = result.data?.getBooleanExtra("post_deleted", false) ?: false
+                if (postDeleted) {
+                    refreshPosts() // Refresh the list when a post is deleted
+                }
+            }
+        }
+
         // Initialize Post RecyclerViews
         profilePostRecyclerView = view.findViewById(recycler_view_posts)
         val gridLayoutManager:LinearLayoutManager= GridLayoutManager(context,3)
         profilePostRecyclerView.layoutManager = gridLayoutManager
 
-        profilePostAdapter = context?.let { ProfilePostAdapter(it, profilePostList) }!!
+        profilePostAdapter = context?.let { ProfilePostAdapter(it, profilePostList, postDetailsLauncher) }!!
         profilePostRecyclerView.adapter = profilePostAdapter
 
         // Initialize Following RecyclerViews
@@ -209,6 +224,10 @@ class ProfileFragment : Fragment() {
         })
 
         return  view
+    }
+
+    private fun refreshPosts() {
+        takePosts(viewedProfileId)
     }
 
     private fun loadPosts() {

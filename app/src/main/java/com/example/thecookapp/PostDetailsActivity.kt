@@ -1,5 +1,6 @@
 package com.example.thecookapp
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -167,6 +168,9 @@ class PostDetailsActivity : AppCompatActivity() {
                     Log.e("API_SUCCESS", "Recipe deleted: ${response.body()}")
                     runOnUiThread {
                         Toast.makeText(this@PostDetailsActivity, "Post deleted successfully!", Toast.LENGTH_LONG).show()
+                        val resultIntent = Intent()
+                        resultIntent.putExtra("post_deleted", true) // Optional: Pass additional data if needed
+                        setResult(Activity.RESULT_OK, resultIntent) // Set the result code
                         finish() // Close the current activity and return to the previous screen
                     }
                 } else {
