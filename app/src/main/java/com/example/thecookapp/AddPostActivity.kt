@@ -93,8 +93,7 @@ class AddPostActivity : AppCompatActivity() {
     // Image variable
     private var imageUri: Uri? = null
     private lateinit var recipeImageView: ImageView
-    private val getImage =
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+    private val getImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             uri?.let {
                 startCrop(it) // Pass the selected image to uCrop
             } ?: run {
@@ -102,9 +101,7 @@ class AddPostActivity : AppCompatActivity() {
             }
         }
 
-
-    private val takePhoto =
-        registerForActivityResult(ActivityResultContracts.TakePicture()) { isSuccess: Boolean ->
+    private val takePhoto = registerForActivityResult(ActivityResultContracts.TakePicture()) { isSuccess: Boolean ->
             if (isSuccess && imageUri != null) {
                 startCrop(imageUri!!) // Pass the captured photo to uCrop
             } else {
@@ -112,8 +109,7 @@ class AddPostActivity : AppCompatActivity() {
             }
         }
 
-    private val cropImage =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    private val cropImage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 imageUri = UCrop.getOutput(result.data!!)
                 imageUri?.let {
@@ -130,7 +126,6 @@ class AddPostActivity : AppCompatActivity() {
                 cropError?.let { Log.e("uCrop", "Crop error: ${it.message}") }
             }
         }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -638,6 +633,7 @@ class AddPostActivity : AppCompatActivity() {
         }
 
         // Create URL of image - saved on Flask server
+        Log.e("Upload Image", "sourceUri: $imageUri" )
         val imageUrl = uploadImage(imageUri!!) ?: run {
             Log.e("Upload Image", "Failed to upload image")
             Toast.makeText(this@AddPostActivity, "Failed to upload image", Toast.LENGTH_LONG)
@@ -645,8 +641,8 @@ class AddPostActivity : AppCompatActivity() {
             return
         }
 
-        val locationLatitude = latitude
-        val locationLongitude = longitude
+        val locationLatitude = latitude ?: 0.0
+        val locationLongitude = longitude ?: 0.0
 
         ApiClient.recipeApi.getPostCount(user_id).enqueue(object : Callback<Int> {
             override fun onResponse(call: Call<Int>, response: Response<Int>) {
@@ -743,53 +739,40 @@ class AddPostActivity : AppCompatActivity() {
     }
 
     private suspend fun uploadImage(imageUri: Uri): String? {
-        val file = getFileFromUri(this, imageUri)
-        if (file == null) {
-            Log.e("Upload Image", "Error creating temporary file from URI")
-            return null
-        }
-        Log.e("Upload Image", "File path: ${file}")
+        try {
+            // Verify that URi is file type
+            if (imageUri.scheme == "file") {
+                val filePath = imageUri.path ?: return null
+                val file = File(filePath)
+                if (!file.exists()) {
+                    Log.e("Upload Image", "File does not exist: $filePath")
+                    return null
+                }
 
-        val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-        val body = MultipartBody.Part.createFormData("image", file.name, requestFile)
+                Log.e("Upload Image", "File path: $filePath")
 
-        return try {
-            val response = ApiClient.recipeApi.uploadImage(body)
-            if (response.isSuccessful) {
-                response.body()?.get("url")?.asString
+                // Create body for the uploading
+                val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+                val body = MultipartBody.Part.createFormData("image", file.name, requestFile)
+
+                // Call API
+                val response = ApiClient.recipeApi.uploadImage(body)
+                return if (response.isSuccessful) {
+                    response.body()?.get("url")?.asString
+                } else {
+                    Log.e("Upload Image", "Error uploading image: ${response.errorBody()?.string()}")
+                    null
+                }
             } else {
-                Log.e("Upload Image", "Error uploading image: ${response.errorBody()?.string()}")
-                null
+                Log.e("Upload Image", "Unsupported URI scheme: ${imageUri.scheme}")
+                return null
             }
         } catch (e: Exception) {
             Log.e("Upload Image", "Exception during image upload", e)
-            null
+            return null
         }
     }
 
-
-    private fun getFileFromUri(context: Context, uri: Uri): File? {
-        val contentResolver = context.contentResolver
-        val fileName = getFileName(contentResolver, uri) ?: return null
-        val tempFile = File(context.cacheDir, fileName)
-        contentResolver.openInputStream(uri)?.use { inputStream ->
-            tempFile.outputStream().use { outputStream ->
-                inputStream.copyTo(outputStream)
-            }
-        }
-        return tempFile
-    }
-
-    private fun getFileName(contentResolver: ContentResolver, uri: Uri): String? {
-        val cursor = contentResolver.query(uri, null, null, null, null)
-        cursor?.use {
-            val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-            if (nameIndex != -1 && it.moveToFirst()) {
-                return it.getString(nameIndex)
-            }
-        }
-        return null
-    }
 
     private fun startCrop(sourceUri: Uri) {
         try {

@@ -11,6 +11,7 @@ import com.example.thecookapp.FirebaseUtils
 import com.example.thecookapp.R
 import com.squareup.picasso.Picasso
 import android.content.Context
+import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import com.bumptech.glide.Glide
 import com.example.thecookapp.ui.profile.ProfileFragment
@@ -53,6 +54,8 @@ class PostPreviewAdapter(
         }
 
         holder.title.text = post.title
+
+        Log.e("Upload Image", "Image URL: ${post.image_url}")
 
         Glide.with(mContext)
             .load(post.image_url)
