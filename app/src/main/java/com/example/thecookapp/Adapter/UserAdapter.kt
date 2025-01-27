@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.annotation.NonNull
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.example.thecookapp.FirebaseUtils
 import com.example.thecookapp.R
 import com.example.thecookapp.R.id.*
 import com.example.thecookapp.ui.profile.ProfileFragment
@@ -103,7 +104,7 @@ class UserAdapter (private var mContext: Context,
                                         .setValue(true).addOnCompleteListener { task ->
                                             if (task.isSuccessful)
                                             {
-
+                                                FirebaseUtils.pushNotification(user.getUid(), isLikeNotification = false)
                                             }
                                         }
                                 }
@@ -138,7 +139,6 @@ class UserAdapter (private var mContext: Context,
                     }
                 }
             }
-
         }
     }
 

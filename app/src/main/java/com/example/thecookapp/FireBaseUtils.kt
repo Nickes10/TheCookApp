@@ -1,5 +1,6 @@
 package com.example.thecookapp
 
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 
 object FirebaseUtils {
@@ -31,4 +32,23 @@ object FirebaseUtils {
             callback("")
         }
     }
+
+    fun pushNotification(userId: String, postId: String ="", isLikeNotification: Boolean) {
+        // Function to push notification
+        val ref = database.child("Notification").child(userId)
+
+        val notifyMap = HashMap<String, Any>()
+        notifyMap["userid"] = FirebaseAuth.getInstance().currentUser!!.uid
+        notifyMap["postid"] = postId
+        notifyMap["isLikeNotification"] = isLikeNotification
+
+        if (isLikeNotification){
+            notifyMap["text"] = "liked your post"
+        } else{
+            notifyMap["text"] = "started following you"
+        }
+
+        ref.push().setValue(notifyMap)
+    }
 }
+

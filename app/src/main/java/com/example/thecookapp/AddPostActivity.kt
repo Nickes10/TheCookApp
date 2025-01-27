@@ -773,7 +773,6 @@ class AddPostActivity : AppCompatActivity() {
         }
     }
 
-
     private fun startCrop(sourceUri: Uri) {
         try {
             val fileName = "cropped_image_${System.currentTimeMillis()}.jpg"
@@ -790,8 +789,6 @@ class AddPostActivity : AppCompatActivity() {
                 setStatusBarColor(ContextCompat.getColor(this@AddPostActivity, R.color.colorPrimaryDark))
             }
 
-            Log.e("UCrop", "UCrop options configured")
-
             val cropIntent = UCrop.of(sourceUri, destinationUri)
                 .withAspectRatio(1f, 1f)
                 .withMaxResultSize(800, 800)
@@ -804,7 +801,6 @@ class AddPostActivity : AppCompatActivity() {
             Log.e("UCrop", "Error in startCrop: ${e.message}", e)
         }
     }
-
 }
 
 class RoundedCornersTransformation(private val radius: Float, private val margin: Float) : Transformation {

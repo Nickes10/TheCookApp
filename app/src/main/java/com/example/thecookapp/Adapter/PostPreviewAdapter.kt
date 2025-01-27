@@ -15,6 +15,12 @@ import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import com.bumptech.glide.Glide
 import com.example.thecookapp.ui.profile.ProfileFragment
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -24,12 +30,16 @@ class PostPreviewAdapter(
     private val onPostClick: (Recipe) -> Unit
 ) : RecyclerView.Adapter<PostPreviewAdapter.PostPreviewViewHolder>() {
 
+    private val firebaseAuth = FirebaseAuth.getInstance()
+
     class PostPreviewViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val userName: TextView = itemView.findViewById(R.id.postUserName)
         val profileImage: ImageView = itemView.findViewById(R.id.profileImage)
         val title: TextView = itemView.findViewById(R.id.postTitle)
         val image: ImageView = itemView.findViewById(R.id.imagePost)
         val createdAt: TextView = itemView.findViewById(R.id.postCreatedAt)
+        val likeButton: ImageView = itemView.findViewById(R.id.likeButton)
+        val numberLikes: TextView = itemView.findViewById(R.id.likeCount)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostPreviewViewHolder {
@@ -38,6 +48,7 @@ class PostPreviewAdapter(
     }
 
     override fun onBindViewHolder(holder: PostPreviewViewHolder, position: Int) {
+        val userId = firebaseAuth.currentUser?.uid
         val post = posts[position]
 
         FirebaseUtils.fetchUsername(post.user_id) { username ->
@@ -73,6 +84,9 @@ class PostPreviewAdapter(
         val formattedDate = targetFormat.format(date)
         holder.createdAt.text = "Created at: $formattedDate"
 
+        isLiked(post.post_id.toString(), holder.likeButton)
+        getNumberLikes(post.post_id.toString(), holder.numberLikes)
+
         holder.itemView.setOnClickListener {
             onPostClick(post)
         }
@@ -84,7 +98,29 @@ class PostPreviewAdapter(
         holder.profileImage.setOnClickListener {
             openProfileFragment(post.user_id)
         }
+
+        holder.likeButton.setOnClickListener{
+            if (holder.likeButton.tag.toString()=="like")
+            {
+                FirebaseDatabase.getInstance().reference.child("Likes")
+                    .child(post.post_id.toString())
+                    .child(userId!!)
+                    .setValue(true)
+                
+                FirebaseUtils.pushNotification(post.user_id, post.post_id.toString(), true)
+            }
+            else
+            {
+                FirebaseDatabase.getInstance().reference.child("Likes")
+                    .child(post.post_id.toString())
+                    .child(userId!!)
+                    .removeValue()
+            }
+        }
     }
+
+
+    override fun getItemCount(): Int = posts.size
 
     private fun openProfileFragment(userId: String) {
         val preference = mContext.getSharedPreferences("PREFS", Context.MODE_PRIVATE).edit()
@@ -97,5 +133,41 @@ class PostPreviewAdapter(
             .commit()
     }
 
-    override fun getItemCount(): Int = posts.size
+    private fun isLiked(postid:String, likeImageView: ImageView) {
+        // Function to verify if the post is liked by the app user
+        val currentUser=FirebaseAuth.getInstance().currentUser
+        val postRef=FirebaseDatabase.getInstance().reference.child("Likes").child(postid)
+
+        postRef.addValueEventListener(object : ValueEventListener {
+            override fun onCancelled(error: DatabaseError) {
+
+            }
+
+            override fun onDataChange(datasnapshot: DataSnapshot) {
+                if (datasnapshot.child(currentUser!!.uid).exists()) {
+                    likeImageView.setImageResource(R.drawable.like_icon_full)
+                    likeImageView.tag =" liked"
+                }
+                else {
+                    likeImageView.setImageResource(R.drawable.like_icon_black)
+                    likeImageView.tag = "like"
+                }
+            }
+        })
+    }
+
+    private fun getNumberLikes(postid: String, Nlikes: TextView) {
+        // To set number of likes of the post
+        val postRef=FirebaseDatabase.getInstance().reference.child("Likes").child(postid)
+
+        postRef.addValueEventListener(object : ValueEventListener {
+            override fun onCancelled(error: DatabaseError) {
+            }
+
+            override fun onDataChange(datasnapshot: DataSnapshot) {
+                Nlikes.text = datasnapshot.childrenCount.toString()
+            }
+        })
+    }
+
 }

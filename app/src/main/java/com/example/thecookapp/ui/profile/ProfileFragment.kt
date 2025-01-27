@@ -20,6 +20,7 @@ import com.example.thecookapp.EditProfileActivity
 import com.example.thecookapp.Adapter.ProfilePostAdapter
 import com.example.thecookapp.Adapter.UserAdapter
 import com.example.thecookapp.AppObject.User
+import com.example.thecookapp.FirebaseUtils
 import com.example.thecookapp.MainActivity
 import com.example.thecookapp.R
 import com.example.thecookapp.R.id.*
@@ -142,7 +143,11 @@ class ProfileFragment : Fragment() {
                         FirebaseDatabase.getInstance().reference
                             .child("Follow").child(viewedProfileId)
                             .child("Followers").child(it1.toString())
-                            .setValue(true)
+                            .setValue(true).addOnCompleteListener{task ->
+                                if (task.isSuccessful) {
+                                    FirebaseUtils.pushNotification(viewedProfileId, isLikeNotification = false)
+                                }
+                            }
                     }
 
                     FirebaseDatabase.getInstance().reference.child("Users").child(viewedProfileId).child("fcmToken")
