@@ -13,6 +13,7 @@ import androidx.annotation.NonNull
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.thecookapp.FirebaseUtils
+import com.example.thecookapp.PostDetailsActivity
 import com.example.thecookapp.R
 import com.example.thecookapp.R.id.*
 import com.example.thecookapp.ui.profile.ProfileFragment
@@ -65,14 +66,34 @@ class UserAdapter (private var mContext: Context,
         // If user clicks everywhere on the user item
         holder.item.setOnClickListener(View.OnClickListener {
             Log.e("Profile Adapter", "User item clicked: ${user.getUsername()}, and ${user.getUid()}")
-            val preference = mContext.getSharedPreferences("PREFS",Context.MODE_PRIVATE).edit()
-            preference.putString("profileId",user.getUid())
-            preference.apply()
-            val savedId = mContext.getSharedPreferences("PREFS", Context.MODE_PRIVATE).getString("profileId", null)
-            Log.e("Profile Adapter", "Saved profileId in SharedPreferences: $savedId")
 
-            (mContext as FragmentActivity).supportFragmentManager.beginTransaction()
-                .replace(fragment_container, ProfileFragment()).commit()
+            val preference = mContext.getSharedPreferences("PREFS", Context.MODE_PRIVATE).edit()
+            preference.putString("profileId", user.getUid())
+            preference.apply()
+
+            if (mContext is PostDetailsActivity) {
+                Log.e("Profile Adapter", "PostDetailsActivity found")
+                // Verify if the activity is PostDetailsActivity
+                val fragmentManager = (mContext as FragmentActivity).supportFragmentManager
+                val existingFragment = fragmentManager.findFragmentByTag("ProfileFragment")
+                Log.e("Profile Adapter", "ExistingFragment: $existingFragment")
+
+                if (existingFragment is ProfileFragment) {
+                    Log.e("Profile Adapter", "ProfileFragment found")
+                    // If exist a ProfileFragment, update the profile
+                    existingFragment.updateProfile(user.getUid())
+                } else {
+                    // Otherwise, create a new ProfileFragment
+                    fragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, ProfileFragment(), "ProfileFragment")
+                        .commit()
+                }
+            } else {
+                // Behaviour for the other activity
+                (mContext as FragmentActivity).supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, ProfileFragment())
+                    .commit()
+            }
         })
 
         if (user.getUid() == firebaseUser?.uid) {

@@ -244,8 +244,12 @@ class ProfileFragment : Fragment() {
         followingRecyclerView.visibility = View.VISIBLE
         followersRecyclerView.visibility = View.GONE
 
+        Log.e("ProfileFragment", "We are in loadFollowing and the profile Id is $viewedProfileId ")
+
         // Fetch following data if not already loaded
-        if (listFollowing.isNullOrEmpty()) {
+        //if (listFollowing.isNullOrEmpty()) {
+
+            Log.e("ProfileFragment", "the profile Id is $viewedProfileId")
             val followingRef = FirebaseDatabase.getInstance().reference
                 .child("Follow").child(viewedProfileId).child("Following")
 
@@ -259,9 +263,7 @@ class ProfileFragment : Fragment() {
                         fetchUserDetails(userId, listFollowing!!) {
                             processedCount++
                             if (processedCount == totalChildren) {
-                                Log.e("ProfileFragment", "l'adapter $followingAdapter")
                                 followingAdapter?.notifyDataSetChanged()
-                                Log.e("ProfileFragment", "Conto ${followingAdapter!!?.itemCount}")
                             }
                         }
                     }
@@ -269,7 +271,7 @@ class ProfileFragment : Fragment() {
 
                 override fun onCancelled(error: DatabaseError) {}
             })
-        }
+        //}
 
     }
 
@@ -278,8 +280,9 @@ class ProfileFragment : Fragment() {
         followingRecyclerView.visibility = View.GONE
         followersRecyclerView.visibility = View.VISIBLE
 
-        // Fetch followers data if not already loaded
-        if (listFollowers.isNullOrEmpty()) {
+        Log.e("ProfileFragment", "We are in loadFollowers and the profile Id is $viewedProfileId ")
+        // Fetch following data if not already loaded
+        //if (listFollowers.isNullOrEmpty()) {
             val followersRef = FirebaseDatabase.getInstance().reference
                 .child("Follow").child(viewedProfileId).child("Followers")
 
@@ -301,7 +304,8 @@ class ProfileFragment : Fragment() {
 
                 override fun onCancelled(error: DatabaseError) {}
             })
-        }
+        //}
+
     }
 
     private fun fetchUserDetails(userId: String, list: MutableList<User>, onComplete: () -> Unit) {
@@ -356,27 +360,31 @@ class ProfileFragment : Fragment() {
             .child("Follow").child(viewedProfileId)
             .child(followType)
 
+        Log.e("ProfileFragment", "Sono nel updateFollowCount con followType $followType")
+
         followRef.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
                 // Handle error if needed
             }
 
             override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()) {
-                    val tabLayout = view?.findViewById<TabLayout>(tabs_profile_sections)
+                Log.e("ProfileFragment", "Sono entrato onDatachange e lo snapshot è $snapshot e esiste: ${snapshot.exists()}")
 
-                    // Determine which tab to update based on followType
-                    when (followType) {
-                        "Followers" -> {
-                            // Update the Followers tab
-                            tabLayout?.getTabAt(2)?.text = "${snapshot.childrenCount} Followers"
-                        }
-                        "Following" -> {
-                            // Update the Following tab
-                            tabLayout?.getTabAt(1)?.text = "${snapshot.childrenCount} Following"
-                        }
+                val tabLayout = view?.findViewById<TabLayout>(tabs_profile_sections)
+                Log.e("ProfileFragment", "Sono nel if di onDatachange, il followType è $followType e il snapchot.ChildrenCount è ${snapshot.childrenCount}")
+
+                // Determine which tab to update based on followType
+                when (followType) {
+                    "Followers" -> {
+                        // Update the Followers tab
+                        tabLayout?.getTabAt(2)?.text = "${snapshot.childrenCount} Followers"
+                    }
+                    "Following" -> {
+                        // Update the Following tab
+                        tabLayout?.getTabAt(1)?.text = "${snapshot.childrenCount} Following"
                     }
                 }
+
             }
         })
     }
@@ -436,12 +444,19 @@ class ProfileFragment : Fragment() {
                         // Update Post Number
                         val tabLayout = view?.findViewById<TabLayout>(tabs_profile_sections)
                         tabLayout?.getTabAt(0)?.text = "${profilePostList.size} Posts"
+                        Log.e("ProfileFragment", "Posts Number: ${profilePostList.size}")
 
                         // Notify the adapter of data changes
                         profilePostAdapter?.notifyDataSetChanged()
                     }
                 } else {
+                    // Handle the case where no posts are found
                     Log.e("ProfileFragment", "Error: ${response.errorBody()?.string()}")
+                    (profilePostList as ArrayList<Recipe>).clear() // Clear the list
+                    val tabLayout = view?.findViewById<TabLayout>(tabs_profile_sections)
+                    tabLayout?.getTabAt(0)?.text = "0 Posts"
+                    // Notify the adapter of data changes
+                    profilePostAdapter?.notifyDataSetChanged()
                 }
             }
 
@@ -450,6 +465,49 @@ class ProfileFragment : Fragment() {
                 Toast.makeText(requireContext(), "Error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
+    }
+
+    fun updateProfile(newProfileId: String) {
+        // Function to reuse the same ProfileFragment in the case we are in the PostDetailsActivity
+        if (viewedProfileId != newProfileId) {
+            viewedProfileId = newProfileId
+            Log.e("ProfileFragment", "Profile updated to new profileId: $newProfileId and viewedProfileId: $viewedProfileId")
+
+            // Update the informations of the profile and all the other variables
+            getUserInfo(requireView())
+            getFollowers()
+            getFollowing()
+            takePosts(newProfileId)
+            loadFollowers()
+            loadFollowing()
+
+            // Get the TabLayout and select the first tab (position 0)
+            val tabLayout = view?.findViewById<TabLayout>(R.id.tabs_profile_sections)
+            tabLayout?.selectTab(tabLayout.getTabAt(0))
+
+            tabLayout?.clearOnTabSelectedListeners()
+            tabLayout?.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+                override fun onTabSelected(tab: TabLayout.Tab?) {
+                    when (tab?.position) {
+                        0 -> { // Posts tab
+                            loadPosts()
+                        }
+                        1 -> { // Following tab
+                            loadFollowing()
+                        }
+                        2 -> { // Followers tab
+                            loadFollowers()
+                        }
+                    }
+                }
+
+                override fun onTabUnselected(tab: TabLayout.Tab?) {}
+                override fun onTabReselected(tab: TabLayout.Tab?) {}
+            })
+
+
+            Log.e("ProfileFragment", "Profile updated to new profileId: $newProfileId")
+        }
     }
 
 
@@ -499,6 +557,7 @@ class ProfileFragment : Fragment() {
             pref?.apply()
         }
     }
+
 }
 
 

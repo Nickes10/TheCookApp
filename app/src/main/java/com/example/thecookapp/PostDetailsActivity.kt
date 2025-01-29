@@ -204,7 +204,7 @@ class PostDetailsActivity : AppCompatActivity() {
         fragment.arguments = args
 
         supportFragmentManager.beginTransaction()
-            .replace(R.id.profileFragmentContainer, fragment)
+            .replace(R.id.profileFragmentContainer, fragment, "ProfileFragment")
             .addToBackStack(null)
             .commit()
 
