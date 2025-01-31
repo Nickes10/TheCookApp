@@ -3,20 +3,20 @@ package com.example.thecookapp.AppObject
 class Notification {
     private var userid:String=""
     private var text:String=""
-    private var postid:String=""
-    private var isLikedNotification:Boolean=false
+    private var postUrl:String=""
+    private var isLikeNotification:Boolean=false
 
     constructor()
 
-    constructor(userid: String,text: String,postid:String, isLikedNotification:Boolean) {
+    constructor(userid: String,text: String,postUrl:String, isLikedNotification:Boolean) {
         this.userid=userid
         this.text=text
-        this.postid=postid
-        this.isLikedNotification= isLikedNotification
+        this.postUrl=postUrl
+        this.isLikeNotification= isLikedNotification
     }
 
-    fun getPostId():String{
-        return postid
+    fun getPostUrl():String{
+        return postUrl
     }
 
     fun getUserId():String{
@@ -25,12 +25,12 @@ class Notification {
     fun getText():String{
         return text
     }
-    fun getIsLikedNotification():Boolean{
-        return isLikedNotification
+    fun getIsLikeNotification():Boolean{
+        return isLikeNotification
     }
 
-    fun setPostId(postid: String){
-        this.postid= postid
+    fun setPostUrl(postUrl: String){
+        this.postUrl= postUrl
     }
 
     fun setUserId(userid: String){
@@ -41,7 +41,7 @@ class Notification {
         this.text= text
     }
 
-    fun setIsLikedNotification(isLikedNotification: Boolean){
-        this.isLikedNotification= isLikedNotification
+    fun setIsLikeNotification(isLikedNotification: Boolean){
+        this.isLikeNotification= isLikedNotification
     }
 }

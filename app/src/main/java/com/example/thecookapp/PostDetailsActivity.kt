@@ -83,8 +83,6 @@ class PostDetailsActivity : AppCompatActivity() {
         }
         findViewById<TextView>(R.id.postTitle).text = post.title
         findViewById<TextView>(R.id.postDescription).text = post.description
-        //findViewById<TextView>(R.id.postIngredients).text = "Ingredients: ${post.ingredients}"
-        //findViewById<TextView>(R.id.postInstructions).text = "Instructions: ${post.instructions}"
         findViewById<TextView>(R.id.postDifficulty).text = post.difficulty
         findViewById<TextView>(R.id.postServings).text = post.servings
         findViewById<TextView>(R.id.postTime).text = post.time_to_do
@@ -189,7 +187,6 @@ class PostDetailsActivity : AppCompatActivity() {
             }
         })
     }
-
 
     private fun showProfileFragment(userId: String) {
         // Save profile ID in SharedPreferences

@@ -1,9 +1,11 @@
 package com.example.thecookapp.ui.notifications
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -52,8 +54,7 @@ class NotificationsFragment : Fragment() {
     private fun readNotification() {
 
         val postRef= FirebaseDatabase.getInstance().reference.child("Notification").child(firebaseUser!!.uid)
-        postRef.addValueEventListener(object : ValueEventListener
-        {
+        postRef.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
 
             }
@@ -61,8 +62,7 @@ class NotificationsFragment : Fragment() {
             override fun onDataChange(p0: DataSnapshot)
             {
                 notificationList?.clear()
-                for (snapshot in p0.children)
-                {
+                for (snapshot in p0.children) {
                     val notification: Notification? = snapshot.getValue(Notification::class.java)
                     notificationList!!.add(notification!!)
                 }

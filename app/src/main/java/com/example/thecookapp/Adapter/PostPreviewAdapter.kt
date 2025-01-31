@@ -48,9 +48,10 @@ class PostPreviewAdapter(
     }
 
     override fun onBindViewHolder(holder: PostPreviewViewHolder, position: Int) {
-        val userId = firebaseAuth.currentUser?.uid
+        val currentUserId = firebaseAuth.currentUser?.uid
         val post = posts[position]
 
+        // To put username with the first letter capitalized
         FirebaseUtils.fetchUsername(post.user_id) { username ->
             val formattedUsername = username.split(" ")
                 .joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
@@ -84,8 +85,8 @@ class PostPreviewAdapter(
         val formattedDate = targetFormat.format(date)
         holder.createdAt.text = "Created at: $formattedDate"
 
-        isLiked(post.post_id.toString(), holder.likeButton)
-        getNumberLikes(post.post_id.toString(), holder.numberLikes)
+        isLiked(post.user_id, post.post_id.toString(), holder.likeButton)
+        getNumberLikes(post.user_id, post.post_id.toString(), holder.numberLikes)
 
         holder.itemView.setOnClickListener {
             onPostClick(post)
@@ -100,21 +101,22 @@ class PostPreviewAdapter(
         }
 
         holder.likeButton.setOnClickListener{
-            if (holder.likeButton.tag.toString()=="like")
-            {
+            if (holder.likeButton.tag.toString()=="like") {
                 FirebaseDatabase.getInstance().reference.child("Likes")
+                    .child(post.user_id)
                     .child(post.post_id.toString())
-                    .child(userId!!)
+                    .child(currentUserId!!)
                     .setValue(true)
                 
-                FirebaseUtils.pushNotification(post.user_id, post.post_id.toString(), true)
-            }
-            else
-            {
+                FirebaseUtils.pushNotification(post.user_id, post.image_url, true)
+            } else {
                 FirebaseDatabase.getInstance().reference.child("Likes")
+                    .child(post.user_id)
                     .child(post.post_id.toString())
-                    .child(userId!!)
+                    .child(currentUserId!!)
                     .removeValue()
+
+                FirebaseUtils.removeNotification(post.user_id, post.image_url, isLikeNotification = true)
             }
         }
     }
@@ -133,10 +135,10 @@ class PostPreviewAdapter(
             .commit()
     }
 
-    private fun isLiked(postid:String, likeImageView: ImageView) {
+    private fun isLiked(userid: String, postid:String, likeImageView: ImageView) {
         // Function to verify if the post is liked by the app user
         val currentUser=FirebaseAuth.getInstance().currentUser
-        val postRef=FirebaseDatabase.getInstance().reference.child("Likes").child(postid)
+        val postRef=FirebaseDatabase.getInstance().reference.child("Likes").child(userid).child(postid)
 
         postRef.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
@@ -156,9 +158,9 @@ class PostPreviewAdapter(
         })
     }
 
-    private fun getNumberLikes(postid: String, Nlikes: TextView) {
+    private fun getNumberLikes(userid: String, postid: String, Nlikes: TextView) {
         // To set number of likes of the post
-        val postRef=FirebaseDatabase.getInstance().reference.child("Likes").child(postid)
+        val postRef=FirebaseDatabase.getInstance().reference.child("Likes").child(userid).child(postid)
 
         postRef.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {

@@ -151,7 +151,7 @@ class UserAdapter (private var mContext: Context,
                                             .child("Followers").child(it1.toString())
                                             .removeValue().addOnCompleteListener { task ->
                                                 if (task.isSuccessful) {
-
+                                                    FirebaseUtils.removeNotification(user.getUid(), creatorNotification = firebaseUser!!.uid, isLikeNotification = false)
                                                 }
                                             }
                                     }

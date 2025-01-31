@@ -131,7 +131,7 @@ class ProfileFragment : Fragment() {
         }
 
 
-        view.findViewById<Button>(logout_button).setOnClickListener {
+        logout.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
             val intent = Intent(context, SignInActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -160,22 +160,24 @@ class ProfileFragment : Fragment() {
                             .child("Followers").child(it1.toString())
                             .setValue(true).addOnCompleteListener{task ->
                                 if (task.isSuccessful) {
+                                    // Send notification to the viewed profile
                                     FirebaseUtils.pushNotification(viewedProfileId, isLikeNotification = false)
                                 }
                             }
                     }
 
-                    FirebaseDatabase.getInstance().reference.child("Users").child(viewedProfileId).child("fcmToken")
-                        .get()
-                        .addOnSuccessListener { snapshot ->
-                            val token = snapshot.getValue(String::class.java)
-                            if (token != null) {
-                                Log.e("FCM", "send notify to user: $viewedProfileId")
-                                FirebaseMessagingService.sendNotification(token, "New Follower", "You have a new follower!")
-                            } else {
-                                Log.e("FCM", "No token found for user: $viewedProfileId")
-                            }
-                        }
+                    // CREDO SERVA PER NOTIFICHE ESTERNE ALL'APP (FORSE RIMUOVERLO)
+//                    FirebaseDatabase.getInstance().reference.child("Users").child(viewedProfileId).child("fcmToken")
+//                        .get()
+//                        .addOnSuccessListener { snapshot ->
+//                            val token = snapshot.getValue(String::class.java)
+//                            if (token != null) {
+//                                Log.e("FCM", "send notify to user: $viewedProfileId")
+//                                FirebaseMessagingService.sendNotification(token, "New Follower", "You have a new follower!")
+//                            } else {
+//                                Log.e("FCM", "No token found for user: $viewedProfileId")
+//                            }
+//                        }
                 }
 
                 getButtontext == "Following" -> {
@@ -190,7 +192,11 @@ class ProfileFragment : Fragment() {
                         FirebaseDatabase.getInstance().reference
                             .child("Follow").child(viewedProfileId)
                             .child("Followers").child(it1.toString())
-                            .removeValue()
+                            .removeValue().addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    FirebaseUtils.removeNotification(viewedProfileId, creatorNotification = signInUser.uid, isLikeNotification = false)
+                                }
+                            }
                     }
                 }
             }
@@ -504,6 +510,15 @@ class ProfileFragment : Fragment() {
                 override fun onTabUnselected(tab: TabLayout.Tab?) {}
                 override fun onTabReselected(tab: TabLayout.Tab?) {}
             })
+
+            val currentUser = FirebaseAuth.getInstance().currentUser!!
+            val logoutButton = view?.findViewById<Button>(logout_button)
+            // Check if the viewed profile belongs to the current user
+            if (viewedProfileId == currentUser.uid) {
+                updateProfileButtonText("Edit Profile")
+            } else if (viewedProfileId != signInUser.uid){
+                checkFollowOrFollowingButtonStatus()
+            }
 
 
             Log.e("ProfileFragment", "Profile updated to new profileId: $newProfileId")
