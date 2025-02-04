@@ -107,7 +107,9 @@ class ProfileFragment : Fragment() {
         listFollowers = ArrayList()
         followersAdapter = context?.let { UserAdapter(it, listFollowers as ArrayList<User>, true) }
         followersRecyclerView.adapter = followersAdapter
+
         val logout = view.findViewById<Button>(logout_button)
+        val editProfileButton = view.findViewById<Button>(edit_profile_button)
 
         // Get the current authenticated user
         signInUser = FirebaseAuth.getInstance().currentUser!!
@@ -119,13 +121,12 @@ class ProfileFragment : Fragment() {
 
             Log.e("Profile Adapter", "ProfileId: $viewedProfileId, and the sharedPreferenzes: $sharedPreferences")
 
-
             // Check if the viewed profile belongs to the current user
             if (viewedProfileId == signInUser.uid) {
                 updateProfileButtonText("Edit Profile")
                 logout.visibility = View.VISIBLE
             } else if (viewedProfileId != signInUser.uid){
-                checkFollowOrFollowingButtonStatus()
+                FirebaseUtils.checkFollowingStatus(requireContext(), signInUser.uid, viewedProfileId, editProfileButton)
                 logout.visibility = View.GONE
             }
         }
@@ -138,67 +139,14 @@ class ProfileFragment : Fragment() {
             startActivity(intent)
         }
 
-        view.findViewById<Button>(edit_profile_button).setOnClickListener{
-            val getButtontext = view.findViewById<Button>(edit_profile_button).text.toString()
-            Log.d("ProfileFragment", "Button text: $getButtontext")
+        editProfileButton.setOnClickListener{
+            val getButtonText = editProfileButton.text.toString()
+            Log.d("ProfileFragment", "Button text: $getButtonText")
 
-            when {
-                getButtontext == "Edit Profile" -> startActivity(Intent(context, EditProfileActivity::class.java))
-
-                getButtontext == "Follow" -> {
-                    signInUser.uid.let { it1 ->
-                        FirebaseDatabase.getInstance().reference
-                            .child("Follow").child(it1.toString())
-                            .child("Following").child(viewedProfileId)
-                            .setValue(true)
-
-                    }
-
-                    signInUser.uid.let { it1 ->
-                        FirebaseDatabase.getInstance().reference
-                            .child("Follow").child(viewedProfileId)
-                            .child("Followers").child(it1.toString())
-                            .setValue(true).addOnCompleteListener{task ->
-                                if (task.isSuccessful) {
-                                    // Send notification to the viewed profile
-                                    FirebaseUtils.pushNotification(viewedProfileId, isLikeNotification = false)
-                                }
-                            }
-                    }
-
-                    // CREDO SERVA PER NOTIFICHE ESTERNE ALL'APP (FORSE RIMUOVERLO)
-//                    FirebaseDatabase.getInstance().reference.child("Users").child(viewedProfileId).child("fcmToken")
-//                        .get()
-//                        .addOnSuccessListener { snapshot ->
-//                            val token = snapshot.getValue(String::class.java)
-//                            if (token != null) {
-//                                Log.e("FCM", "send notify to user: $viewedProfileId")
-//                                FirebaseMessagingService.sendNotification(token, "New Follower", "You have a new follower!")
-//                            } else {
-//                                Log.e("FCM", "No token found for user: $viewedProfileId")
-//                            }
-//                        }
-                }
-
-                getButtontext == "Following" -> {
-                    signInUser.uid.let { it1 ->
-                        FirebaseDatabase.getInstance().reference
-                            .child("Follow").child(it1.toString())
-                            .child("Following").child(viewedProfileId)
-                            .removeValue()
-                    }
-
-                    signInUser.uid.let { it1 ->
-                        FirebaseDatabase.getInstance().reference
-                            .child("Follow").child(viewedProfileId)
-                            .child("Followers").child(it1.toString())
-                            .removeValue().addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    FirebaseUtils.removeNotification(viewedProfileId, creatorNotification = signInUser.uid, isLikeNotification = false)
-                                }
-                            }
-                    }
-                }
+            if (getButtonText == "Edit Profile") {
+                startActivity(Intent(context, EditProfileActivity::class.java))
+            } else {
+                FirebaseUtils.handleFollowButtonClick(requireContext(), signInUser.uid, viewedProfileId, view.findViewById(edit_profile_button))
             }
         }
 
@@ -512,19 +460,18 @@ class ProfileFragment : Fragment() {
             })
 
             val currentUser = FirebaseAuth.getInstance().currentUser!!
-            val logoutButton = view?.findViewById<Button>(logout_button)
+            val editProfileButton = view?.findViewById<Button>(edit_profile_button)
+
             // Check if the viewed profile belongs to the current user
             if (viewedProfileId == currentUser.uid) {
                 updateProfileButtonText("Edit Profile")
             } else if (viewedProfileId != signInUser.uid){
-                checkFollowOrFollowingButtonStatus()
+                FirebaseUtils.checkFollowingStatus(requireContext(), signInUser.uid, viewedProfileId, editProfileButton!!)
             }
-
 
             Log.e("ProfileFragment", "Profile updated to new profileId: $newProfileId")
         }
     }
-
 
 
     override fun onStop() {
@@ -567,6 +514,7 @@ class ProfileFragment : Fragment() {
         Log.e("Profile Fragment", "onDestroy called and actualProfileId is $actualProfileId and viewedProfileId is $viewedProfileId")
 
         if (actualProfileId == "none" || actualProfileId == viewedProfileId) {
+            // When the ProfileFragment is actually destroyed and there is not a change with another User Profile
             val pref = context?.getSharedPreferences("PREFS", Context.MODE_PRIVATE)?.edit()
             pref?.putString("profileId", signInUser.uid)
             pref?.apply()

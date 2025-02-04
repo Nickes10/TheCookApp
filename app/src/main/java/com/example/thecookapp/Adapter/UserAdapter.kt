@@ -28,7 +28,7 @@ import de.hdodenhof.circleimageview.CircleImageView
 
 class UserAdapter (private var mContext: Context,
                    private var mUser: List<User>,
-                   private var isFragment: Boolean = false): RecyclerView.Adapter<UserAdapter.ViewHolder>()
+                   private var isProfile: Boolean = true): RecyclerView.Adapter<UserAdapter.ViewHolder>()
 {
     private var firebaseUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
 
@@ -36,6 +36,7 @@ class UserAdapter (private var mContext: Context,
         var username: TextView = itemView.findViewById(searched_user_username)
         var fullname: TextView = itemView.findViewById(searched_user_full_name)
         var item: RelativeLayout = itemView.findViewById(searched_user_layout)
+        var rank_number: TextView = itemView.findViewById(classification_rank_number)
         var profileimage: CircleImageView = itemView.findViewById(searched_user_profile_image)
         var followButton: Button = itemView.findViewById(searched_follow_button)
     }
@@ -60,8 +61,13 @@ class UserAdapter (private var mContext: Context,
         holder.fullname.text = user.getFullname()
         // For return the image
         Picasso.get().load(user.getImage()).placeholder(R.drawable.default_image_profile).into(holder.profileimage)
-        
-        checkFollowingStatus(user.getUid(), holder.followButton)
+
+        if(!isProfile) {
+            holder.rank_number.visibility = View.VISIBLE
+            holder.rank_number.text = (position + 1).toString()
+        } else {
+            holder.rank_number.visibility = View.GONE
+        }
 
         // If user clicks everywhere on the user item
         holder.item.setOnClickListener(View.OnClickListener {
@@ -101,93 +107,13 @@ class UserAdapter (private var mContext: Context,
             holder.followButton.visibility = View.GONE
         } else {
             // Show the follow button
+            FirebaseUtils.checkFollowingStatus(holder.itemView.context, firebaseUser?.uid ?: return, user.getUid(), holder.followButton)
             holder.followButton.visibility = View.VISIBLE
-            checkFollowingStatus(user.getUid(), holder.followButton)
         }
 
         // If user clicks on the follow button
         holder.followButton.setOnClickListener {
-            if (holder.followButton.text.toString() == "Follow")
-            {
-                firebaseUser?.uid.let { it ->
-                    // Searched user added to Following of Current user
-                    FirebaseDatabase.getInstance().reference
-                        .child("Follow").child(it.toString())
-                        .child("Following").child(user.getUid())
-                        .setValue(true).addOnCompleteListener { task ->
-                            if (task.isSuccessful)
-                            {
-                                // Current user added to Followers of Searched user
-                                firebaseUser?.uid.let { it1 ->
-                                    FirebaseDatabase.getInstance().reference
-                                        .child("Follow").child(user.getUid())
-                                        .child("Followers").child(it1.toString())
-                                        .setValue(true).addOnCompleteListener { task ->
-                                            if (task.isSuccessful)
-                                            {
-                                                FirebaseUtils.pushNotification(user.getUid(), isLikeNotification = false)
-                                            }
-                                        }
-                                }
-                            }
-                        }
-                }
-            }
-            else
-            {
-                if(holder.followButton.text.toString()=="Following")
-                {
-                    // Removing searched user from Following of Current user
-                    firebaseUser?.uid.let { it1 ->
-                        FirebaseDatabase.getInstance().reference
-                            .child("Follow").child(it1.toString())
-                            .child("Following").child(user.getUid())
-                            .removeValue().addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    // Remove the current user from Followers of searched user
-                                    firebaseUser?.uid.let { it1 ->
-                                        FirebaseDatabase.getInstance().reference
-                                            .child("Follow").child(user.getUid())
-                                            .child("Followers").child(it1.toString())
-                                            .removeValue().addOnCompleteListener { task ->
-                                                if (task.isSuccessful) {
-                                                    FirebaseUtils.removeNotification(user.getUid(), creatorNotification = firebaseUser!!.uid, isLikeNotification = false)
-                                                }
-                                            }
-                                    }
-                                }
-                            }
-                    }
-                }
-            }
+            FirebaseUtils.handleFollowButtonClick(holder.itemView.context, firebaseUser?.uid ?: return@setOnClickListener, user.getUid(), holder.followButton)
         }
     }
-
-
-    private fun checkFollowingStatus(uid: String, followButton: Button)
-    // Function to check if the Searched is followed or not but by current user
-    {
-        val followingList = firebaseUser?.uid.let { it1 ->
-            FirebaseDatabase.getInstance().reference
-                .child("Follow").child(it1.toString())
-                .child("Following")
-        }
-
-        followingList.addValueEventListener(object : ValueEventListener {
-            override fun onCancelled(error: DatabaseError) {
-
-            }
-
-            override fun onDataChange(datasnapshot: DataSnapshot) {
-                if (datasnapshot.child(uid).exists()) {
-                    followButton.text = "Following"
-                }
-                else {
-                    followButton.text = "Follow"
-                }
-            }
-        })
-
-    }
-
 }

@@ -126,6 +126,7 @@ class HomeFragment : Fragment() {
         )
     }
 
+
     private fun fetchGlobalPosts(userId: String) {
         //list of users followed
         database.child("Follow").child(userId).child("Following").get().addOnSuccessListener { followingSnapshot ->

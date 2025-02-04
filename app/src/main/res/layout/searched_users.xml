@@ -6,10 +6,26 @@
     android:layout_height="wrap_content"
     android:layout_marginTop="10dp">
 
+    <!-- Ranking Badge -->
+    <TextView
+        android:id="@+id/classification_rank_number"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="4dp"
+        android:gravity="center"
+        android:text="1"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:background="@drawable/rank_badge_background" />
+
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/searched_user_profile_image"
         android:layout_width="80dp"
         android:layout_height="80dp"
+        android:layout_toEndOf="@id/classification_rank_number"
         android:src="@drawable/default_image_profile"
         android:layout_margin="8dp"/>
 

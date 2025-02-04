@@ -13,8 +13,10 @@ import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.thecookapp.AppObject.Notification
 import com.example.thecookapp.AppObject.User
+import com.example.thecookapp.FirebaseUtils
 import com.example.thecookapp.R
 import com.example.thecookapp.ui.profile.ProfileFragment
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -27,6 +29,7 @@ class NotificationAdapter(
     private var listNotification:List<Notification>)
     : RecyclerView.Adapter<NotificationAdapter.ViewHolder>() {
 
+    private var firebaseUser = FirebaseAuth.getInstance().currentUser
 
     class ViewHolder(@NonNull itemView: View) : RecyclerView.ViewHolder(itemView) {
         var username: TextView = itemView.findViewById(R.id.notification_username)
@@ -62,6 +65,7 @@ class NotificationAdapter(
         } else {
             holder.postimg.visibility=View.GONE
             holder.followbutton.visibility=View.VISIBLE
+            FirebaseUtils.checkFollowingStatus(holder.itemView.context, firebaseUser!!.uid, notification.getUserId(), holder.followbutton)
         }
 
         holder.username.setOnClickListener {
@@ -75,6 +79,21 @@ class NotificationAdapter(
                 .commit()
         }
 
+        holder.profileimage.setOnClickListener {
+            // If user click on the profile image, open the correspondent user profile
+            val preference = mContext.getSharedPreferences("PREFS", Context.MODE_PRIVATE).edit()
+            preference.putString("profileId", notification.getUserId())
+            preference.apply()
+
+            (mContext as FragmentActivity).supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, ProfileFragment())
+                .commit()
+        }
+
+        holder.followbutton.setOnClickListener {
+            // Call the function for follow or unfollow the user in FirebaseUtils
+            FirebaseUtils.handleFollowButtonClick(holder.itemView.context, firebaseUser!!.uid, notification.getUserId(), holder.followbutton)
+        }
     }
 
     private fun publisherInfo(imgView: CircleImageView, username: TextView, publisherid: String) {

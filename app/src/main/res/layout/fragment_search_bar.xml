@@ -1,48 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="16dp"
+    android:layout_height="match_parent"
     tools:context=".ui.search.SearchBarFragment">
 
-    <!-- Search Bar Container -->
-    <LinearLayout
-        android:id="@+id/search_bar_container"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:orientation="horizontal"
-        android:background="@drawable/search_bar_background"
-        android:padding="8dp"
-        android:gravity="center_vertical">
+        android:layout_height="wrap_content">
 
-        <!-- Magnifying Glass Icon -->
-        <ImageView
-            android:id="@+id/search_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/my_search"
-            android:layout_marginEnd="8dp" />
+        <RelativeLayout
+            android:id="@+id/search_bar_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
 
-        <!-- Search Input Field -->
-        <EditText
-            android:id="@+id/search_input"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:hint="Looking for something?"
-            android:background="@android:color/transparent"
-            android:padding="0dp"
-            android:textColor="@android:color/black"
-            android:textSize="16dp" />
+            <!-- Search Bar Container -->
+            <LinearLayout
+                android:id="@+id/search_bar_container"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal"
+                android:background="@drawable/search_bar_background"
+                android:padding="8dp"
+                android:gravity="center_vertical">
 
-    </LinearLayout>
+                <!-- Magnifying Glass Icon -->
+                <ImageView
+                    android:id="@+id/search_icon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/my_search"
+                    android:layout_marginEnd="8dp" />
 
-    <!-- RecyclerView to show the searched users -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/search_bar_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:layout_below="@id/search_bar_container" />
-</RelativeLayout>
+                <!-- Search Input Field -->
+                <EditText
+                    android:id="@+id/search_input"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:hint="Looking for something?"
+                    android:background="@android:color/transparent"
+                    android:padding="0dp"
+                    android:textColor="@android:color/black"
+                    android:textSize="16dp" />
+
+            </LinearLayout>
+
+            <!-- RecyclerView to show the searched users -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/search_bar_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_below="@id/search_bar_container"/>
+
+            <!-- "Top Chefs" Title -->
+            <TextView
+                android:id="@+id/top_chefs_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/search_bar_container"
+                android:layout_marginTop="12dp"
+                android:text="🏆 Top Chefs"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black" />
+
+            <!-- Top Chefs RecyclerView (Horizontal) -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/top_chefs_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/top_chefs_title"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                android:overScrollMode="never"
+                android:scrollbars="none" />
+
+            <!-- "Trending Recipes" Title -->
+            <TextView
+                android:id="@+id/trending_recipes_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/top_chefs_recycler_view"
+                android:layout_marginTop="20dp"
+                android:text="🔥 Trending Recipes"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black" />
+        </RelativeLayout>
+
+        <!-- Grid of Trending Recipes -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/trending_recipes_grid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/search_bar_layout"
+            android:layout_marginTop="8dp"
+            android:numColumns="2"
+            android:scrollbars="none"
+            android:overScrollMode="never"
+            android:clipToPadding="false"
+            android:paddingBottom="10dp" />
+
+    </RelativeLayout>
+</ScrollView>

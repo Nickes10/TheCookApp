@@ -7,23 +7,20 @@ import android.view.View
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
+import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.thecookapp.PostDetailsActivity
 import com.example.thecookapp.Recipe
 import com.example.thecookapp.R
-import com.example.thecookapp.R.id.profile_post_layout
-import com.squareup.picasso.Callback
-import com.squareup.picasso.Picasso
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.GlideException
 
 class ProfilePostAdapter(
     private val context: Context,
     private val postList: List<Recipe>,
-    private val postDetailsLauncher: ActivityResultLauncher<Intent>
+    private val postDetailsLauncher: ActivityResultLauncher<Intent>? = null
 ) : RecyclerView.Adapter<ProfilePostAdapter.ProfilePostViewHolder>() {
 
     inner class ProfilePostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -33,18 +30,19 @@ class ProfilePostAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProfilePostViewHolder {
         val displayMetrics = context?.resources?.displayMetrics
         val screenWidth = displayMetrics?.widthPixels
-        val imageWidth = screenWidth?.div(3) ?: 0
-        val imageHeight = imageWidth
+        val spacing = 4 // Adjust as needed (same as ItemDecoration)
+        val columns = 3 // Change this to match the number of grid columns
+        val totalSpacing = spacing * (columns + 1) // Total space including edges
+        val itemSize = (screenWidth!! - totalSpacing) / columns // Calculate item width dynamically
+        // Inflate new layout
+        val itemView = LayoutInflater.from(context).inflate(R.layout.posts_profile_layout, parent, false)
 
-        val itemView = LayoutInflater.from(context).inflate(R.layout.profilepost_layout, parent, false)
-        val linearLayout = itemView.findViewById<LinearLayout>(profile_post_layout)
-        val params = linearLayout.layoutParams
-
-        // Set the width and height of the layout to be adaptable to each screen
-        params.width = imageWidth
-        params.height = imageHeight
-
-        linearLayout.layoutParams = params
+        // Set dynamic width and height
+        val cardView = itemView.findViewById<CardView>(R.id.profile_post_layout)
+        val params = cardView.layoutParams
+        params.width = itemSize
+        params.height = itemSize
+        cardView.layoutParams = params
 
         return ProfilePostViewHolder(itemView)
     }
@@ -97,7 +95,13 @@ class ProfilePostAdapter(
         holder.postImageView.setOnClickListener {
             val intent = Intent(context, PostDetailsActivity::class.java)
             intent.putExtra("POST_DETAILS", currentPost)
-            postDetailsLauncher.launch(intent)
+
+            if (postDetailsLauncher != null) {
+                // Launcher used to reload the Profile page if the user deletes a post
+                postDetailsLauncher.launch(intent)
+            } else {
+                context.startActivity(intent)
+            }
         }
     }
 
