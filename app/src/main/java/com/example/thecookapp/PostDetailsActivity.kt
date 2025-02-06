@@ -12,16 +12,14 @@ import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.FragmentActivity
 import com.example.thecookapp.ui.profile.ProfileFragment
 import com.google.firebase.auth.FirebaseAuth
 import com.squareup.picasso.Picasso
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.text.SimpleDateFormat
-import java.util.Locale
-import android.view.MenuItem
+import android.widget.Button
+import android.widget.ImageButton
 import com.bumptech.glide.Glide
 
 
@@ -31,9 +29,18 @@ class PostDetailsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.item_post)
+        //setContentView(R.layout.item_post)
+        setContentView(R.layout.activity_post_details)
 
         val post = intent.getParcelableExtra<Recipe>("POST_DETAILS")
+        val currentUserId = firebaseAuth.currentUser?.uid
+
+        val likeButton = findViewById<ImageView>(R.id.post_like_button)
+        val backButton = findViewById<ImageButton>(R.id.post_back_button)
+        val followButton = findViewById<Button>(R.id.post_follow_button)
+
+        FirebaseUtils.isLiked(post!!.user_id, post.post_id.toString(), likeButton)
+        FirebaseUtils.checkFollowingStatus(this, currentUserId ?: return, post.user_id, followButton)
 
         if (post != null) {
             updateUI(post)
@@ -42,6 +49,23 @@ class PostDetailsActivity : AppCompatActivity() {
             finish()
         }
 
+        likeButton.setOnClickListener{
+           FirebaseUtils.handleLikeButtonClick(this, post, likeButton)
+        }
+
+        // Set BackButton
+        backButton.setOnClickListener {
+            onBackPressedDispatcher.onBackPressed()
+        }
+
+        followButton.setOnClickListener {
+            FirebaseUtils.handleFollowButtonClick(this, currentUserId ?: return@setOnClickListener, post!!.user_id, followButton)
+        }
+
+        // Avoid that user can follow himself
+        if (post.user_id == currentUserId) {
+            followButton.visibility = View.GONE
+        }
 
     }
 
@@ -59,15 +83,22 @@ class PostDetailsActivity : AppCompatActivity() {
             showMenuOptions(post)
         }
 
-        FirebaseUtils.fetchUsername(post.user_id) { username ->
-            val formattedUsername = username.split(" ")
+        FirebaseUtils.fetchUserandFullName(post.user_id) { fullName, userName ->
+            val formattedFullname = fullName.split(" ")
                 .joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
-            findViewById<TextView>(R.id.postUserName).text = formattedUsername
+            findViewById<TextView>(R.id.postUserFullName).text = formattedFullname
+            findViewById<TextView>(R.id.postUserFullName).setOnClickListener {
+                showProfileFragment(post.user_id)
+            }
+
+            val formattedUserName = "@${userName.trim()}"
+            findViewById<TextView>(R.id.postUserName).text= formattedUserName
             findViewById<TextView>(R.id.postUserName).setOnClickListener {
                 showProfileFragment(post.user_id)
             }
         }
 
+        Log.e("PostDetails", "punto sei")
         FirebaseUtils.fetchProfileImage(post.user_id) { profileImageUrl ->
             Picasso.get()
                 .load(profileImageUrl)
@@ -81,29 +112,25 @@ class PostDetailsActivity : AppCompatActivity() {
             findViewById<TextView>(R.id.locationInput).text =
                 "lat: ${post.latitude}, lon: ${post.longitude}"
         }
-        findViewById<TextView>(R.id.postTitle).text = post.title
+        findViewById<TextView>(R.id.postTitle).text = post.title.uppercase()
         findViewById<TextView>(R.id.postDescription).text = post.description
-        findViewById<TextView>(R.id.postDifficulty).text = post.difficulty
-        findViewById<TextView>(R.id.postServings).text = post.servings
+        findViewById<TextView>(R.id.postDifficulty).text = post.difficulty.replaceFirstChar { it.uppercase() }
+        findViewById<TextView>(R.id.postServings).text = "${post.servings} servings"
         findViewById<TextView>(R.id.postTime).text = post.time_to_do
 
-        val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-        val targetFormat = SimpleDateFormat("MM/dd/yy", Locale.getDefault())
-        val date = originalFormat.parse(post.created_at)
-        val formattedDate = targetFormat.format(date)
+        // i don't think it makes sense to put it here when it was created
 
-        findViewById<TextView>(R.id.postCreatedAt).text = "Created at: $formattedDate"
+//        val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+//        val targetFormat = SimpleDateFormat("MM/dd/yy", Locale.getDefault())
+//        val date = originalFormat.parse(post.created_at)
+//        val formattedDate = targetFormat.format(date)
+//
+//        findViewById<TextView>(R.id.postCreatedAt).text = "Created at: $formattedDate"
 
         Glide.with(this)
             .load(post.image_url)
             .placeholder(R.drawable.plate_knife_fork)
             .into(findViewById<ImageView>(R.id.imagePost))
-
-
-//        Picasso.get()
-//            .load(post.image_url)
-//            .placeholder(R.drawable.plate_knife_fork)
-//            .into(findViewById<ImageView>(R.id.imagePost))
 
         val ingredientsContainer = findViewById<LinearLayout>(R.id.postIngredientsContainer)
         ingredientsContainer.removeAllViews() // Clear any previous ingredients
@@ -113,7 +140,7 @@ class PostDetailsActivity : AppCompatActivity() {
             val ingredientLabel = ingredientRow.findViewById<TextView>(R.id.ingredientKey)
             val ingredientValue = ingredientRow.findViewById<TextView>(R.id.ingredientValue)
 
-            ingredientLabel.text = "$ingredient:"
+            ingredientLabel.text = ingredient.replaceFirstChar { it.uppercase() }
             ingredientValue.text = value
 
             ingredientsContainer.addView(ingredientRow)
@@ -127,8 +154,8 @@ class PostDetailsActivity : AppCompatActivity() {
             val instructionLabel = instructionRow.findViewById<TextView>(R.id.instructionLabel)
             val instructionValue = instructionRow.findViewById<TextView>(R.id.instructionValue)
 
-            instructionLabel.text = "Step ${index + 1}:"
-            instructionValue.text = instruction
+            instructionLabel.text = "${index + 1}"
+            instructionValue.text = instruction.replaceFirstChar { it.uppercase() }
 
             instructionsContainer.addView(instructionRow)
         }

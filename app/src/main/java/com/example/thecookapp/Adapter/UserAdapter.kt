@@ -57,12 +57,13 @@ class UserAdapter (private var mContext: Context,
         // Actual data binding happens, every time a new item scrolls into view
         val user = mUser[position]
 
-        holder.username.text = user.getUsername()
+        holder.username.text = "@${user.getUsername().trim()}"
         holder.fullname.text = user.getFullname()
         // For return the image
         Picasso.get().load(user.getImage()).placeholder(R.drawable.default_image_profile).into(holder.profileimage)
 
         if(!isProfile) {
+            Log.e("UserAdapter", "isProfile is false")
             holder.rank_number.visibility = View.VISIBLE
             holder.rank_number.text = (position + 1).toString()
         } else {
@@ -102,10 +103,10 @@ class UserAdapter (private var mContext: Context,
             }
         })
 
-        if (user.getUid() == firebaseUser?.uid) {
+        if (user.getUid() == firebaseUser?.uid || !isProfile) {
             // Hide the follow button
             holder.followButton.visibility = View.GONE
-        } else {
+        } else{
             // Show the follow button
             FirebaseUtils.checkFollowingStatus(holder.itemView.context, firebaseUser?.uid ?: return, user.getUid(), holder.followButton)
             holder.followButton.visibility = View.VISIBLE

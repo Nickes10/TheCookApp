@@ -33,6 +33,7 @@ class PostPreviewAdapter(
     private val firebaseAuth = FirebaseAuth.getInstance()
 
     class PostPreviewViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val fullName: TextView = itemView.findViewById(R.id.postUserFullName)
         val userName: TextView = itemView.findViewById(R.id.postUserName)
         val profileImage: ImageView = itemView.findViewById(R.id.profileImage)
         val title: TextView = itemView.findViewById(R.id.postTitle)
@@ -52,10 +53,13 @@ class PostPreviewAdapter(
         val post = posts[position]
 
         // To put username with the first letter capitalized
-        FirebaseUtils.fetchUsername(post.user_id) { username ->
-            val formattedUsername = username.split(" ")
+        FirebaseUtils.fetchUserandFullName(post.user_id) { fullName, userName ->
+            val formattedFullname = fullName.split(" ")
                 .joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
-            holder.userName.text = formattedUsername
+            holder.fullName.text = formattedFullname
+
+            val formattedUserName = "@${userName.trim()}"
+            holder.userName.text = formattedUserName
         }
 
         FirebaseUtils.fetchProfileImage(post.user_id) { profileImageUrl ->
@@ -65,7 +69,7 @@ class PostPreviewAdapter(
                 .into(holder.profileImage)
         }
 
-        holder.title.text = post.title
+        holder.title.text = post.title.uppercase()
 
         Log.e("Upload Image", "Image URL: ${post.image_url}")
 
@@ -85,11 +89,15 @@ class PostPreviewAdapter(
         val formattedDate = targetFormat.format(date)
         holder.createdAt.text = "Created at: $formattedDate"
 
-        isLiked(post.user_id, post.post_id.toString(), holder.likeButton)
+        FirebaseUtils.isLiked(post.user_id, post.post_id.toString(), holder.likeButton)
         getNumberLikes(post.user_id, post.post_id.toString(), holder.numberLikes)
 
         holder.itemView.setOnClickListener {
             onPostClick(post)
+        }
+
+        holder.fullName.setOnClickListener {
+            openProfileFragment(post.user_id)
         }
 
         holder.userName.setOnClickListener {
@@ -101,23 +109,7 @@ class PostPreviewAdapter(
         }
 
         holder.likeButton.setOnClickListener{
-            if (holder.likeButton.tag.toString()=="like") {
-                FirebaseDatabase.getInstance().reference.child("Likes")
-                    .child(post.user_id)
-                    .child(post.post_id.toString())
-                    .child(currentUserId!!)
-                    .setValue(true)
-                
-                FirebaseUtils.pushNotification(post.user_id, post.image_url, true)
-            } else {
-                FirebaseDatabase.getInstance().reference.child("Likes")
-                    .child(post.user_id)
-                    .child(post.post_id.toString())
-                    .child(currentUserId!!)
-                    .removeValue()
-
-                FirebaseUtils.removeNotification(post.user_id, post.image_url, isLikeNotification = true)
-            }
+            FirebaseUtils.handleLikeButtonClick(mContext, post, holder.likeButton)
         }
     }
 
@@ -135,28 +127,6 @@ class PostPreviewAdapter(
             .commit()
     }
 
-    private fun isLiked(userid: String, postid:String, likeImageView: ImageView) {
-        // Function to verify if the post is liked by the app user
-        val currentUser=FirebaseAuth.getInstance().currentUser
-        val postRef=FirebaseDatabase.getInstance().reference.child("Likes").child(userid).child(postid)
-
-        postRef.addValueEventListener(object : ValueEventListener {
-            override fun onCancelled(error: DatabaseError) {
-
-            }
-
-            override fun onDataChange(datasnapshot: DataSnapshot) {
-                if (datasnapshot.child(currentUser!!.uid).exists()) {
-                    likeImageView.setImageResource(R.drawable.like_icon_full)
-                    likeImageView.tag =" liked"
-                }
-                else {
-                    likeImageView.setImageResource(R.drawable.like_icon_black)
-                    likeImageView.tag = "like"
-                }
-            }
-        })
-    }
 
     private fun getNumberLikes(userid: String, postid: String, Nlikes: TextView) {
         // To set number of likes of the post

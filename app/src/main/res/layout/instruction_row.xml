@@ -1,28 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="4dp">
 
-    <!-- Instruction Step Number -->
-    <TextView
-        android:id="@+id/instructionLabel"
-        android:layout_width="wrap_content"
+    <!-- CardView Container -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/step_card"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Step 1:"
-        android:textSize="14sp"
-        android:textColor="@color/black"
-        android:layout_marginBottom="4dp"/>
+        android:layout_margin="8dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        android:backgroundTint="#FFFFFF"
+        android:layout_centerVertical="true">
 
-    <!-- Instruction Description (Now below the step number) -->
-    <TextView
-        android:id="@+id/instructionValue"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Step description"
-        android:textSize="14sp"
-        android:textColor="@color/black"/>
+        <!-- Linear Layout for Number and Text -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <!-- Circular Red Number -->
+            <TextView
+                android:id="@+id/instructionLabel"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="1"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:background="@drawable/circular_red_background" />
+
+            <!-- Step Description -->
+            <TextView
+                android:id="@+id/instructionValue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:text="When you let your chicken rest, place your tortillas on the grill to warm up just a bit."
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 </LinearLayout>
 

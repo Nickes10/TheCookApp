@@ -28,24 +28,70 @@
             android:layout_marginEnd="8dp"
             android:src="@drawable/default_image_profile" />
 
-        <TextView
-            android:id="@+id/postUserName"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="User Name"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/postUserFullName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Full Name"
+                android:layout_marginLeft="18dp"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <!-- Username -->
+            <TextView
+                android:id="@+id/postUserName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/postUserFullName"
+                android:layout_marginTop="2dp"
+                android:layout_marginLeft="18dp"
+                android:text="FielymonFiel"
+                android:textSize="14sp"
+                android:textColor="@android:color/darker_gray"/>
+        </RelativeLayout>
+
     </LinearLayout>
 
     <!-- Post Image -->
     <!--android:scaleType="centerCrop"-->
-    <ImageView
-        android:id="@+id/imagePost"
+    <FrameLayout
+        android:id="@+id/layout_post"
+        app:layout_constraintTop_toBottomOf="@id/userInfo"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:src="@drawable/plate_knife_fork"
-        android:scaleType="centerCrop"
-        app:layout_constraintTop_toBottomOf="@id/userInfo"/>
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/imagePost"
+            android:layout_width="match_parent"
+            android:layout_height="360dp"
+            android:src="@drawable/plate_knife_fork"
+            android:scaleType="centerCrop"
+            app:layout_constraintTop_toBottomOf="@id/userInfo"/>
+
+        <!-- Title Overlay -->
+        <TextView
+            android:id="@+id/postTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:layout_margin="16dp"
+            android:text="AUNT JAMIE'S CHICKEN WINGS"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:textSize="24sp"
+            android:padding="8dp"
+            android:shadowColor="@android:color/black"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="2"/>
+    </FrameLayout>
 
 <!-- Post Title -->
     <!-- Container for Title and Like Button -->
@@ -55,12 +101,13 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        app:layout_constraintTop_toBottomOf="@id/imagePost"
+        app:layout_constraintTop_toBottomOf="@id/layout_post"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:paddingTop="8dp">
 
         <!-- Post Title -->
+        <!--
         <TextView
             android:id="@+id/postTitle"
             android:layout_width="0dp"
@@ -69,6 +116,7 @@
             android:text="Post Title"
             android:textSize="18sp"
             android:textStyle="bold" />
+            -->
 
         <!-- Like Button -->
         <ImageView

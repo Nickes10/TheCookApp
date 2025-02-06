@@ -285,30 +285,6 @@ class ProfileFragment : Fragment() {
         view?.findViewById<Button>(R.id.edit_profile_button)?.text = text
     }
 
-    private fun checkFollowOrFollowingButtonStatus() {
-        // To check if the current user follows or not the other uid user
-        val followingRef = signInUser.uid.let {it1 ->
-            FirebaseDatabase.getInstance().reference
-                .child("Follow").child(it1.toString())
-                .child("Following")
-        }
-
-        followingRef.addValueEventListener(object : ValueEventListener {
-            override fun onCancelled(error: DatabaseError) {
-            }
-
-            override fun onDataChange(snapshot: DataSnapshot) {
-                // Check if the current user is following the viewed profile
-
-                if (snapshot.child(viewedProfileId).exists()) {
-                    updateProfileButtonText("Following")
-                } else {
-                    updateProfileButtonText("Follow")
-                }
-            }
-        })
-    }
-
     private fun updateFollowCount(followType: String) {
         val followRef = FirebaseDatabase.getInstance().reference
             .child("Follow").child(viewedProfileId)

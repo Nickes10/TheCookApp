@@ -3,6 +3,7 @@ package com.example.thecookapp
 import android.content.Context
 import android.util.Log
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.example.thecookapp.AppObject.Notification
@@ -20,18 +21,24 @@ object FirebaseUtils {
 
     private val database = FirebaseDatabase.getInstance().reference
 
-    fun fetchUsername(userId: String, callback: (String) -> Unit) {
-        database.child("Users").child(userId).get().addOnSuccessListener { snapshot ->
-            if (snapshot.exists()) {
-                val username = snapshot.child("fullname").value.toString()
-                callback(username)
-            } else {
-                callback("Unknown User")
+
+    fun fetchUserandFullName(userId: String, callback: (fullName: String, userName: String) -> Unit) {
+        // Function to return the full name and username from the user_id
+        database.child("Users").child(userId).get()
+            .addOnSuccessListener { snapshot ->
+                if (snapshot.exists()) {
+                    val fullName = snapshot.child("fullname").value?.toString() ?: "Unknown Fullname"
+                    val userName = snapshot.child("username").value?.toString() ?: "Unknown Username"
+                    callback(fullName, userName)
+                } else {
+                    callback("Unknown Fullname", "Unknown Username")
+                }
             }
-        }.addOnFailureListener {
-            callback("Unknown User")
-        }
+            .addOnFailureListener {
+                callback("Unknown Fullname", "Unknown Username")
+            }
     }
+
 
     fun fetchProfileImage(userId: String, callback: (String) -> Unit) {
         database.child("Users").child(userId).get().addOnSuccessListener { snapshot ->
@@ -124,6 +131,53 @@ object FirebaseUtils {
         })
     }
 
+
+    fun isLiked(userid: String, postid: String, likeImageView: ImageView) {
+        // Function to verify if the post is liked by the app user
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val postRef = database.child("Likes").child(userid).child(postid)
+
+        postRef.addValueEventListener(object : ValueEventListener {
+            override fun onCancelled(error: DatabaseError) {
+                // You can add any necessary error handling here
+            }
+
+            override fun onDataChange(datasnapshot: DataSnapshot) {
+                if (datasnapshot.child(currentUser!!.uid).exists()) {
+                    likeImageView.setImageResource(R.drawable.like_icon_full)
+                    likeImageView.tag = "liked"
+                } else {
+                    likeImageView.setImageResource(R.drawable.like_icon_black)
+                    likeImageView.tag = "like"
+                }
+            }
+        })
+    }
+
+
+    fun handleLikeButtonClick(context: Context, post: Recipe, likeButton: ImageView) {
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+
+        if (currentUserId != null) {
+            val likeRef = FirebaseDatabase.getInstance().reference.child("Likes")
+                .child(post.user_id)
+                .child(post.post_id.toString())
+                .child(currentUserId)
+
+            if (likeButton.tag.toString() == "like") {
+                // Like the post
+                likeRef.setValue(true)
+                pushNotification(post.user_id, post.image_url, true)
+            } else {
+                // Unlike the post
+                likeRef.removeValue()
+                removeNotification(post.user_id, post.image_url, isLikeNotification = true)
+            }
+        } else {
+            // Handle case where the user is not logged in (if necessary)
+            Toast.makeText(context, "Please log in to like posts", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     fun pushNotification(userId: String, postUrl: String ="", isLikeNotification: Boolean) {
         // Function to push notification

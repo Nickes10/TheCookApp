@@ -62,7 +62,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/search_bar_container"
                 android:layout_marginTop="12dp"
-                android:text="🏆 Top Chefs"
+                android:text="TOP CHEFS"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black" />
@@ -85,7 +85,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/top_chefs_recycler_view"
                 android:layout_marginTop="20dp"
-                android:text="🔥 Trending Recipes"
+                android:text="TRENDING RECIPES"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black" />
