@@ -62,9 +62,10 @@ class PostDetailsActivity : AppCompatActivity() {
             FirebaseUtils.handleFollowButtonClick(this, currentUserId ?: return@setOnClickListener, post!!.user_id, followButton)
         }
 
-        // Avoid that user can follow himself
+        // Avoid that user can follow himself and like his posts
         if (post.user_id == currentUserId) {
             followButton.visibility = View.GONE
+            likeButton.visibility = View.GONE
         }
 
     }

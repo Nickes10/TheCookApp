@@ -66,6 +66,13 @@ dependencies {
     implementation ("com.google.firebase:firebase-messaging")
     //implementation("com.google.firebase:firebase-database.py")
     implementation("com.google.firebase:firebase-storage")
+    implementation ("com.google.android.libraries.identity.googleid:googleid")
+
+
+    implementation("com.google.android.gms:play-services-auth:21.1.1")
+    implementation("com.google.firebase:firebase-auth-ktx:23.0.0")
+    implementation ("androidx.credentials:credentials:1.2.2")
+    implementation ("androidx.credentials:credentials-play-services-auth:1.2.2")
 
     // For the circular image in the profile
     implementation("de.hdodenhof:circleimageview:3.1.0")

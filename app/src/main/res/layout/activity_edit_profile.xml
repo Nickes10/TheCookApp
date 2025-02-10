@@ -20,7 +20,7 @@
             android:layout_height="match_parent"
             android:layout_width="match_parent"
             android:layout_alignParentStart="true"
-            >
+            android:background="@android:color/white">
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -29,13 +29,14 @@
 
                 <ImageButton
                     android:id="@+id/back_edit_button"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:layout_alignParentStart="true"
                     android:background="@android:color/white"
                     android:layout_centerVertical="true"
                     android:scaleType="fitCenter"
                     android:clickable="true"
+                    android:padding="9dp"
                     android:src="@drawable/back_arrow_icon" />
 
                 <TextView
@@ -72,11 +73,11 @@
         </androidx.appcompat.widget.Toolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <View
+    <!--<View
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:background="@color/colorGrey"
-        android:layout_below="@id/app_bar_layout_accountSettings" />
+        android:layout_below="@id/app_bar_layout_accountSettings" />-->
 
     <RelativeLayout
         android:id="@+id/layout_accountSettings"
@@ -101,7 +102,8 @@
             android:text="Change Image"
             android:layout_below="@+id/accountSettings_image_profile"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="12dp"
+            android:paddingTop="13dp"
+            android:paddingBottom="13dp"
             android:textStyle="bold"
             android:textSize="16dp"
             android:textColor="@color/colorApp"
@@ -109,9 +111,9 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="2dp"
+            android:layout_height="1dp"
             android:layout_marginTop="15dp"
-            android:background="@color/colorGrey"
+            android:background="#DDDDDD"
             android:layout_below="@id/accountSettings_change_image" />
 
         <!-- Layout of the Name Field -->
@@ -146,7 +148,8 @@
                 app:layout_constraintBottom_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/accountSettings_nameLabel" />
+                app:layout_constraintTop_toBottomOf="@id/accountSettings_nameLabel"/>
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -185,6 +188,7 @@
                 app:layout_constraintTop_toBottomOf="@id/accountSettings_usernameLabel" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 
         <!-- Layout of the Bio Field -->
@@ -229,10 +233,11 @@
         <View
             android:id="@+id/line"
             android:layout_width="match_parent"
-            android:layout_height="2dp"
+            android:layout_height="1dp"
             android:layout_above="@id/change_password_button"
             android:layout_marginBottom="10dp"
-            android:background="@color/colorGrey" />
+            android:background="#DDDDDD"/>
+
         <Button
             android:id="@+id/change_password_button"
             android:layout_width="match_parent"

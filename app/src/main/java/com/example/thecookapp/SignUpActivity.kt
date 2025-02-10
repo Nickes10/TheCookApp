@@ -73,7 +73,7 @@ class SignUpActivity : AppCompatActivity() {
 
         profileImageView = findViewById(R.id.profile_image)
         val selectImageBtn: TextView = findViewById(R.id.select_image_btn)
-        val signInBtn: Button = findViewById(signin_link_btn)
+        val signInBtn: TextView = findViewById(signin_link_btn)
         signInBtn.setOnClickListener {
             startActivity(Intent(this, SignInActivity::class.java))
         }

@@ -97,7 +97,6 @@ class NotificationAdapter(
     }
 
     private fun publisherInfo(imgView: CircleImageView, username: TextView, publisherid: String) {
-
         val userRef= FirebaseDatabase.getInstance().reference.child("Users").child(publisherid)
         userRef.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {

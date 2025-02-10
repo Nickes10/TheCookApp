@@ -12,6 +12,7 @@
     <color name="colorAccent">#ff68a5</color>
     <!-- Color Grey -->
     <color name="colorLightGrey">#EEEEEE</color>
+    <color name="colorLightGrey2">#dfdfdf</color>
     <color name="colorGrey">#aaaaaa</color>
     <color name="colorDarkGrey">#777777</color>
 

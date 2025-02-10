@@ -29,9 +29,12 @@ import com.example.thecookapp.R
 import com.example.thecookapp.R.id.*
 import com.example.thecookapp.Recipe
 import com.example.thecookapp.SignInActivity
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -323,6 +326,8 @@ class ProfileFragment : Fragment() {
         // Function for set all the info in the user Profile
         val userRef = FirebaseDatabase.getInstance().reference.child("Users").child(viewedProfileId)
 
+        Log.e("ProfileFragment", "UserRef: $userRef")
+
         userRef.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
 
@@ -332,6 +337,7 @@ class ProfileFragment : Fragment() {
 
                 if (snapshot.exists()) {
                     val user = snapshot.getValue<User>(User::class.java)
+                    Log.e("ProfileFragment", "User: $user, and the username is ${user?.getUsername()} and the fullname is ${user?.getFullname()}")
 
                     val imageProfile = view.findViewById<CircleImageView>(profile_photo)
                     Log.e("AccountSetting", "Image URL: ${user!!.getImage()}")

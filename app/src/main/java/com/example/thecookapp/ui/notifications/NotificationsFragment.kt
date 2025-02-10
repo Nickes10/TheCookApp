@@ -37,6 +37,7 @@ class NotificationsFragment : Fragment() {
         val view= inflater.inflate(R.layout.fragment_notifications, container, false)
 
         firebaseUser = FirebaseAuth.getInstance().currentUser!!
+
         var recyclerView: RecyclerView?=null
         recyclerView=view.findViewById<RecyclerView>(R.id.recyclerview_notifications)
         recyclerView.setHasFixedSize(true)
@@ -52,7 +53,6 @@ class NotificationsFragment : Fragment() {
     }
 
     private fun readNotification() {
-
         val postRef= FirebaseDatabase.getInstance().reference.child("Notification").child(firebaseUser!!.uid)
         postRef.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
