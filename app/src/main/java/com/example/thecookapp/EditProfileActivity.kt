@@ -112,10 +112,23 @@ class EditProfileActivity : AppCompatActivity() {
             onBackPressedDispatcher.onBackPressed()
         }
 
-        deleteButton.setOnClickListener{
-            val progressDialog = ProgressDialog(this)
-            progressDialog.setCancelable(false)
-            deleteUserAccount(progressDialog)
+        deleteButton.setOnClickListener {
+            val alertDialog = AlertDialog.Builder(this)
+                .setTitle("Confirm Deletion")
+                .setMessage("Are you sure you want to delete your account? This action cannot be undone.")
+                .setPositiveButton("Delete") { _, _ ->
+                    val progressDialog = ProgressDialog(this)
+                    progressDialog.setCancelable(false)
+                    progressDialog.setMessage("Deleting account...")
+                    progressDialog.show()
+                    deleteUserAccount(progressDialog)
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .create()
+
+            alertDialog.show()
         }
 
         changePassButton.setOnClickListener {
@@ -167,7 +180,7 @@ class EditProfileActivity : AppCompatActivity() {
                         }
                 } else {
                     Log.e("API_ERROR", "Error: ${response.errorBody()?.string()}")
-                    Toast.makeText(this@EditProfileActivity, "Failed to delete posts. Please try again.", Toast.LENGTH_LONG).show()
+                    //Toast.makeText(this@EditProfileActivity, "Failed to delete posts. Please try again.", Toast.LENGTH_LONG).show()
                 }
             }
 
@@ -198,6 +211,76 @@ class EditProfileActivity : AppCompatActivity() {
                     //delete the user from Follow tree
                     deleteUserFromFollowLists(currentUserID)
 
+                    val notificationsRef = FirebaseDatabase.getInstance().getReference("Notification")
+
+                    // Delete notifications related to the user
+                    notificationsRef.child(currentUserID).removeValue().addOnCompleteListener { notifTask1 ->
+                        if (notifTask1.isSuccessful) {
+                            Log.d("DeleteUser", "User notifications deleted successfully")
+                        } else {
+                            Log.e("DeleteUser", "Failed to delete user notifications: ${notifTask1.exception?.message}")
+                        }
+                    }
+
+                    // Delete notifications where the user's posts are referenced
+                    notificationsRef.get().addOnSuccessListener { snapshot ->
+                        for (otherUserSnapshot in snapshot.children) {
+                            val otherUserId = otherUserSnapshot.key
+                            if (otherUserId != null && otherUserId != currentUserID) {
+                                for (postSnapshot in otherUserSnapshot.children) {
+                                    val postId = postSnapshot.key
+                                    if (postId != null) {
+                                        val userRefToDelete = notificationsRef.child(otherUserId).child(postId).child(currentUserID)
+                                        userRefToDelete.removeValue().addOnCompleteListener { notifTask2 ->
+                                            if (notifTask2.isSuccessful) {
+                                                Log.d("DeleteUser", "Deleted post-related notifications for user $currentUserID in $otherUserId/$postId")
+                                            } else {
+                                                Log.e("DeleteUser", "Failed to delete post-related notifications: ${notifTask2.exception?.message}")
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }.addOnFailureListener { e ->
+                        Log.e("DeleteUser", "Failed to fetch notifications: ${e.message}")
+                    }
+
+                    // Delete likes related to the user
+                    val likesRef = FirebaseDatabase.getInstance().getReference("Likes")
+                    likesRef.child(currentUserID).removeValue().addOnCompleteListener { likeTask1 ->
+                        if (likeTask1.isSuccessful) {
+                            Log.d("DeleteUser", "User likes deleted successfully")
+                        } else {
+                            Log.e("DeleteUser", "Failed to delete user likes: ${likeTask1.exception?.message}")
+                        }
+                    }
+
+                    // Delete likes where the user's posts are referenced
+                    likesRef.get().addOnSuccessListener { snapshot ->
+                        for (otherUserSnapshot in snapshot.children) {
+                            val otherUserId = otherUserSnapshot.key
+                            if (otherUserId != null && otherUserId != currentUserID) {
+                                for (postSnapshot in otherUserSnapshot.children) {
+                                    val postId = postSnapshot.key
+                                    if (postId != null) {
+                                        val userRefToDelete = likesRef.child(otherUserId).child(postId).child(currentUserID)
+                                        userRefToDelete.removeValue().addOnCompleteListener { likeTask2 ->
+                                            if (likeTask2.isSuccessful) {
+                                                Log.d("DeleteUser", "Deleted post-related likes for user $currentUserID in $otherUserId/$postId")
+                                            } else {
+                                                Log.e("DeleteUser", "Failed to delete post-related likes: ${likeTask2.exception?.message}")
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }.addOnFailureListener { e ->
+                        Log.e("DeleteUser", "Failed to fetch likes: ${e.message}")
+                    }
+
+
                     //delete the user from Firebase
                     currentUser.delete().addOnCompleteListener { deleteTask ->
                         if (deleteTask.isSuccessful) {
@@ -213,6 +296,7 @@ class EditProfileActivity : AppCompatActivity() {
                             // Handle error while deleting user from Auth
                             progressDialog.dismiss()
                             val message = deleteTask.exception?.message ?: "Unknown error"
+                            Log.e("delete User", "Error fetching follow data: $message")
                             Toast.makeText(this, "Error deleting account: $message", Toast.LENGTH_LONG).show()
                         }
                     }

@@ -39,7 +39,7 @@ class HomeFragment : Fragment() {
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val database = FirebaseDatabase.getInstance().reference
 
-    private var isGlobalSelected = false
+    private var isGlobalSelected = true
     private var isRefreshing = false
 
     override fun onCreateView(
@@ -161,6 +161,11 @@ class HomeFragment : Fragment() {
     private fun fetchPostsForUsers(userIds: List<String>) {
         val allPosts = mutableListOf<Recipe>()
         var fetchedUsersCount = 0
+
+        if (userIds.isEmpty()) {
+            updateRecyclerView(allPosts) // Ensure RecyclerView is cleared if no users to fetch
+            return
+        }
 
         for (userId in userIds) {
             ApiClient.recipeApi.get_post(userId).enqueue(object : Callback<List<Recipe>> {

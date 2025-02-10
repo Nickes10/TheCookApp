@@ -55,6 +55,8 @@ import com.google.android.gms.location.LocationServices
 import android.location.Location
 import android.location.LocationManager
 import android.os.Looper
+import android.widget.ArrayAdapter
+import android.widget.Spinner
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -137,6 +139,17 @@ class AddPostActivity : AppCompatActivity() {
 
         recipeImageView = findViewById<ImageView>(R.id.recipeImage)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        val difficultySpinner = findViewById<Spinner>(R.id.difficult_value)
+
+        // Define the difficulty levels
+        val difficulties = listOf("Easy", "Medium", "Hard")
+
+        // Set up the adapter
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, difficulties)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        difficultySpinner.adapter = adapter
+
 
         // Set up the location button
         val locationButton = findViewById<Button>(R.id.location_btn)
@@ -316,11 +329,27 @@ class AddPostActivity : AppCompatActivity() {
     }
 
     private fun populateUI() {
+
+        val difficultySpinner = findViewById<Spinner>(R.id.difficult_value)
+
+        // Define the difficulty levels
+        val difficulties = listOf("Easy", "Medium", "Hard")
+
+        // Set up the adapter
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, difficulties)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        difficultySpinner.adapter = adapter
+
+        // Set the current difficulty
+        val difficultyIndex = difficulties.indexOf(recipe_modify?.difficulty)
+        if (difficultyIndex != -1) {
+            difficultySpinner.setSelection(difficultyIndex)
+        }
+
         // Fill all Front-end with the correct info of the post
         findViewById<EditText>(R.id.titleInput).setText(recipe_modify?.title)
         findViewById<EditText>(R.id.aboutInput).setText(recipe_modify?.description)
         findViewById<EditText>(R.id.time_value).setText(recipe_modify?.time_to_do)
-        findViewById<EditText>(R.id.difficult_value).setText(recipe_modify?.difficulty)
         findViewById<EditText>(R.id.servings_value).setText(recipe_modify?.servings)
         val locationInput = findViewById<EditText>(R.id.locationInput)
         locationInput.setText("Lat: ${recipe_modify?.latitude}\nLon: ${recipe_modify?.longitude}")
@@ -367,7 +396,8 @@ class AddPostActivity : AppCompatActivity() {
         val servings = findViewById<EditText>(R.id.servings_value).text.toString()
         val title = findViewById<EditText>(R.id.titleInput).text.toString()
         val description = findViewById<EditText>(R.id.aboutInput).text.toString()
-        val difficulty = findViewById<EditText>(R.id.difficult_value).text.toString()
+        val difficultySpinner = findViewById<Spinner>(R.id.difficult_value)
+        val difficulty = difficultySpinner.selectedItem.toString()
         val time = findViewById<EditText>(R.id.time_value).text.toString()
 
         // Validate inputs

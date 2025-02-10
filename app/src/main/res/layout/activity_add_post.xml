@@ -244,7 +244,7 @@
                         android:background="@drawable/edit_text_background"
                         android:gravity="center"
                         android:hint="0 mins"
-                        android:padding="12dp"
+                        android:textAlignment="center"
                         android:textColor="@color/black"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -262,7 +262,7 @@
                     android:gravity="center"
                     android:orientation="vertical">
 
-                    <!-- Servings Label -->
+                    <!-- Difficulty Label -->
                     <TextView
                         android:id="@+id/difficult_label"
                         android:layout_width="match_parent"
@@ -273,16 +273,15 @@
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
-                    <!-- Servings Input -->
-                    <EditText
+                    <!-- Difficulty Spinner (Choice: Easy, Medium, Hard) -->
+                    <Spinner
                         android:id="@+id/difficult_value"
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
                         android:layout_marginTop="8dp"
                         android:background="@drawable/edit_text_background"
                         android:gravity="center"
-                        android:hint="Medium"
-                        android:padding="12dp"
+                        android:textAlignment="center"
                         android:textColor="@color/black"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -320,7 +319,7 @@
                         android:background="@drawable/edit_text_background"
                         android:gravity="center"
                         android:hint="0 servings"
-                        android:padding="12dp"
+                        android:textAlignment="center"
                         android:textColor="@color/black"
                         android:textSize="14sp" />
                 </LinearLayout>
