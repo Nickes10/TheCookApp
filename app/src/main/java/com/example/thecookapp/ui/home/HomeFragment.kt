@@ -63,7 +63,7 @@ class HomeFragment : Fragment() {
 
         val userId = firebaseAuth.currentUser?.uid
         if (userId != null) {
-            fetchFollowingPosts(userId)
+            fetchGlobalPosts(userId)
         } else {
             Toast.makeText(requireContext(), "User not logged in", Toast.LENGTH_SHORT).show()
         }
@@ -163,6 +163,9 @@ class HomeFragment : Fragment() {
         var fetchedUsersCount = 0
 
         if (userIds.isEmpty()) {
+            val textView = view?.findViewById<TextView>(R.id.no_followed_users_message)
+            textView?.visibility = View.VISIBLE
+            textView?.text = "You don’t follow anyone, explore the global"
             updateRecyclerView(allPosts) // Ensure RecyclerView is cleared if no users to fetch
             return
         }

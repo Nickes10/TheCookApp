@@ -30,6 +30,7 @@ import com.example.thecookapp.R.id.*
 import com.example.thecookapp.Recipe
 import com.example.thecookapp.SignInActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.FirebaseAuth
@@ -49,6 +50,7 @@ class ProfileFragment : Fragment() {
 
     private lateinit var viewedProfileId: String // the Id of the profile displayed
     private lateinit var signInUser: FirebaseUser // the user of Firebase SignIn in this moment (the one that is using the app)
+    private lateinit var mGoogleSignInClient: GoogleSignInClient
 
     // Declaration of Posts Variables
     private lateinit var profilePostAdapter:ProfilePostAdapter
@@ -84,6 +86,13 @@ class ProfileFragment : Fragment() {
                 }
             }
         }
+
+        // Initialize Google Sign-In client
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build()
+        mGoogleSignInClient = GoogleSignIn.getClient(requireContext(), gso)
 
         // Initialize Post RecyclerViews
         profilePostRecyclerView = view.findViewById(recycler_view_posts)
@@ -137,9 +146,14 @@ class ProfileFragment : Fragment() {
 
         logout.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
-            val intent = Intent(context, SignInActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-            startActivity(intent)
+            mGoogleSignInClient.revokeAccess().addOnCompleteListener(requireActivity()) {
+                mGoogleSignInClient.signOut().addOnCompleteListener(requireActivity()) {
+                    Toast.makeText(requireContext(), "Signed out successfully", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(requireContext(), SignInActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(intent)
+                }
+            }
         }
 
         editProfileButton.setOnClickListener{

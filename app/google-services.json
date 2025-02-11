@@ -44,14 +44,6 @@
       },
       "oauth_client": [
         {
-          "client_id": "92157865429-9ap75q22fv2ljp4d69g9bcc32k91b3j6.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.thecookapp",
-            "certificate_hash": "a774cef22e587a039a4d4254d4f0968e42c49322"
-          }
-        },
-        {
           "client_id": "92157865429-68n79amo9jeap10egvnv0lc1g200q10g.apps.googleusercontent.com",
           "client_type": 3
         }

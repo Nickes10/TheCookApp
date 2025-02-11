@@ -126,7 +126,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             val addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
             if (addresses != null && addresses.isNotEmpty()) {
                 val address = addresses[0]
-                val city = address.locality ?: "Unknown City"
+                val city = address.locality ?:
+                    address.subAdminArea?: address.subLocality ?: "Unknown City"
                 val country = address.countryName ?: "Unknown Country"
                 Toast.makeText(this, "Location: $city, $country", Toast.LENGTH_LONG).show()
             } else {
@@ -143,7 +144,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         try {
             val addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
             if (!addresses.isNullOrEmpty()) {
-                val city = addresses[0].locality ?: "Unknown City"
+                val address = addresses[0]
+                val city = address.locality ?:
+                    address.subAdminArea?: address.subLocality ?: "Unknown City"
                 val country = addresses[0].countryName ?: "Unknown Country"
                 Toast.makeText(this, "Location: $city, $country", Toast.LENGTH_LONG).show()
 
