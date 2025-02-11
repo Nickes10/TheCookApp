@@ -20,7 +20,7 @@ class User
 
     // Getters and Setters
     fun getUsername(): String{
-        return username
+        return username.trim()
     }
 
     fun setUsername(username:String){

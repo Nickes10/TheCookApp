@@ -109,9 +109,8 @@ class PostDetailsActivity : AppCompatActivity() {
                 showProfileFragment(post.user_id)
             }
         }
-        if(post.latitude != null){
-            findViewById<TextView>(R.id.locationInput).text =
-                "lat: ${post.latitude}, lon: ${post.longitude}"
+        if(post.recipe_position != null){
+            findViewById<TextView>(R.id.locationInput).text = post.recipe_position
         }
         findViewById<TextView>(R.id.postTitle).text = post.title.uppercase()
         findViewById<TextView>(R.id.postDescription).text = post.description

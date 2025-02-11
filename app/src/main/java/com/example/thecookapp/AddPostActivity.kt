@@ -1,5 +1,6 @@
 package com.example.thecookapp
 import android.Manifest
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.ContentResolver
@@ -72,10 +73,11 @@ class AddPostActivity : AppCompatActivity() {
     // user id
     private lateinit var signInUser: FirebaseUser
 
-    // gps location
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private var latitude: Double? = null
-    private var longitude: Double? = null
+    private var post_location: String? = null
+    // Code for identify answer of the MapsActivity
+    companion object {
+        private const val LOCATION_REQUEST_CODE = 1001
+    }
 
     // Ingredients variable
     private lateinit var ingredientAdapter: IngredientAdapter
@@ -138,7 +140,6 @@ class AddPostActivity : AppCompatActivity() {
         recipe_modify = intent.getParcelableExtra<Recipe>("RECIPE_DETAILS")
 
         recipeImageView = findViewById<ImageView>(R.id.recipeImage)
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         val difficultySpinner = findViewById<Spinner>(R.id.difficult_value)
 
@@ -150,15 +151,11 @@ class AddPostActivity : AppCompatActivity() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         difficultySpinner.adapter = adapter
 
-
         // Set up the location button
         val locationButton = findViewById<Button>(R.id.location_btn)
         locationButton.setOnClickListener {
-            if (checkLocationPermission()) {
-                fetchCurrentLocation()
-            } else {
-                requestLocationPermission()
-            }
+            val intent = Intent(this, MapsActivity::class.java)
+            startActivityForResult(intent, LOCATION_REQUEST_CODE)
         }
 
         // Set up the back button
@@ -276,7 +273,7 @@ class AddPostActivity : AppCompatActivity() {
         instructionItemTouchHelper.attachToRecyclerView(instructionRecyclerView)
 
 
-        // Set up the Edit button
+        // Set up the Edit button for Ingredients
         val editButtonIngredient = findViewById<TextView>(R.id.edit_button_ingredients)
         editButtonIngredient.setOnClickListener {
             isEditingIngredient = !isEditingIngredient
@@ -284,6 +281,7 @@ class AddPostActivity : AppCompatActivity() {
             ingredientAdapter.toggleIconVisibility(isEditingIngredient, ingredientRecyclerView)
         }
 
+        // Set up the Edit button for Instructions
         val editButtonInstruction = findViewById<TextView>(R.id.edit_button_instructions)
         editButtonInstruction.setOnClickListener {
             isEditingInstruction = !isEditingInstruction
@@ -352,7 +350,7 @@ class AddPostActivity : AppCompatActivity() {
         findViewById<EditText>(R.id.time_value).setText(recipe_modify?.time_to_do)
         findViewById<EditText>(R.id.servings_value).setText(recipe_modify?.servings)
         val locationInput = findViewById<EditText>(R.id.locationInput)
-        locationInput.setText("Lat: ${recipe_modify?.latitude}\nLon: ${recipe_modify?.longitude}")
+        locationInput.setText(recipe_modify!!.recipe_position)
 
         // Set Image using Picasso
         Picasso.get()
@@ -423,15 +421,12 @@ class AddPostActivity : AppCompatActivity() {
             }
         }
 
-        var locationLatitude: Double
-        var locationLongitude: Double
+        var location: String
 
-        if (latitude == null && longitude == null) {
-            locationLatitude = recipe_modify?.latitude!!
-            locationLongitude = recipe_modify?.longitude!!
+        if (post_location == null) {
+            location = recipe_modify?.recipe_position!!
         } else {
-            locationLatitude = latitude!!
-            locationLongitude = longitude!!
+            location= post_location as String
         }
 
         // Create the updated recipe object
@@ -446,15 +441,10 @@ class AddPostActivity : AppCompatActivity() {
             difficulty = difficulty,
             servings = servings,
             time_to_do = time,
-            latitude = locationLatitude,
-            longitude = locationLongitude,
+            recipe_position = location,
             created_at = "Set by SQL"
         )
 
-        Log.e(
-            "AddpostActivity",
-            "latitude is $locationLatitude and longitude is $locationLongitude"
-        )
 
         // Use the API to update the recipe
         ApiClient.recipeApi.updatePost(user_id, post_id, updatedRecipe)
@@ -500,8 +490,23 @@ class AddPostActivity : AppCompatActivity() {
             })
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        // Function to manage response from MapsActivity
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == LOCATION_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            val city = data.getStringExtra("city")
+            val country = data.getStringExtra("country")
+
+            post_location = "$city, $country"
+
+            val locationInput = findViewById<EditText>(R.id.locationInput)
+            locationInput.setText(post_location)
+        }
+    }
+
 
     private fun checkPermissions(): Boolean {
+        // Check if the app has the permission to the camera and the gallery
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             ContextCompat.checkSelfPermission(
                 this,
@@ -521,6 +526,7 @@ class AddPostActivity : AppCompatActivity() {
     }
 
     private fun requestPermissions() {
+        // Request the permission to the camera and the gallery
         ActivityCompat.requestPermissions(
             this,
             arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA),
@@ -528,56 +534,6 @@ class AddPostActivity : AppCompatActivity() {
         )
     }
 
-    private fun checkLocationPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            this, Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-    }
-
-    private fun requestLocationPermission() {
-        ActivityCompat.requestPermissions(
-            this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 200
-        )
-    }
-
-    private fun fetchCurrentLocation() {
-        if (ActivityCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            Toast.makeText(this, "Location permission not granted", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        fusedLocationClient.lastLocation.addOnSuccessListener { loc: Location? ->
-            if (loc != null) {
-                latitude = loc.latitude
-                longitude = loc.longitude
-                Log.d("Location", "Latitude: $latitude, Longitude: $longitude")
-
-                // Display the coordinates
-                val locationInput = findViewById<EditText>(R.id.locationInput)
-                locationInput.setText("Lat: $latitude\nLon: $longitude")
-            } else {
-                Toast.makeText(this, "Unable to fetch location", Toast.LENGTH_SHORT).show()
-            }
-        }.addOnFailureListener { exception ->
-            Log.e("Location", "Failed to get location", exception)
-            Toast.makeText(this, "Failed to fetch location", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == 200 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            fetchCurrentLocation()
-        } else {
-            Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show()
-        }
-    }
 
 
     // Opens a dialog to select or capture an image from gallery
@@ -671,8 +627,7 @@ class AddPostActivity : AppCompatActivity() {
             return
         }
 
-        val locationLatitude = latitude ?: 0.0
-        val locationLongitude = longitude ?: 0.0
+        val location = post_location ?: "Unknown Position"
 
         ApiClient.recipeApi.getPostCount(user_id).enqueue(object : Callback<Int> {
             override fun onResponse(call: Call<Int>, response: Response<Int>) {
@@ -692,8 +647,7 @@ class AddPostActivity : AppCompatActivity() {
                         servings = servings,
                         time_to_do = time,
                         created_at = "SETTED BY SQL",
-                        latitude = locationLatitude,
-                        longitude = locationLongitude
+                        recipe_position = location
                     )
 
                     // Use the API to add the recipe
