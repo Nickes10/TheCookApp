@@ -43,7 +43,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         setContentView(R.layout.activity_maps)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        geocoder = Geocoder(this, Locale.getDefault())
+        geocoder = Geocoder(this, Locale.ENGLISH)
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map_fragment) as? SupportMapFragment
         mapFragment?.getMapAsync(this)
@@ -102,7 +102,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             .addOnSuccessListener { location: Location? ->
                 if (location != null) {
                     userLatLng = LatLng(location.latitude, location.longitude)
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, 12f))
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, 10f))
                 } else {
                     Log.e("MapsActivity", "Current location is null")
                     Toast.makeText(this, "Unable to fetch current location", Toast.LENGTH_LONG).show()
