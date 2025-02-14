@@ -63,7 +63,7 @@
         android:layout_height="34dp"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:layout_marginEnd="4dp"
+        android:layout_marginEnd="2dp"
         android:text="Follow"
         android:textAllCaps="false"
         android:textColor="@android:color/white"

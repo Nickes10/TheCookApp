@@ -11,9 +11,18 @@ import com.example.thecookapp.FirebaseUtils
 import com.example.thecookapp.R
 import com.squareup.picasso.Picasso
 import android.content.Context
+import android.graphics.drawable.Drawable
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.view.animation.AnimationUtils
+import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
 import com.example.thecookapp.ui.profile.ProfileFragment
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -41,6 +50,8 @@ class PostPreviewAdapter(
         val createdAt: TextView = itemView.findViewById(R.id.postCreatedAt)
         val likeButton: ImageView = itemView.findViewById(R.id.likeButton)
         val numberLikes: TextView = itemView.findViewById(R.id.likeCount)
+        val progressBar: ProgressBar = itemView.findViewById(R.id.progress_bar_preview)
+        val insideHeart: ImageView = itemView.findViewById(R.id.insideHeart)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostPreviewViewHolder {
@@ -73,10 +84,57 @@ class PostPreviewAdapter(
 
         Log.e("Upload Image", "Image URL: ${post.image_url}")
 
-        Glide.with(mContext)
-            .load(post.image_url)
-            .placeholder(R.drawable.plate_knife_fork)
-            .into(holder.image)
+        if (!post.image_url.isNullOrEmpty()) {
+            // Show the ProgressBar
+            holder.progressBar.visibility = View.VISIBLE
+
+            Glide.with(mContext)
+                .load(post.image_url)
+                .centerCrop()
+                .listener(object : com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable>?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        e?.printStackTrace()
+                        Log.e("ProfileFragment", "Error loading image: ${e?.message}")
+
+                        Toast.makeText(
+                            holder.itemView.context,
+                            "Unable to load image, check your connection",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        // Impose a default image in case of error
+                        holder.image.setImageResource(R.drawable.plate_knife_fork)
+                        holder.progressBar.visibility = View.GONE
+                        return false // Return false to allow Glide to handle the error placeholder
+                    }
+
+                    override fun onResourceReady(
+                        resource: android.graphics.drawable.Drawable?,
+                        model: Any?,
+                        target: com.bumptech.glide.request.target.Target<android.graphics.drawable.Drawable>?,
+                        dataSource: com.bumptech.glide.load.DataSource?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        Log.e("ProfileFragment", "Image loaded successfully")
+                        // When image is loaded, hide the ProgressBar
+                        holder.progressBar.visibility = View.GONE
+                        return false // Return false to let Glide handle setting the image
+                    }
+                })
+                .into(holder.image)
+        }
+
+
+//        Glide.with(mContext)
+//            .load(post.image_url)
+//            .placeholder(R.drawable.plate_knife_fork)
+//            .into(holder.image)
+
 
 //        Picasso.get()
 //            .load(post.image_url)
@@ -92,9 +150,9 @@ class PostPreviewAdapter(
         FirebaseUtils.isLiked(post.user_id, post.post_id.toString(), holder.likeButton)
         getNumberLikes(post.user_id, post.post_id.toString(), holder.numberLikes)
 
-        holder.itemView.setOnClickListener {
-            onPostClick(post)
-        }
+//        holder.itemView.setOnClickListener {
+//            onPostClick(post)
+//        }
 
         holder.fullName.setOnClickListener {
             openProfileFragment(post.user_id)
@@ -111,6 +169,23 @@ class PostPreviewAdapter(
         holder.likeButton.setOnClickListener{
             FirebaseUtils.handleLikeButtonClick(mContext, post, holder.likeButton)
         }
+
+        val zoomInAnim = AnimationUtils.loadAnimation(mContext, R.anim.zoom_in)
+        val zoomOutAnim = AnimationUtils.loadAnimation(mContext, R.anim.zoom_out)
+
+        holder.itemView.setOnClickListener(object : DoubleClickListener() {
+            override fun onSingleClick(v: View?) {
+                // Single click: start the activity to show full post details.
+                onPostClick(post)
+            }
+
+            override fun onDoubleClick(v: View?) {
+                // Double click: perform the like animation and like the post.
+                holder.insideHeart.startAnimation(zoomInAnim)
+                holder.insideHeart.startAnimation(zoomOutAnim)
+                FirebaseUtils.handleLikeButtonClick(mContext, post, holder.likeButton)
+            }
+        })
     }
 
 
@@ -141,5 +216,34 @@ class PostPreviewAdapter(
             }
         })
     }
+
+    abstract class DoubleClickListener : View.OnClickListener {
+        // Class to handle single and double click
+
+        private var lastClickTime: Long = 0
+        private val doubleClickTimeDelta: Long = 200 // milliseconds
+        private var handler = Handler(Looper.getMainLooper())
+        private var singleClickRunnable: Runnable? = null
+
+        override fun onClick(v: View?) {
+            val clickTime = System.currentTimeMillis()
+            if (clickTime - lastClickTime < doubleClickTimeDelta) {
+                // It's a double click: cancel any pending single-click action and trigger double-click
+                singleClickRunnable?.let { handler.removeCallbacks(it) }
+                onDoubleClick(v)
+            } else {
+                // Schedule the single-click action after the delay
+                singleClickRunnable = Runnable {
+                    onSingleClick(v)
+                }
+                handler.postDelayed(singleClickRunnable!!, doubleClickTimeDelta)
+            }
+            lastClickTime = clickTime
+        }
+
+        abstract fun onSingleClick(v: View?)
+        abstract fun onDoubleClick(v: View?)
+    }
+
 
 }

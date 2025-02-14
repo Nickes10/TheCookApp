@@ -7,6 +7,7 @@ import android.view.View
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.cardview.widget.CardView
@@ -25,6 +26,8 @@ class ProfilePostAdapter(
 
     inner class ProfilePostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val postImageView: ImageView = itemView.findViewById(R.id.profile_posted_picture)
+        // Initialize ProgressBar for the image
+        val progressBar = itemView.findViewById<ProgressBar>(R.id.progress_bar)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProfilePostViewHolder {
@@ -44,18 +47,22 @@ class ProfilePostAdapter(
         params.height = itemSize
         cardView.layoutParams = params
 
+
         return ProfilePostViewHolder(itemView)
     }
 
     override fun onBindViewHolder(holder: ProfilePostViewHolder, position: Int) {
         val currentPost = postList[position]
 
+
+
         // Load the Post image using Glide
         if (!currentPost.image_url.isNullOrEmpty()) {
+            // Show the ProgressBar
+            holder.progressBar.visibility = View.VISIBLE
 
             Glide.with(context)
                 .load(currentPost.image_url)
-                .placeholder(R.drawable.plate_knife_fork)
                 .centerCrop()
                 .listener(object : com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable> {
                     override fun onLoadFailed(
@@ -75,6 +82,7 @@ class ProfilePostAdapter(
 
                         // Impose a default image in case of error
                         holder.postImageView.setImageResource(R.drawable.plate_knife_fork)
+                        holder.progressBar.visibility = View.GONE
                         return false // Return false to allow Glide to handle the error placeholder
                     }
 
@@ -86,6 +94,8 @@ class ProfilePostAdapter(
                         isFirstResource: Boolean
                     ): Boolean {
                         Log.e("ProfileFragment", "Image loaded successfully")
+                        // When image is loaded, hide the ProgressBar
+                        holder.progressBar.visibility = View.GONE
                         return false // Return false to let Glide handle setting the image
                     }
                 })

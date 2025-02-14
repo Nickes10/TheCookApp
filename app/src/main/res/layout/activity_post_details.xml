@@ -119,7 +119,7 @@
                             android:layout_marginEnd="20dp"
                             android:padding="4dp"
                             android:clickable="true"
-                            android:src="@drawable/like_icon_black"
+                            android:src="@drawable/like"
                             android:background="@drawable/circular_white_button_background"
                             android:contentDescription="Like Button" />
 

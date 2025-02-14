@@ -119,8 +119,6 @@ class SearchBarFragment : Fragment() {
         getTopThreeChefs()
         fetchGlobalPosts()
 
-
-
         return  view
     }
 
@@ -239,22 +237,22 @@ class SearchBarFragment : Fragment() {
         topChefsAdapter?.notifyDataSetChanged()
     }
 
+    // Fetch all posts globally (from all users)
     private fun fetchGlobalPosts() {
-        database.child("Follow").child(currentUserId!!).child("Following").get()
-            .addOnSuccessListener { followingSnapshot ->
-                val followingList = followingSnapshot.children.mapNotNull { it.key }.toSet()
-
-                database.child("Users").get().addOnSuccessListener { usersSnapshot ->
-                    val allUsers = usersSnapshot.children.mapNotNull { it.key }
-                    // Create a list of all users without current user and users followed
-                    val globalUsers = allUsers.filterNot { it in followingList || it == currentUserId }
-
-                    fetchPostsForUsers(globalUsers)
-                }
+        // Return a list of all userid in the Firebase database
+        database.child("Users").get()
+            .addOnSuccessListener { usersSnapshot ->
+                val allUsers = usersSnapshot.children.mapNotNull { it.key }
+                fetchPostsForUsers(allUsers)
+            }
+            .addOnFailureListener { error ->
+                Log.e("HomeFragment", "Failed to fetch users: ${error.message}")
+                Toast.makeText(requireContext(), "Failed to load users list", Toast.LENGTH_SHORT).show()
             }
     }
 
     private fun fetchPostsForUsers(userIds: List<String>) {
+        // Fetch posts for each user
         val allPosts = mutableListOf<Recipe>()
         var fetchedUsersCount = 0
 
@@ -263,6 +261,8 @@ class SearchBarFragment : Fragment() {
                 override fun onResponse(call: Call<List<Recipe>>, response: Response<List<Recipe>>) {
                     if (response.isSuccessful) {
                         allPosts.addAll(response.body() ?: emptyList())
+                    } else {
+                        Log.e("HomeFragment", "Error fetching posts for user $userId: ${response.errorBody()?.string()}")
                     }
 
                     fetchedUsersCount++
@@ -272,6 +272,7 @@ class SearchBarFragment : Fragment() {
                 }
 
                 override fun onFailure(call: Call<List<Recipe>>, t: Throwable) {
+                    Log.e("HomeFragment", "Failed to fetch posts for user $userId: ${t.message}")
                     fetchedUsersCount++
                     if (fetchedUsersCount == userIds.size) {
                         fetchLikesForPosts(allPosts)
@@ -282,6 +283,7 @@ class SearchBarFragment : Fragment() {
     }
 
     private fun fetchLikesForPosts(posts: List<Recipe>) {
+        // Reorder the post list by number of likes
         val postsWithLikes = mutableMapOf<Recipe, Int>()
         var processedPosts = 0
 
@@ -296,12 +298,21 @@ class SearchBarFragment : Fragment() {
                 processedPosts++
 
                 if (processedPosts == posts.size) {
+                    // Sort posts by number of likes in descending order
+                    val sortedPosts = postsWithLikes.toList().sortedByDescending { it.second }.map { it.first }
+                    updateRecyclerView(sortedPosts)
+                }
+            }.addOnFailureListener { e ->
+                Log.e("HomeFragment", "Error fetching likes for post ${post.post_id}: ${e.message}")
+                processedPosts++
+                if (processedPosts == posts.size) {
                     val sortedPosts = postsWithLikes.toList().sortedByDescending { it.second }.map { it.first }
                     updateRecyclerView(sortedPosts)
                 }
             }
         }
     }
+
 
     private fun updateRecyclerView(sortedPosts: List<Recipe>) {
         recipesList?.clear()

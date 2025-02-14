@@ -85,13 +85,8 @@ dependencies {
     // Import UCrop for crop the image
     implementation("com.github.yalantis:ucrop:2.2.8")
 
-
     implementation("androidx.activity:activity-ktx:1.7.0")
     implementation("androidx.fragment:fragment-ktx:1.5.5")
-
-    // Glide dependencies
-    //implementation("com.github.bumptech.glide:glide:4.15.0")
-    //kapt("com.github.bumptech.glide:compiler:4.15.0")
 
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
@@ -102,7 +97,12 @@ dependencies {
 
     implementation ("com.google.android.gms:play-services-location:21.0.1")
 
+    // Glide dependencies
     implementation ("com.github.bumptech.glide:glide:4.15.1")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1")
+
+    // Coroutines dependency
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
 
 }

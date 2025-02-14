@@ -14,6 +14,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -315,10 +316,8 @@ class ProfileFragment : Fragment() {
             }
 
             override fun onDataChange(snapshot: DataSnapshot) {
-                Log.e("ProfileFragment", "Sono entrato onDatachange e lo snapshot è $snapshot e esiste: ${snapshot.exists()}")
 
                 val tabLayout = view?.findViewById<TabLayout>(tabs_profile_sections)
-                Log.e("ProfileFragment", "Sono nel if di onDatachange, il followType è $followType e il snapchot.ChildrenCount è ${snapshot.childrenCount}")
 
                 // Determine which tab to update based on followType
                 when (followType) {
@@ -360,7 +359,7 @@ class ProfileFragment : Fragment() {
                         .placeholder(R.drawable.default_image_profile)
                         .into(imageProfile)
 
-                    view.findViewById<TextView>(username).text = user.getUsername()
+                    view.findViewById<TextView>(username).text = "@${user.getUsername()}"
                     view.findViewById<TextView>(user_fullname).text = user.getFullname()
                     view.findViewById<TextView>(bio).text = user.getBio()
                 }
@@ -461,6 +460,9 @@ class ProfileFragment : Fragment() {
             // Check if the viewed profile belongs to the current user
             if (viewedProfileId == currentUser.uid) {
                 updateProfileButtonText("Edit Profile")
+                editProfileButton?.setBackgroundResource(R.drawable.buttons_background11)
+                editProfileButton?.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
+
             } else if (viewedProfileId != signInUser.uid){
                 FirebaseUtils.checkFollowingStatus(requireContext(), signInUser.uid, viewedProfileId, editProfileButton!!)
             }
@@ -477,7 +479,6 @@ class ProfileFragment : Fragment() {
         val sharedPreferences = context?.getSharedPreferences("PREFS", Context.MODE_PRIVATE)
         val actualProfileId = sharedPreferences?.getString("profileId", "none") ?: "none"
 
-        Log.e("Profile Fragment", "onStop called and actualProfileId is $actualProfileId and viewedProfileId is $viewedProfileId")
 
         if (actualProfileId == "none" || actualProfileId == viewedProfileId) {
             val pref = context?.getSharedPreferences("PREFS", Context.MODE_PRIVATE)?.edit()
@@ -492,7 +493,6 @@ class ProfileFragment : Fragment() {
         val sharedPreferences = context?.getSharedPreferences("PREFS", Context.MODE_PRIVATE)
         val actualProfileId = sharedPreferences?.getString("profileId", "none") ?: "none"
 
-        Log.e("Profile Fragment", "onPause called and actualProfileId is $actualProfileId and viewedProfileId is $viewedProfileId")
 
         if (actualProfileId == "none" || actualProfileId == viewedProfileId) {
             val pref = context?.getSharedPreferences("PREFS", Context.MODE_PRIVATE)?.edit()
@@ -506,8 +506,6 @@ class ProfileFragment : Fragment() {
         super.onDestroy()
         val sharedPreferences = context?.getSharedPreferences("PREFS", Context.MODE_PRIVATE)
         val actualProfileId = sharedPreferences?.getString("profileId", "none") ?: "none"
-
-        Log.e("Profile Fragment", "onDestroy called and actualProfileId is $actualProfileId and viewedProfileId is $viewedProfileId")
 
         if (actualProfileId == "none" || actualProfileId == viewedProfileId) {
             // When the ProfileFragment is actually destroyed and there is not a change with another User Profile

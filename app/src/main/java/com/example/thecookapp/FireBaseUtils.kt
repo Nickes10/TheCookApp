@@ -13,9 +13,6 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 object FirebaseUtils {
 
@@ -144,10 +141,10 @@ object FirebaseUtils {
 
             override fun onDataChange(datasnapshot: DataSnapshot) {
                 if (datasnapshot.child(currentUser!!.uid).exists()) {
-                    likeImageView.setImageResource(R.drawable.like_icon_full)
+                    likeImageView.setImageResource(R.drawable.like_red)
                     likeImageView.tag = "liked"
                 } else {
-                    likeImageView.setImageResource(R.drawable.like_icon_black)
+                    likeImageView.setImageResource(R.drawable.like)
                     likeImageView.tag = "like"
                 }
             }

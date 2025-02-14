@@ -20,6 +20,13 @@ import com.example.thecookapp.Recipe
 import com.example.thecookapp.databinding.FragmentHomeBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -128,73 +135,85 @@ class HomeFragment : Fragment() {
 
 
     private fun fetchGlobalPosts(userId: String) {
-        //list of users followed
-        database.child("Follow").child(userId).child("Following").get().addOnSuccessListener { followingSnapshot ->
-            val followingList = followingSnapshot.children.mapNotNull { it.key }.toSet()
+        // Fetch posts from all users
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val followingList = withContext(Dispatchers.IO) {
+                    val snapshot = database.child("Follow").child(userId).child("Following").get().await()
+                    snapshot.children.mapNotNull { it.key }.toSet()
+                }
 
-            // Get all users
-            database.child("Users").get().addOnSuccessListener { usersSnapshot ->
-                val allUsers = usersSnapshot.children.mapNotNull { it.key }
-                val globalUsers = allUsers.filterNot { it in followingList || it == userId }
+                val globalUsers = withContext(Dispatchers.IO) {
+                    val usersSnapshot = database.child("Users").get().await()
+                    usersSnapshot.children.mapNotNull { it.key }
+                        .filterNot { it in followingList || it == userId }
+                }
 
                 fetchPostsForUsers(globalUsers)
-            }.addOnFailureListener {
-                Log.e("HomeFragment", "Failed to fetch all users: ${it.message}")
-                Toast.makeText(requireContext(), "Failed to load users list", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Log.e("HomeFragment", "Failed to fetch data: ${e.message}")
+                    Toast.makeText(requireContext(), "Failed to load posts", Toast.LENGTH_SHORT).show()
+                }
             }
-        }.addOnFailureListener {
-            Log.e("HomeFragment", "Failed to fetch following list: ${it.message}")
-            Toast.makeText(requireContext(), "Failed to load following list", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun fetchFollowingPosts(userId: String) {
-        database.child("Follow").child(userId).child("Following").get().addOnSuccessListener { snapshot ->
-            val followingList = snapshot.children.mapNotNull { it.key }
-            fetchPostsForUsers(followingList)
-        }.addOnFailureListener {
-            Log.e("HomeFragment", "Failed to fetch following list: ${it.message}")
-            Toast.makeText(requireContext(), "Failed to load following list", Toast.LENGTH_SHORT).show()
+        // Fetch posts from the users the user is following
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val followingList = withContext(Dispatchers.IO) {
+                    val snapshot = database.child("Follow").child(userId).child("Following").get().await()
+                    snapshot.children.mapNotNull { it.key }
+                }
+                fetchPostsForUsers(followingList)
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Log.e("HomeFragment", "Error fetching following list: ${e.message}")
+                    Toast.makeText(requireContext(), "Failed to load posts", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
-    private fun fetchPostsForUsers(userIds: List<String>) {
-        val allPosts = mutableListOf<Recipe>()
-        var fetchedUsersCount = 0
-
+    private suspend fun fetchPostsForUsers(userIds: List<String>) {
         if (userIds.isEmpty()) {
-            val textView = view?.findViewById<TextView>(R.id.no_followed_users_message)
-            textView?.visibility = View.VISIBLE
-            textView?.text = "You don’t follow anyone, explore the global"
-            updateRecyclerView(allPosts) // Ensure RecyclerView is cleared if no users to fetch
+            withContext(Dispatchers.Main) {
+                val textView = view?.findViewById<TextView>(R.id.no_followed_users_message)
+                textView?.visibility = View.VISIBLE
+                textView?.text = "You don’t follow anyone, explore the global"
+                updateRecyclerView(emptyList()) // Clear RecyclerView
+            }
             return
         }
 
-        for (userId in userIds) {
-            ApiClient.recipeApi.get_post(userId).enqueue(object : Callback<List<Recipe>> {
-                override fun onResponse(call: Call<List<Recipe>>, response: Response<List<Recipe>>) {
-                    if (response.isSuccessful) {
-                        val userPosts = response.body() ?: emptyList()
-                        allPosts.addAll(userPosts)
-                    } else {
-                        Log.e("HomeFragment", "Error fetching posts for user $userId: ${response.errorBody()?.string()}")
-                    }
+        CoroutineScope(Dispatchers.IO).launch {
+            val allPosts = mutableListOf<Recipe>()
 
-                    fetchedUsersCount++
-                    if (fetchedUsersCount == userIds.size) {
-                        updateRecyclerView(allPosts)
-                    }
-                }
-
-                override fun onFailure(call: Call<List<Recipe>>, t: Throwable) {
-                    Log.e("HomeFragment", "Failed to fetch posts for user $userId: ${t.message}")
-
-                    fetchedUsersCount++
-                    if (fetchedUsersCount == userIds.size) {
-                        updateRecyclerView(allPosts)
+            val deferredPosts = userIds.map { userId ->
+                async {
+                    try {
+                        val response = ApiClient.recipeApi.get_post(userId).execute()
+                        if (response.isSuccessful) {
+                            response.body() ?: emptyList()
+                        } else {
+                            Log.e("HomeFragment", "Error fetching posts for $userId: ${response.errorBody()?.string()}")
+                            emptyList()
+                        }
+                    } catch (e: Exception) {
+                        Log.e("HomeFragment", "Failed to fetch posts for $userId: ${e.message}")
+                        emptyList()
                     }
                 }
-            })
+            }
+
+            val results = deferredPosts.awaitAll() // Wait for all API calls to finish
+            allPosts.addAll(results.flatten())
+
+            withContext(Dispatchers.Main) {
+                updateRecyclerView(allPosts)
+            }
         }
     }
 
