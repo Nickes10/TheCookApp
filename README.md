@@ -2,7 +2,18 @@
 
 In this project, a **recipe-sharing social app** was developed using **Kotlin** in **Android Studio**. The app allows users to **upload their homemade recipes**, complete with images and step-by-step instructions.
 It includes all the usual windows of a social platform (posts, profile, search...) while maintaining an intuitive and simple user experience. These are visible below.
-(TO DO) add Sign-in Home addPost Post Search Profile screenshots.
+
+<div style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <img src="Examples/signIn.png" alt="App Screenshot" width="200">
+    <img src="Examples/home.png" alt="App Screenshot" width="200">
+    <img src="Examples/createPost.png" alt="App Screenshot" width="200">
+    <img src="Examples/post.png" alt="App Screenshot" width="200">
+    <img src="Examples/search.png" alt="App Screenshot" width="200">
+    <img src="Examples/profile.png" alt="App Screenshot" width="200">
+</div>
+
+
+
 ### Key Features and Implementation  
 
 **Graphical Elements & UI Enhancements**  
