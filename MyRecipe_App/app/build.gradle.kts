@@ -66,7 +66,6 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation ("com.google.firebase:firebase-messaging")
-    //implementation("com.google.firebase:firebase-database.py")
     implementation("com.google.firebase:firebase-storage")
     implementation ("com.google.android.libraries.identity.googleid:googleid")
 

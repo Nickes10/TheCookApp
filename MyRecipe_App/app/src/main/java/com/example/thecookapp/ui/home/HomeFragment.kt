@@ -218,6 +218,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun updateRecyclerView(posts: List<Recipe>) {
+        if (!isAdded || context == null) return // Ensure the fragment is attached before updating UI
+
         val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
         val sortedPosts = posts.sortedByDescending { post ->
             post.created_at?.let {
