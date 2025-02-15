@@ -67,7 +67,7 @@
         android:text="Follow"
         android:textAllCaps="false"
         android:textColor="@android:color/white"
-        android:background="@drawable/buttons_background22" />
+        android:background="@drawable/buttons_background_red" />
 
 
 </RelativeLayout>

@@ -604,13 +604,11 @@ class AddPostActivity : AppCompatActivity() {
         // Validate inputs
         if (title.isEmpty() || description.isEmpty() || ingredients.isEmpty() || instructions.isEmpty()) {
             runOnUiThread {
-                Log.e("AIUTO", "All fields are required!")
                 Toast.makeText(this@AddPostActivity, "All fields are required!", Toast.LENGTH_LONG)
                     .show()
             }
             return
         }
-        Log.e("AIUTO", "cose prese")
 
         // Check if image is upload by user
         if (imageUri == null) {
@@ -630,11 +628,7 @@ class AddPostActivity : AppCompatActivity() {
             return
         }
 
-        Log.e("AIUTO", "Imagine Funziona")
-
         val location = post_location ?: "Unknown Position"
-
-        Log.e("AIUTO", "Location ok")
 
         ApiClient.recipeApi.getPostCount(user_id).enqueue(object : Callback<Int> {
             override fun onResponse(call: Call<Int>, response: Response<Int>) {
@@ -656,7 +650,6 @@ class AddPostActivity : AppCompatActivity() {
                         created_at = "SETTED BY SQL",
                         recipe_position = location
                     )
-                    Log.e("AIUTO", "risposta successo")
 
                     // Use the API to add the recipe
                     ApiClient.recipeApi.addRecipe(newRecipe)
@@ -667,7 +660,6 @@ class AddPostActivity : AppCompatActivity() {
                             ) {
                                 if (response.isSuccessful) {
                                     Log.e("API_SUCCESS", "Recipe added: ${response.body()}")
-                                    Log.e("AIUTO", "Recipe added: ${response.body()}")
                                     runOnUiThread {
                                         Toast.makeText(
                                             this@AddPostActivity,
@@ -685,7 +677,6 @@ class AddPostActivity : AppCompatActivity() {
                                     }
                                 } else {
                                     Log.e("API_ERROR", "Error: ${response.errorBody()?.string()}")
-                                    Log.e("AIUTO", "Error: ${response.errorBody()?.string()}")
                                     runOnUiThread {
                                         Toast.makeText(
                                             this@AddPostActivity,
@@ -771,7 +762,6 @@ class AddPostActivity : AppCompatActivity() {
         try {
             val fileName = "cropped_image_${System.currentTimeMillis()}.jpg"
             val destinationUri = Uri.fromFile(File(cacheDir, fileName))
-            Log.e("UCrop", "Destination URI: $destinationUri")
 
             val options = UCrop.Options().apply {
                 setCompressionFormat(Bitmap.CompressFormat.JPEG)
@@ -789,7 +779,6 @@ class AddPostActivity : AppCompatActivity() {
                 .withOptions(options)
                 .getIntent(this)
 
-            Log.e("UCrop", "Launching crop intent")
             cropImage.launch(cropIntent) // Launch the UCrop activity
         } catch (e: Exception) {
             Log.e("UCrop", "Error in startCrop: ${e.message}", e)
@@ -798,6 +787,7 @@ class AddPostActivity : AppCompatActivity() {
 }
 
 class RoundedCornersTransformation(private val radius: Float, private val margin: Float) : Transformation {
+    // Class for rounding the edges of the image
     override fun transform(source: Bitmap): Bitmap {
         val paint = Paint().apply {
             isAntiAlias = true

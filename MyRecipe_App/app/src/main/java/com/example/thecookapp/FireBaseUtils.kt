@@ -80,7 +80,7 @@ object FirebaseUtils {
         } else if (followButton.text.toString() == "Following") {
             // Change text & background immediately for better UX
             followButton.text = "Follow"
-            followButton.setBackgroundResource(R.drawable.buttons_background22)
+            followButton.setBackgroundResource(R.drawable.buttons_background_red)
             followButton.setTextColor(ContextCompat.getColor(context, android.R.color.white))
 
             // Remove from Following list
@@ -121,7 +121,7 @@ object FirebaseUtils {
                     followButton.setTextColor(ContextCompat.getColor(context, colorApp))
                 } else {
                     followButton.text = "Follow"
-                    followButton.setBackgroundResource(R.drawable.buttons_background22)
+                    followButton.setBackgroundResource(R.drawable.buttons_background_red)
                     followButton.setTextColor(ContextCompat.getColor(context, android.R.color.white))
                 }
             }

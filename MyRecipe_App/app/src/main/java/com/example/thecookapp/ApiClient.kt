@@ -6,7 +6,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 object ApiClient {
     private const val BASE_URL = "https://nick99.pythonanywhere.com/"
 
-
     val recipeApi: RecipeApi by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)

@@ -53,7 +53,7 @@
                                     android:text="Log out"
                                     android:layout_marginRight="4dp"
                                     android:layout_marginTop="2dp"
-                                    android:background="@drawable/buttons_background22"
+                                    android:background="@drawable/buttons_background_red"
                                     android:textColor="@android:color/white"
                                     android:textAllCaps="false" />
 
@@ -138,7 +138,7 @@
                                 android:text="Edit Profile"
                                 android:textAlignment="center"
                                 android:textAllCaps="false"
-                                android:background="@drawable/buttons_background11"
+                                android:background="@drawable/buttons_background_grey"
                                 android:textColor="@color/white"
                                 android:layout_marginTop="10dp" />
                         </LinearLayout>

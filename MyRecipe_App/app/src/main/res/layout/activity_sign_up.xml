@@ -96,7 +96,7 @@
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
                 android:textSize="17dp"
-                android:background="@drawable/buttons_background22" />
+                android:background="@drawable/buttons_background_red" />
 
         </LinearLayout>
 

@@ -9,7 +9,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -25,7 +24,6 @@ import com.example.thecookapp.Adapter.ProfilePostAdapter
 import com.example.thecookapp.Adapter.UserAdapter
 import com.example.thecookapp.AppObject.User
 import com.example.thecookapp.FirebaseUtils
-import com.example.thecookapp.MainActivity
 import com.example.thecookapp.R
 import com.example.thecookapp.R.id.*
 import com.example.thecookapp.Recipe
@@ -36,7 +34,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
@@ -69,7 +66,6 @@ class ProfileFragment : Fragment() {
     private var listFollowers: MutableList<User>? = null
 
     private lateinit var postDetailsLauncher: ActivityResultLauncher<Intent>
-
 
 
     override fun onCreateView(
@@ -159,7 +155,6 @@ class ProfileFragment : Fragment() {
 
         editProfileButton.setOnClickListener{
             val getButtonText = editProfileButton.text.toString()
-            Log.d("ProfileFragment", "Button text: $getButtonText")
 
             if (getButtonText == "Edit Profile") {
                 startActivity(Intent(context, EditProfileActivity::class.java))
@@ -216,35 +211,27 @@ class ProfileFragment : Fragment() {
         followingRecyclerView.visibility = View.VISIBLE
         followersRecyclerView.visibility = View.GONE
 
-        Log.e("ProfileFragment", "We are in loadFollowing and the profile Id is $viewedProfileId ")
+        val followingRef = FirebaseDatabase.getInstance().reference
+            .child("Follow").child(viewedProfileId).child("Following")
 
-        // Fetch following data if not already loaded
-        //if (listFollowing.isNullOrEmpty()) {
-
-            Log.e("ProfileFragment", "the profile Id is $viewedProfileId")
-            val followingRef = FirebaseDatabase.getInstance().reference
-                .child("Follow").child(viewedProfileId).child("Following")
-
-            followingRef.addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val totalChildren = snapshot.childrenCount.toInt()
-                    var processedCount = 0
-                    listFollowing?.clear()
-                    for (child in snapshot.children) {
-                        val userId = child.key ?: continue
-                        fetchUserDetails(userId, listFollowing!!) {
-                            processedCount++
-                            if (processedCount == totalChildren) {
-                                followingAdapter?.notifyDataSetChanged()
-                            }
+        followingRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val totalChildren = snapshot.childrenCount.toInt()
+                var processedCount = 0
+                listFollowing?.clear()
+                for (child in snapshot.children) {
+                    val userId = child.key ?: continue
+                    fetchUserDetails(userId, listFollowing!!) {
+                        processedCount++
+                        if (processedCount == totalChildren) {
+                            followingAdapter?.notifyDataSetChanged()
                         }
                     }
                 }
+            }
 
-                override fun onCancelled(error: DatabaseError) {}
-            })
-        //}
-
+            override fun onCancelled(error: DatabaseError) {}
+        })
     }
 
     private fun loadFollowers() {
@@ -252,32 +239,27 @@ class ProfileFragment : Fragment() {
         followingRecyclerView.visibility = View.GONE
         followersRecyclerView.visibility = View.VISIBLE
 
-        Log.e("ProfileFragment", "We are in loadFollowers and the profile Id is $viewedProfileId ")
-        // Fetch following data if not already loaded
-        //if (listFollowers.isNullOrEmpty()) {
-            val followersRef = FirebaseDatabase.getInstance().reference
-                .child("Follow").child(viewedProfileId).child("Followers")
+        val followersRef = FirebaseDatabase.getInstance().reference
+            .child("Follow").child(viewedProfileId).child("Followers")
 
-            followersRef.addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val totalChildren = snapshot.childrenCount.toInt()
-                    var processedCount = 0
-                    listFollowers?.clear()
-                    for (child in snapshot.children) {
-                        val userId = child.key ?: continue
-                        fetchUserDetails(userId, listFollowers!!) {
-                            processedCount++
-                            if (processedCount == totalChildren) {
-                                followersAdapter?.notifyDataSetChanged()
-                            }
+        followersRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val totalChildren = snapshot.childrenCount.toInt()
+                var processedCount = 0
+                listFollowers?.clear()
+                for (child in snapshot.children) {
+                    val userId = child.key ?: continue
+                    fetchUserDetails(userId, listFollowers!!) {
+                        processedCount++
+                        if (processedCount == totalChildren) {
+                            followersAdapter?.notifyDataSetChanged()
                         }
                     }
                 }
+            }
 
-                override fun onCancelled(error: DatabaseError) {}
-            })
-        //}
-
+            override fun onCancelled(error: DatabaseError) {}
+        })
     }
 
     private fun fetchUserDetails(userId: String, list: MutableList<User>, onComplete: () -> Unit) {
@@ -307,8 +289,6 @@ class ProfileFragment : Fragment() {
         val followRef = FirebaseDatabase.getInstance().reference
             .child("Follow").child(viewedProfileId)
             .child(followType)
-
-        Log.e("ProfileFragment", "Sono nel updateFollowCount con followType $followType")
 
         followRef.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(error: DatabaseError) {
@@ -420,7 +400,6 @@ class ProfileFragment : Fragment() {
         // Function to reuse the same ProfileFragment in the case we are in the PostDetailsActivity
         if (viewedProfileId != newProfileId) {
             viewedProfileId = newProfileId
-            Log.e("ProfileFragment", "Profile updated to new profileId: $newProfileId and viewedProfileId: $viewedProfileId")
 
             // Update the informations of the profile and all the other variables
             getUserInfo(requireView())
@@ -460,7 +439,7 @@ class ProfileFragment : Fragment() {
             // Check if the viewed profile belongs to the current user
             if (viewedProfileId == currentUser.uid) {
                 updateProfileButtonText("Edit Profile")
-                editProfileButton?.setBackgroundResource(R.drawable.buttons_background11)
+                editProfileButton?.setBackgroundResource(R.drawable.buttons_background_grey)
                 editProfileButton?.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
 
             } else if (viewedProfileId != signInUser.uid){
@@ -514,7 +493,6 @@ class ProfileFragment : Fragment() {
             pref?.apply()
         }
     }
-
 }
 
 

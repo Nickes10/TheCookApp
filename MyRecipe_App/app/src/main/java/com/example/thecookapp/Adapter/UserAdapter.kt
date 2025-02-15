@@ -63,7 +63,6 @@ class UserAdapter (private var mContext: Context,
         Picasso.get().load(user.getImage()).placeholder(R.drawable.default_image_profile).into(holder.profileimage)
 
         if(!isProfile) {
-            Log.e("UserAdapter", "isProfile is false")
             holder.rank_number.visibility = View.VISIBLE
             holder.rank_number.text = (position + 1).toString()
         } else {
@@ -72,21 +71,17 @@ class UserAdapter (private var mContext: Context,
 
         // If user clicks everywhere on the user item
         holder.item.setOnClickListener(View.OnClickListener {
-            Log.e("Profile Adapter", "User item clicked: ${user.getUsername()}, and ${user.getUid()}")
 
             val preference = mContext.getSharedPreferences("PREFS", Context.MODE_PRIVATE).edit()
             preference.putString("profileId", user.getUid())
             preference.apply()
 
             if (mContext is PostDetailsActivity) {
-                Log.e("Profile Adapter", "PostDetailsActivity found")
                 // Verify if the activity is PostDetailsActivity
                 val fragmentManager = (mContext as FragmentActivity).supportFragmentManager
                 val existingFragment = fragmentManager.findFragmentByTag("ProfileFragment")
-                Log.e("Profile Adapter", "ExistingFragment: $existingFragment")
 
                 if (existingFragment is ProfileFragment) {
-                    Log.e("Profile Adapter", "ProfileFragment found")
                     // If exist a ProfileFragment, update the profile
                     existingFragment.updateProfile(user.getUid())
                 } else {

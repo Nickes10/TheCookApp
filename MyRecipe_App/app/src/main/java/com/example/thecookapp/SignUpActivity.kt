@@ -41,36 +41,6 @@ class SignUpActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_sign_up)
 
-//        val fixedButtonContainer = findViewById<LinearLayout>(R.id.fixed_button_container)
-//        val rootView: View = findViewById(android.R.id.content)
-//        rootView.viewTreeObserver.addOnGlobalLayoutListener {
-//            val rect = Rect()
-//            rootView.getWindowVisibleDisplayFrame(rect)
-//
-//            val screenHeight = rootView.rootView.height
-//            val keyboardHeight = screenHeight - rect.bottom
-//
-//            // Check if the keyboard is visible (arbitrary threshold)
-//            if (keyboardHeight > screenHeight * 0.15) {
-//                Log.e("Pasqualo", "Keyboard opened")
-//                // Adjust the height of the fixed button container when the keyboard is visible
-//                val params = fixedButtonContainer.layoutParams as RelativeLayout.LayoutParams
-//                params.height = 500
-//                Log.e("Pasqualo", params.toString())
-//                fixedButtonContainer.layoutParams = params
-//                fixedButtonContainer.requestLayout()
-//                Log.e("DEBUG", "New height: ${fixedButtonContainer.layoutParams.height}")
-//
-//            } else {
-//                // Reset to default height when the keyboard is hidden
-//                val params = fixedButtonContainer.layoutParams as LinearLayout.LayoutParams
-//                params.height = 2054
-//
-//                fixedButtonContainer.layoutParams = params
-//                fixedButtonContainer.requestLayout()
-//            }
-//        }
-
         profileImageView = findViewById(R.id.profile_image)
         val selectImageBtn: TextView = findViewById(R.id.select_image_btn)
         val signInBtn: TextView = findViewById(signin_link_btn)

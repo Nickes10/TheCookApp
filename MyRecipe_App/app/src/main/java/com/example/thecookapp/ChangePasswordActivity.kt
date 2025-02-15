@@ -1,6 +1,5 @@
 package com.example.thecookapp
 
-import android.content.Intent
 import android.widget.Button
 import com.google.firebase.auth.FirebaseAuth
 import android.os.Bundle
@@ -131,10 +130,10 @@ class ChangePasswordActivity : AppCompatActivity() {
 
         if (oldPass.isNotEmpty() && newPass.isNotEmpty() && confirmPass.isNotEmpty()) {
             // Set the button background to "buttons_background22" when fields are filled
-            changePasswordButton.setBackgroundResource(R.drawable.buttons_background22)
+            changePasswordButton.setBackgroundResource(R.drawable.buttons_background_red)
         } else {
             // Set the default button background when fields are not filled
-            changePasswordButton.setBackgroundResource(R.drawable.buttons_background11)
+            changePasswordButton.setBackgroundResource(R.drawable.buttons_background_grey)
         }
     }
 

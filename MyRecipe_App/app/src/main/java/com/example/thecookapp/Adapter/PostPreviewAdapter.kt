@@ -130,17 +130,6 @@ class PostPreviewAdapter(
         }
 
 
-//        Glide.with(mContext)
-//            .load(post.image_url)
-//            .placeholder(R.drawable.plate_knife_fork)
-//            .into(holder.image)
-
-
-//        Picasso.get()
-//            .load(post.image_url)
-//            .placeholder(R.drawable.plate_knife_fork)
-//            .into(holder.image)
-
         val originalFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
         val targetFormat = SimpleDateFormat("MM/dd/yy", Locale.getDefault())
         val date = originalFormat.parse(post.created_at)
@@ -150,9 +139,6 @@ class PostPreviewAdapter(
         FirebaseUtils.isLiked(post.user_id, post.post_id.toString(), holder.likeButton)
         getNumberLikes(post.user_id, post.post_id.toString(), holder.numberLikes)
 
-//        holder.itemView.setOnClickListener {
-//            onPostClick(post)
-//        }
 
         holder.fullName.setOnClickListener {
             openProfileFragment(post.user_id)

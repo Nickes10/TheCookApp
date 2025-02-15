@@ -37,10 +37,7 @@ class InstructionAdapter (
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        Log.e("StepItem", "Called OnBindViewHolder, list is: $steps")
         val stepItem = steps[position]
-        Log.e("StepItem", "Current step position: ${holder.adapterPosition + 1}")
-        Log.e("StepItem", "Current step position saved: ${stepItem.number+1}")
 
         holder.stepNumText.text = " "
         holder.stepNumText.text = "Step ${stepItem.number +1}"
@@ -55,7 +52,6 @@ class InstructionAdapter (
                 val adapterPosition = holder.adapterPosition
                 if (adapterPosition != RecyclerView.NO_POSITION) {
                     steps[adapterPosition].description = s.toString()
-                    Log.e("StepItem", "Change of the text: ${steps[adapterPosition]}, steps: $steps")
                 }
             }
 
